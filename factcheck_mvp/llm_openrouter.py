@@ -29,6 +29,21 @@ def _provider() -> Dict[str, Any]:
     return {"order": ordem} if ordem else {}
 
 
+def _esforco() -> str:
+    """Esforço de raciocínio da chamada: `OPENROUTER_REASONING_EFFORT_<FINALIDADE>` > padrão da finalidade
+    (reformular: `AGENTE_REFORMULAR_ESFORCO`) > `OPENROUTER_REASONING_EFFORT` global. Vazio = não envia."""
+    fin = (telemetria.finalidade_atual() or "").strip()
+    if fin:
+        proprio = os.getenv(f"OPENROUTER_REASONING_EFFORT_{fin.upper()}", "").strip()
+        if proprio:
+            return proprio
+        if fin == "reformular":
+            padrao = str(getattr(config, "AGENTE_REFORMULAR_ESFORCO", "") or "").strip()
+            if padrao:
+                return padrao
+    return os.getenv("OPENROUTER_REASONING_EFFORT", "").strip()
+
+
 def _post(modelo: str, messages: List[dict], max_tokens: int, timeout_s: int) -> str:
     if not config.OPENROUTER_API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY ausente")
@@ -37,7 +52,7 @@ def _post(modelo: str, messages: List[dict], max_tokens: int, timeout_s: int) ->
     prov = _provider()
     if prov:
         payload["provider"] = prov  # fallbacks p/ outros providers do MESMO modelo seguem ativos
-    esforco = os.getenv("OPENROUTER_REASONING_EFFORT", "").strip()
+    esforco = _esforco()
     if esforco:  # low|medium|high: limita o raciocínio (que conta nos max_tokens)
         payload["reasoning"] = {"effort": esforco}
     r = replay.llm_post(

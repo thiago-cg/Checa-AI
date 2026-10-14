@@ -502,3 +502,42 @@ agentes Sonnet em paralelo (worktrees), integrados por merge; **tudo que muda de
 - Pendências (não bloqueiam o merge): a poda da Lupa deve usar estes números novos; medição final da Missão F segue
   bloqueada por chave SerpAPI/OpenRouter; decisões de produto (sem_evidencia/B4, P3(c), P7, polaridade determinística,
   padrão `AGENTE_SITES_MODO`) continuam com a usuária.
+
+## Missão G — ablação das flags da Missão F e novos padrões (14/10)
+
+- **Mudanças:** rodízio de chaves da SerpAPI (`serpapi_chaves.py`: `SERPAPI_KEY`, `SERPAPI_KEY_2…_20`, `SERPAPI_KEYS`; a
+  recusa 401/403/429 marca a chave e a mesma busca vai para a próxima; cota "esgotada" só sem nenhuma chave; nunca loga o
+  valor), reformulação com `max_tokens` 2000 e `reasoning.effort=high` (`AGENTE_REFORMULAR_*`;
+  `OPENROUTER_REASONING_EFFORT_<FINALIDADE>`), motor híbrido `BUSCA_SITE_NO_ORGANICO` (consulta com `site:` no orgânico,
+  puras no News; não acrescenta busca).
+- **Medição:** simulação de usuário, 50 frases, seed 42, fonte do caso deixada de fora (`EVAL_MODO=1`), K=1, Haiku 5.5,
+  Google News; um braço por flag contra o controle A0 (`eval.comparar_simulacoes`, McNemar pareado). Sem `antigas`:
+
+| braço | acerto | indeterminada | erro grave | buscas novas |
+|---|---|---|---|---|
+| A0 controle | 26/44 = 59,1% [44–72] | 15 | 0 | 97 |
+| A6 trava índice | 27/45 = 60,0% | 15 | 0 | 3 |
+| A3 autoconsistência | 27/45 = 60,0% | 15 | 0 | 2 |
+| A2 sintetizador | 27/45 = 60,0% | 15 | 0 | 0 |
+| G6 `site:` no orgânico | 28/44 = 63,6% | 13 | 0 | 55 |
+| F7 limpeza do extrator | 27/45 = 60,0% | 15 | 0 | 0 |
+| A5 planejador | 28/44 = 63,6% | 12 | 0 | 31 |
+| GX = G6+F7+A5 | 28/45 = 62,2% | 13 | 0 | 0 |
+| TUDO (novos padrões) | 28/45 = 62,2% [48–75] | 13 | 0 | 0 |
+
+  p = 1,0 em todos (McNemar por caso). Único ganho que se repete: `checadas_falsas:22` (indeterminada → alta) sempre que
+  o `site:` vai ao orgânico; nenhum caso certo → errado em nenhum braço. Os 60% de A6/A3/A2/F7 vêm de 1 célula a mais
+  executada (o A0 teve 1 timeout), não de acerto.
+- **Nos traces:** A6 não disparou nenhuma vez (sem a fonte, o índice quase nunca decide sozinho); A3 rejulgou 12 itens
+  decisivos, 12 unânimes; A2 rodou 48×, 0 rebaixamentos, 3 `buscar_mais` sinalizados; F7 mudou as consultas de 2 casos.
+  Dos 18 erros do A0, 15 são `indeterminada` (falta de evidência), 3 `media`, nenhum na direção errada: o gargalo é
+  recuperar evidência sobre a alegação, não julgar (nos erros do GX o juiz dá NAO_TRATA a quase tudo e 9 de 17 casos
+  fizeram só 2 buscas; ver G12).
+- **Decisão (usuária):** como não pioraram e a amostra é pequena demais para provar ganho, A2, A3, A5, A6, item 7,
+  `BUSCA_SITE_NO_ORGANICO` e `SERP_ENGINE=google_news` viram **padrão**. Testes da mecânica base do agente pedem o
+  fixture `base_sem_flags` (conftest) para seguir cobrindo o comportamento antigo; cada flag tem testes próprios.
+- **Operação:** na 1ª tentativa do braço TUDO a API caiu sem traceback depois de 2 checagens (46 "conexão recusada");
+  a repetição, idêntica e com `PYTHONFAULTHANDLER=1`, rodou limpa. Causa não identificada (ver G11/G16). O rodízio de
+  chaves não chegou a trocar de chave ao vivo (a chave 1 não se esgotou); coberto só por testes. Gasto: ~190 buscas.
+- **Verificação:** pytest 1.226 passed; `eval.decisao` a3-dev inalterado (acerto 0,1884, erro grave 0). Nenhum caso,
+  rótulo, gabarito ou baseline alterado. Holdout não rodado.

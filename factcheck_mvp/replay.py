@@ -367,6 +367,8 @@ def resetar_cota() -> None:
     """Limpa a flag (eval.rodar() chama na entrada; testes usam no fixture)."""
     global _cota_esgotada
     _cota_esgotada = False
+    from . import serpapi_chaves
+    serpapi_chaves.resetar()
 
 
 def arq_uso_serpapi() -> Optional[Path]:
@@ -500,11 +502,23 @@ def _checar_cota_serpapi(metodo: str, url: str, resp: Resposta, lat: float) -> N
         detalhe = str((resp.json() or {}).get("error") or "")[:200]
     except Exception:
         detalhe = resp.text[:200]
-    msg = (f"SerpAPI recusou a chave (HTTP {resp.status_code}: {detalhe or 'sem detalhe'}). "
-           "Cota da conta esgotada ou chave inválida: coloque uma nova SERPAPI_KEY no .env.")
-    telemetria.fallback("serpapi", msg, status=resp.status_code)
+    # Rodízio (serpapi_chaves): marca a chave usada; a cota só "esgota" quando não sobra nenhuma.
+    from . import serpapi_chaves
+    usada = dict(parse_qsl(urlsplit(url).query)).get("api_key", "")
+    serpapi_chaves.marcar_esgotada(usada)
+    # Só há "próxima" se a chave recusada é do rodízio (uma chave explícita de fora não troca).
+    resta = usada in serpapi_chaves.chaves() and serpapi_chaves.alguma_disponivel()
+    detalhe = telemetria.redigir(detalhe)
+    if resta:
+        msg = (f"SerpAPI recusou a chave {serpapi_chaves.posicao(usada)} (HTTP {resp.status_code}: "
+               f"{detalhe or 'sem detalhe'}): trocando para a próxima chave.")
+    else:
+        msg = (f"SerpAPI recusou a chave (HTTP {resp.status_code}: {detalhe or 'sem detalhe'}). "
+               "Cota da conta esgotada ou chave inválida: coloque uma nova SERPAPI_KEY no .env.")
+    telemetria.fallback("serpapi", msg, status=resp.status_code, chaves_restantes=resta)
     _evento_http(metodo, url, resp, lat, "live", msg)
-    _cota_esgotada = True
+    if not resta:
+        _cota_esgotada = True
     raise CotaSerpAPIEsgotada(msg)
 
 

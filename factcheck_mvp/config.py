@@ -105,8 +105,9 @@ SERPAPI_DAILY_CAP = _int("SERPAPI_DAILY_CAP", 100)
 # Estratégia no orgânico: `agente` (padrão: onda 1 determinística → extração → juiz →
 # crítico pós-juiz com onda extra reescrita por LLM; ver agente.py), `simples` (crua +
 # dirigida leve), `avancada` (crua + site: das agências do catálogo) ou `ambas` (união).
-# Motor news legado via SERP_ENGINE=google_news.
-SERP_ENGINE = _get("SERP_ENGINE", "google")
+# Motor: `google_news` é o padrão desde a Missão G (o que foi medido); as consultas com `site:` vão ao
+# orgânico (BUSCA_SITE_NO_ORGANICO). `google` = tudo no orgânico.
+SERP_ENGINE = _get("SERP_ENGINE", "google_news")
 SERP_ESTRATEGIA = _get("SERP_ESTRATEGIA", "agente")
 # Teto de buscas SerpAPI do agente POR REQUISIÇÃO (onda 1 + ondas extras). Padrão 9 =
 # 3 afirmações x (2 da onda 1 + 1 extra). A onda 1 reserva n_afirmações x AGENTE_MAX_ONDAS_EXTRAS.
@@ -191,16 +192,16 @@ EVAL_MODO = _bool("EVAL_MODO", False)
 JUIZ_TRECHO_MODO = _get("JUIZ_TRECHO_MODO", "novo").strip().lower()
 # Missão F / A2: sintetizador por afirmação (sintetizador.py). Uma chamada LLM por afirmação relê todos os
 # itens julgados e pode REBAIXAR o nível (para media/indeterminada) ou sinalizar "buscar_mais"; nunca sobe
-# o nível nem muda a direção (trava no código). Padrão desligado até a medição provar ganho sem erro grave.
-SINTETIZADOR = _get("SINTETIZADOR", "0").strip().lower() in ("1", "true", "sim", "on")
+# o nível nem muda a direção (trava no código). Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar).
+SINTETIZADOR = _get("SINTETIZADOR", "1").strip().lower() in ("1", "true", "sim", "on")
 SINTETIZADOR_MAX_ITENS = _int("SINTETIZADOR_MAX_ITENS", 12)    # itens julgados enviados por afirmação
 SINTETIZADOR_MAX_TOKENS = _int("SINTETIZADOR_MAX_TOKENS", 1200)
 SINTETIZADOR_TIMEOUT_S = _int("SINTETIZADOR_TIMEOUT_S", 90)    # 1 chamada LLM (por afirmação)
 
-# Missão F / A5: planejador de busca (factcheck_mvp/planejador_busca.py). Padrão desligado: com 0 a busca é a de
+# Missão F / A5: planejador de busca (factcheck_mvp/planejador_busca.py). Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar). Com 0 a busca é a de
 # antes (mesmas consultas, mesmo motor, mesmo número de ondas). Ligado: relaxa consulta vazia, manda `site:` ao
 # Google orgânico, lê mais resultados quando os primeiros são fora do tema e usa o orçamento que sobra.
-BUSCA_PLANEJADOR = _bool("BUSCA_PLANEJADOR", False)
+BUSCA_PLANEJADOR = _bool("BUSCA_PLANEJADOR", True)
 # Rodadas de relaxamento por onda (cada rodada = 1 busca por consulta vazia, dentro do orçamento do caso).
 BUSCA_RELAXAR_RODADAS = _int("BUSCA_RELAXAR_RODADAS", 2)
 # Teto de resultados lidos por busca ao "ler mais" (a leitura normal é ORGANICOS_POR_BUSCA = 8).
@@ -212,14 +213,21 @@ BUSCA_EXTRAS_MAX = _int("BUSCA_EXTRAS_MAX", 3)
 # Missão F / A6: trava de similaridade no atalho do índice (trava_indice.py). Com 1 só cluster decidindo
 # por selo do índice, exige similaridade mínima (Dice, 0..1) entre a alegação checada e o núcleo da
 # afirmação; abaixo do limiar o nível tem teto "media". 0,6 = o `cobertura_min` do próprio índice.
-INDICE_TRAVA_SIMILARIDADE = _get("INDICE_TRAVA_SIMILARIDADE", "0").strip().lower() in ("1", "true", "sim", "on")
+INDICE_TRAVA_SIMILARIDADE = _get("INDICE_TRAVA_SIMILARIDADE", "1").strip().lower() in ("1", "true", "sim", "on")
 INDICE_TRAVA_SIM_MIN = _float("INDICE_TRAVA_SIM_MIN", 0.6)
 # Missão F / item 7 (Extrator): limpeza determinística pós-LLM do núcleo e da consulta (tira marcadores
-# temporais, moldura de entrega e palavras-ruído que zeram o AND do Google News). Muda consultas: padrão 0.
-EXTRATOR_LIMPEZA = _bool("EXTRATOR_LIMPEZA", False)
+# temporais, moldura de entrega e palavras-ruído que zeram o AND do Google News). Muda consultas. Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar).
+EXTRATOR_LIMPEZA = _bool("EXTRATOR_LIMPEZA", True)
 # Missão F / A3 — autoconsistência do juiz: quando UM julgamento SUSTENTA/REFUTA decide o nível (um só
 # cluster com voto), o item é rejulgado K-1 vezes sem cache (temperatura > 0 + seed por repetição) e vale a
-# maioria; se as classes divergirem na direção, o item vira RELATA_SEM_ENDOSSO. Padrão desligado.
-JUIZ_AUTOCONSISTENCIA = _get("JUIZ_AUTOCONSISTENCIA", "0").strip().lower() in ("1", "true", "sim", "on")
+# maioria; se as classes divergirem na direção, o item vira RELATA_SEM_ENDOSSO. Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar).
+JUIZ_AUTOCONSISTENCIA = _get("JUIZ_AUTOCONSISTENCIA", "1").strip().lower() in ("1", "true", "sim", "on")
 JUIZ_AUTOCONSISTENCIA_K = _int("JUIZ_AUTOCONSISTENCIA_K", 3)  # julgamentos no total (o original + K-1)
 JUIZ_AUTOCONSISTENCIA_TEMP = _float("JUIZ_AUTOCONSISTENCIA_TEMP", 0.5)  # temperatura das repetições
+# Missão G / item 2: reformulação de consulta do agente. O Haiku raciocina antes de responder e o raciocínio conta
+# nos max_tokens: com 300, gastou 258 e a consulta saiu truncada. Esforço via `reasoning.effort` do OpenRouter.
+AGENTE_REFORMULAR_MAX_TOKENS = _int("AGENTE_REFORMULAR_MAX_TOKENS", 2000)
+AGENTE_REFORMULAR_ESFORCO = _get("AGENTE_REFORMULAR_ESFORCO", "high").strip().lower()
+# Missão G / item 6: consulta com `site:` vai ao Google orgânico; as puras seguem em SERP_ENGINE (Google News).
+# Só a troca de motor do A5 (sem relaxar/ler mais/ondas extras): não acrescenta buscas. Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar).
+BUSCA_SITE_NO_ORGANICO = _bool("BUSCA_SITE_NO_ORGANICO", True)

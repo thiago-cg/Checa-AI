@@ -16,7 +16,7 @@ O LLM só RECOMENDA (`manter` | `rebaixar` | `buscar_mais`). Quem manda é a tra
     depende de reabrir o laço do agente depois da decisão e ficou fora deste item (docs/TELEMETRIA.md);
   * saída inválida ou LLM indisponível = `manter` + `telemetria.fallback("sintetizador", ...)`.
 
-O agregador continua dono do número (`log_odds`/`prob` não mudam). Atrás de `SINTETIZADOR=1` (padrão 0).
+O agregador continua dono do número (`log_odds`/`prob` não mudam). Atrás de `SINTETIZADOR` (padrão 1 desde a Missão G; 0 desliga).
 Nunca levanta.
 """
 from __future__ import annotations

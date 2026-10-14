@@ -702,7 +702,9 @@ def reformular(alvo: Alvo, feitas: Sequence[str], fora: Sequence[Tuple[str, str]
     erro = "usar_llm=False"
     if usar_llm:
         res = llm.chat_json([{"role": "user", "content": montar_prompt_reformular(alvo.texto, feitas, fora)}],
-                            _Reformulacao, finalidade="reformular", max_tokens=300, validar=validar)
+                            _Reformulacao, finalidade="reformular",
+                            max_tokens=int(getattr(config, "AGENTE_REFORMULAR_MAX_TOKENS", 2000) or 2000),
+                            validar=validar)
         if res.ok and res.dados is not None:
             return res.dados.consulta, f"llm-reformular:{res.motor}"
         erro = res.erro or "LLM sem resposta válida"

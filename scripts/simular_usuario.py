@@ -27,15 +27,15 @@ from eval import simulacao as sim  # noqa: E402
 
 
 def _cota_serpapi_conta() -> int | None:
-    """Buscas restantes na conta da SerpAPI (consultar a conta não gasta busca). Nunca imprime a chave."""
+    """Buscas restantes somadas em todas as chaves do rodízio (consultar a conta não gasta busca).
+    Nunca imprime a chave."""
     try:
-        import httpx
-        chave = next((l.split("=", 1)[1].strip() for l in (RAIZ / ".env").read_text(encoding="utf-8").splitlines()
-                      if l.startswith("SERPAPI_KEY=")), "")
-        if not chave:
+        from factcheck_mvp import config  # noqa: F401  (carrega o .env)
+        from factcheck_mvp import serpapi_chaves
+        st = serpapi_chaves._status(True)
+        if not st:
             return None
-        d = httpx.get("https://serpapi.com/account.json", params={"api_key": chave}, timeout=15).json()
-        return d.get("total_searches_left")
+        return sum(int(s.get("buscas_restantes") or 0) for s in st)
     except Exception:
         return None
 

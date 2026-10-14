@@ -203,6 +203,25 @@ e anos fora dos números (P1/P4/P6), prompts de afirmações e do juiz, `PADROES
 - [ ] **G8. Decisões**: P3(c) (trecho do índice como corpo quando a página não carrega), P7 (métrica das `antigas_como_atuais` e
   controles sem origem) e a política de `sem_evidencia` (§5.3).
 
+#### Missão G (14/10) — feito e aberto (`eval/ITERACOES.md`, entrada "Missão G")
+
+Feito: rodízio de chaves da SerpAPI (`SERPAPI_KEY_2…`, `serpapi_chaves status --conta`; resolve o G6 da SerpAPI),
+`max_tokens` 2000 + esforço `high` na reformulação, motor híbrido (News na consulta pura + orgânico no `site:`; parte
+do G9), e as flags da Missão F (A2, A3, A5, A6, item 7) **ligadas por padrão** por decisão da usuária: não pioraram na
+ablação de 14/10 e a amostra (n≈45) é pequena demais para provar ganho. Abertos:
+
+- [ ] **G12. Ondas extras não disparam com páginas fora do tema**: nos erros do braço GX, 9 de 17 casos fizeram só 2 buscas
+  (sobrando 7 do teto de 9) apesar de o juiz dar NAO_TRATA a quase tudo (ex.: `verdadeiras:13`, 12 páginas, 12 NAO_TRATA).
+  Conferir o crítico pós-juiz e o `fora_do_tema` do planejador. Provável maior alavanca agora: 15 dos 18 erros do controle
+  são `indeterminada` por falta de evidência, nenhum na direção errada.
+- [ ] **G13. Motor só orgânico** (`SERP_ENGINE=google`) nunca foi medido com a fonte deixada de fora; um braço igual aos da
+  ablação (~100 buscas) decide o padrão do motor com dados.
+- [ ] **G14. Retestar no conjunto independente** (frases escritas fora das checagens, trazidas pela usuária): A2/A3/A6 só
+  agem em veredito confiante, e a amostra atual não teve nenhum na direção errada; A6 não disparou nenhuma vez.
+- [ ] **G15. Juiz rígido em verdadeiras?** 3 verdadeiras do GX (ex.: "Café não cura câncer") ficaram com maioria
+  RELATA_SEM_ENDOSSO; ver se o critério de SUSTENTA está estrito demais.
+- [ ] **G16. Erro de execução de 180 s** (timeout do simulador) em 1 caso por braço; investigar onde o tempo vai.
+
 ## 5. Decisões que são do usuário (pergunte; não decida sozinho)
 
 1. ~~**E3**: seguir à risca "título nunca vota", mesmo com indeterminada ~65% no snapshot, ou antes ampliar a

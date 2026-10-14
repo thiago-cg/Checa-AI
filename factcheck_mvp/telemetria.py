@@ -108,8 +108,12 @@ def redigir(texto: str) -> str:
     if not texto:
         return texto
     s = str(texto)
-    for nome in _ENV_SEGREDOS:
-        val = os.environ.get(nome) or ""
+    valores = [os.environ.get(nome) or "" for nome in _ENV_SEGREDOS]
+    # Chaves extras do rodízio da SerpAPI (SERPAPI_KEY_2…, SERPAPI_KEYS com vírgula).
+    valores += [v for k, v in os.environ.items() if re.fullmatch(r"SERPAPI_KEY_\d+", k)]
+    valores += (os.environ.get("SERPAPI_KEYS") or "").split(",")
+    for val in valores:
+        val = (val or "").strip()
         if len(val) >= 8 and val in s:
             s = s.replace(val, "REDACTED")
     for rx, rep in _RX_REDACAO:
