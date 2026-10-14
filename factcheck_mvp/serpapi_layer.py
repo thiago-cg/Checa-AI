@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from . import config, replay, telemetria
+from . import config, replay, serpapi_chaves, telemetria
 from .catalogo import Catalogo
 
 log = logging.getLogger("factcheck.serpapi")
@@ -257,8 +257,8 @@ class ResultadoBusca:
 class SerpAPIClient:
     def __init__(self, api_key: str | None = None, ttl: int | None = None, timeout: int | None = None,
                  cache_max: int = 200, engine: str | None = None):
-        # None = usa env; "" explícito = força desligado (testes offline)
-        self.api_key = config.SERPAPI_KEY if api_key is None else api_key
+        # None = usa env (com rodízio: SERPAPI_KEY_2…, SERPAPI_KEYS); "" explícito = força desligado (testes offline)
+        self._chave_fixa = api_key
         self.ttl = config.CACHE_SERPAPI_TTL if ttl is None else ttl
         # 15 s por tentativa (era 25 s numa só): duas tentativas cabem no mesmo tempo total.
         self.timeout = timeout if timeout is not None else (getattr(config, "SERPAPI_TIMEOUT_S", 15) or 15)
@@ -282,6 +282,20 @@ class SerpAPIClient:
         if hoje != self._dia:
             self._dia, self._uso_n = hoje, 0
         return self._uso_n
+
+    @property
+    def api_key(self) -> str:
+        """Chave da vez: a 1ª não esgotada (serpapi_chaves). Sem `SERPAPI_KEY` a busca fica desligada,
+        como antes, mesmo que haja chaves numeradas."""
+        if self._chave_fixa is not None:  # chave explícita (testes, scripts): sem rodízio
+            return self._chave_fixa
+        if not config.SERPAPI_KEY:
+            return ""
+        return serpapi_chaves.atual(config.SERPAPI_KEY)
+
+    @property
+    def rodizio(self) -> bool:
+        return self._chave_fixa is None
 
     @property
     def ativo(self) -> bool:
@@ -312,6 +326,21 @@ class SerpAPIClient:
                     raise
                 telemetria.fallback("serpapi", f"{type(e).__name__} (timeout/conexão): nova tentativa")
                 time.sleep(SERPAPI_ESPERA_NOVA_TENTATIVA_S)
+
+    def _get_com_rodizio(self, params_http: Dict[str, Any]):
+        """Repete a MESMA busca com a próxima chave quando a SerpAPI recusa a atual (401/403/429; `replay`
+        marca a chave). Sem chave sobrando, a CotaSerpAPIEsgotada sobe como antes."""
+        tentadas = set()
+        while True:
+            chave = self.api_key
+            if not chave or chave in tentadas:
+                raise replay.CotaSerpAPIEsgotada("nenhuma chave da SerpAPI disponível")
+            tentadas.add(chave)
+            try:
+                return self._get_com_nova_tentativa({**params_http, "api_key": chave})
+            except replay.CotaSerpAPIEsgotada:
+                if not self.rodizio or not serpapi_chaves.alguma_disponivel(config.SERPAPI_KEY):
+                    raise
 
     def buscar(self, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Retorna o JSON bruto ou None (sem chave, timeout, erro). Nunca levanta."""
@@ -348,8 +377,7 @@ class SerpAPIClient:
         try:
             corpo = dict(params)
             corpo.pop("engine", None)  # motor vai explícito (override por query)
-            r = self._get_com_nova_tentativa(
-                {"engine": self.engine_de(params), "api_key": self.api_key, **corpo})
+            r = self._get_com_rodizio({"engine": self.engine_de(params), **corpo})
             r.raise_for_status()
             payload = r.json()
             tem = bool((payload or {}).get(self.result_key(params))

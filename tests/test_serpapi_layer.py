@@ -1,4 +1,5 @@
 """SerpAPI: queries, normalização e roteamento (sem rede, sem denylist)."""
+import pytest
 import json
 from pathlib import Path
 
@@ -377,3 +378,7 @@ def test_dois_timeouts_viram_erro_e_erro_http_nao_repete(monkeypatch):
 def test_timeout_padrao_vem_do_config(monkeypatch):
     monkeypatch.setattr(camada.config, "SERPAPI_TIMEOUT_S", 12)
     assert camada.SerpAPIClient(api_key="k").timeout == 12
+
+
+# Mecânica base (flags da Missão F/G desligadas; cada flag tem testes próprios que a ligam).
+pytestmark = pytest.mark.usefixtures("base_sem_flags")

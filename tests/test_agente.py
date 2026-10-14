@@ -699,3 +699,7 @@ def test_rotulo_do_selo_pelo_titulo_diz_a_origem_e_a_afirmacao():
     assert rotulo_selo(f) == "selo da agência no título: FALSO para “O ibuprofeno cura dengue”"
     assert rotulo_selo(FonteEvidencia(url="u", veredito="FALSO", origem_veredito="pagina")) == "selo da agência: FALSO"
     assert rotulo_selo(FonteEvidencia(url="u")) == ""
+
+
+# Mecânica base (flags da Missão F/G desligadas; cada flag tem testes próprios que a ligam).
+pytestmark = pytest.mark.usefixtures("base_sem_flags")

@@ -20,7 +20,7 @@ Sem cache: cada repetição roda sob `replay.com_sal("autocN")` (o mesmo mecanis
 cassete do juiz, então em `record` a repetição grava o próprio cassete e em `replay` relê o mesmo, de forma
 determinística) e `replay.temperatura(t)` (payload com temperature > 0, que é o que gera variação em `live`).
 
-Liga com `JUIZ_AUTOCONSISTENCIA=1` (padrão 0). `JUIZ_AUTOCONSISTENCIA_K` (3) = julgamentos no total e
+Liga com `JUIZ_AUTOCONSISTENCIA` (padrão 1 desde a Missão G; 0 desliga). `JUIZ_AUTOCONSISTENCIA_K` (3) = julgamentos no total e
 `JUIZ_AUTOCONSISTENCIA_TEMP` (0,5) = temperatura das repetições. Telemetria: evento `autoconsistencia`.
 """
 from __future__ import annotations

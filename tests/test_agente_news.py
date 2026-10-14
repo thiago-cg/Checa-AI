@@ -1,4 +1,5 @@
 """Agente com SERP_ENGINE=google_news: consultas no motor certo e leitura de news_results (sem rede)."""
+import pytest
 from factcheck_mvp import agente, config
 
 AGENCIAS = [{"site": "lupa.uol.com.br"}, {"site": "boatos.org"}]
@@ -59,3 +60,7 @@ def test_absorver_google_organico_continua_igual():
                "top_stories": [{"title": "u", "link": "https://exemplo.test/b", "source": "X"}]}
     n, novos = est.absorver(0, 1, {"q": "x", "engine": "google"}, payload)
     assert (n, novos) == (2, 2)
+
+
+# Mecânica base (flags da Missão F/G desligadas; cada flag tem testes próprios que a ligam).
+pytestmark = pytest.mark.usefixtures("base_sem_flags")

@@ -1,4 +1,4 @@
-"""Planejador de busca (Missão F / A5; auditoria E, seção 5). Atrás de `BUSCA_PLANEJADOR=1` (padrão 0).
+"""Planejador de busca (Missão F / A5; auditoria E, seção 5). Atrás de `BUSCA_PLANEJADOR` (padrão 1 desde a Missão G; 0 desliga).
 
 Quatro decisões, todas dentro do orçamento por caso que o agente já tem (`EstadoBusca.reservar`) e dos tetos
 globais de SerpAPI (`replay._reservar_serpapi`: `--max-buscas`, `SERPAPI_ORCAMENTO_RESTANTE`):
@@ -98,11 +98,18 @@ def tem_site(q: str) -> bool:
     return bool(re.search(r"\bsite:", q or "", flags=re.I))
 
 
+def site_no_organico() -> bool:
+    """Missão G / item 6: só a troca de motor do A5, sem o resto do planejador. A consulta com `site:` (1 por
+    afirmação na onda 1) vai ao Google orgânico; as consultas puras seguem no motor configurado (Google News).
+    Não acrescenta buscas: só muda o motor de uma que já existia. `BUSCA_SITE_NO_ORGANICO` (padrão 1 desde a Missão G; 0 desliga)."""
+    return bool(getattr(config, "BUSCA_SITE_NO_ORGANICO", False))
+
+
 def motor_por_dominio(q: Dict[str, Any], motor_padrao: str) -> Optional[Dict[str, Any]]:
     """Consulta com `site:` -> Google orgânico (`engine=google`, `num` mantido). None = não se aplica
     (planejador desligado ou consulta pura: segue o motor configurado). Emite `trocou_motor` quando o
     motor padrão era outro."""
-    if not ativo() or not tem_site(q.get("q", "")):
+    if not (ativo() or site_no_organico()) or not tem_site(q.get("q", "")):
         return None
     novo = dict(q)
     novo["engine"] = "google"

@@ -437,3 +437,7 @@ def test_pipeline_usa_o_orcamento_que_sobra_em_mais_de_uma_onda_extra(amb, monke
     assert n1 in serp.chamadas and n2 in serp.chamadas                  # 2 ondas extras (antes: só 1)
     assert rel.propensao == "alta", rel.justificativa
     assert len(serp.chamadas) <= config.AGENTE_MAX_BUSCAS
+
+
+# Mecânica base (flags da Missão F/G desligadas; cada flag tem testes próprios que a ligam).
+pytestmark = pytest.mark.usefixtures("base_sem_flags")
