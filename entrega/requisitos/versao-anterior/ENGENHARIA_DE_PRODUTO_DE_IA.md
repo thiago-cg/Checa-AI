@@ -1,8 +1,8 @@
-# Crosscheck BR — Engenharia de Produto de Inteligência Artificial
+# Checa AI — Engenharia de Produto de Inteligência Artificial
 
 | | |
 |---|---|
-| **Produto** | Crosscheck BR — checagem cruzada de fatos em larga escala |
+| **Produto** | Checa AI — checagem cruzada de fatos em larga escala |
 | **Documento** | O que é próprio de um produto de inteligência artificial: o canvas do modelo, o ciclo de vida, os requisitos RNF06 a RNF09, a validação, a operação e o monitoramento |
 | **Data deste documento** | 30 de setembro de 2026 |
 | **Equipe** | Thiago Correia Gonzaga, Gabriella Oliveira de Souza Dias, Maria Eduarda Denis Duarte Marques, Guilherme Silva Dutra, Eliane Orlandin do Carmo, Daltro Oliveira Vinuto |
@@ -10,7 +10,7 @@
 Um produto de inteligência artificial difere de um software tradicional em
 quatro pontos: depende de dados que mudam, tem comportamento probabilístico,
 precisa de operação contínua e só funciona como sistema integrado. Este
-documento registra como o Crosscheck BR trata cada um deles.
+documento registra como o Checa AI trata cada um deles.
 
 **Como este documento se liga ao de requisitos.** Cada dado fica em um único
 lugar. Os números do modelo e dos dados, os indicadores, as regras de negócio
