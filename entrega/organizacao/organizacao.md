@@ -27,8 +27,8 @@ passo da análise.
 | Papel | Quem | Responsabilidades |
 |---|---|---|
 | Product Owner | Mentores do programa | Propor o desafio, orientar a direção do produto e avaliar as entregas. |
-| Scrum Master | Daltro Oliveira Vinuto | Facilitar as reuniões da equipe e acompanhar o andamento e os impedimentos. |
-| Time de desenvolvimento | Thiago Correia Gonzaga, Maria Eduarda Denis Duarte Marques, Guilherme Silva Dutra, Gabriella Oliveira de Souza Dias, Eliane Orlandin do Carmo | Pesquisar, construir, testar e documentar o produto, dividindo o trabalho por frentes (seção 3). |
+| Scrum Master | Sem Scrum Master formal | A comunicação e o alinhamento da equipe ficaram com Guilherme Silva Dutra e Thiago Correia Gonzaga. |
+| Time de desenvolvimento | Thiago Correia Gonzaga, Maria Eduarda Denis Duarte Marques, Guilherme Silva Dutra, Gabriella Oliveira de Souza Dias, Eliane Orlandin do Carmo, Daltro Oliveira Vinuto | Pesquisar, construir, testar e documentar o produto, dividindo o trabalho por frentes (seção 3). |
 
 As decisões de produto do dia a dia (por exemplo, apresentar a resposta como "propensão de ser fake news" e não
 como veredito) foram tomadas pela equipe e ficaram registradas em `docs/PROXIMOS_PASSOS.md`.
@@ -39,12 +39,12 @@ como veredito) foram tomadas pela equipe e ficaram registradas em `docs/PROXIMOS
 
 | Integrante | Frente principal | Guiding Questions | Contribuições registradas no GitHub |
 |---|---|---|---|
-| Thiago Correia Gonzaga | Núcleo da aplicação e modelo próprio | 2, 2.1, 7, 7.1 e 10 | Agente de busca, juiz e avaliador por notícia, telemetria e avaliação (`eval/`), núcleo de decisão, base primeiro (E1), relevância temporal (E4), auditoria de agentes e prompts; no FakenewsBR, o pipeline do BERTimbau e a versão v6 do dataset. 11 pull requests. |
+| Thiago Correia Gonzaga | Núcleo da aplicação e modelo próprio; comunicação da equipe | 2, 2.1, 7, 7.1 e 10 | Agente de busca, juiz e avaliador por notícia, telemetria e avaliação (`eval/`), núcleo de decisão, base primeiro (E1), relevância temporal (E4), auditoria de agentes e prompts; no FakenewsBR, o pipeline do BERTimbau e a versão v6 do dataset. 11 pull requests. |
 | Maria Eduarda Denis Duarte Marques | Requisitos, produto e integrações | 5 e 9 | Engenharia de requisitos e de produto de IA, site do projeto, linguagem de "propensão", modelo de linguagem local, confiabilidade das fontes, base histórica de checagens, simulação de usuário, Fases D e F, Google Fact Check API, entrega dos requisitos. 12 pull requests. |
-| Guilherme Silva Dutra | Organização da entrega e do repositório do modelo | 1, 5.1, 5.2 e 8 | Pasta `entrega/`, dataset e scripts de treinamento do modelo, relatório técnico do modelo; no FakenewsBR, organização do repositório e testes. |
+| Guilherme Silva Dutra | Organização da entrega e do repositório do modelo; comunicação da equipe | 1, 5.1, 5.2 e 8 | Pasta `entrega/`, dataset e scripts de treinamento do modelo, relatório técnico do modelo; no FakenewsBR, organização do repositório e testes. |
 | Gabriella Oliveira de Souza Dias | Pesquisa | 3 e 3.1 | Documento de Guiding Questions (`entrega/guiding_questions/`). |
 | Eliane Orlandin do Carmo | Análise exploratória dos dados | 4 | EDA do dataset v6, com relatórios, gráficos e o pipeline (`entrega/EDA/`). |
-| Daltro Oliveira Vinuto | Scrum Master e processo | 11 | — |
+| Daltro Oliveira Vinuto | Pesquisa | 11 | — |
 
 As perguntas 6, 6.1 e 12 (transparência da avaliação, apresentação sem enviesar e aplicações) foram respondidas por
 toda a equipe.
@@ -56,7 +56,7 @@ toda a equipe.
 | Prática | Como foi feita |
 |---|---|
 | Ciclos | Sem sprints formais. O trabalho foi organizado por fases de entrega (A a G, em `docs/PROXIMOS_PASSOS.md`), cada uma com itens, responsável e situação. |
-| Reuniões | Reuniões curtas e frequentes de alinhamento (daily). |
+| Reuniões | Reuniões curtas e frequentes de alinhamento (daily), sem Scrum Master formal; a comunicação ficou com Guilherme e Thiago (seção 2). |
 | Fluxo no código | Uma branch por tarefa, pull request para a `main` com o que mudou, as medições e o que ficou sem validar; os entregáveis do desafio entram pela branch `entrega`. |
 | Critério de pronto | Testes automatizados passando; avaliação de decisão antes e depois registrada no pull request e em `eval/ITERACOES.md`; nenhum erro grave novo; commits por tema; o que ficou sem validar escrito no pull request. |
 | Decisões | Registradas no próprio repositório: planos aprovados em `docs/superpowers/plans/`, decisões e pendências em `docs/PROXIMOS_PASSOS.md` e na seção de pendências dos requisitos. |
@@ -94,4 +94,5 @@ toda a equipe.
 | Sem backlog priorizado em ferramenta própria (o repositório não tem issues nem quadro de tarefas) | Usar issues e um quadro do GitHub Projects, com os itens de `docs/PROXIMOS_PASSOS.md` |
 | Reuniões sem registro escrito | Registrar decisões e impedimentos de cada reunião num arquivo do repositório |
 | Sem ciclos com início e fim definidos | Adotar sprints de uma semana, com revisão das entregas junto aos mentores no fim de cada uma |
+| Sem Scrum Master formal | Formalizar o papel com quem já faz a comunicação da equipe, ou fazer rodízio a cada ciclo |
 | Trabalho de código concentrado em poucas pessoas | Distribuir tarefas de código com par (uma pessoa revisa o pull request da outra) |
