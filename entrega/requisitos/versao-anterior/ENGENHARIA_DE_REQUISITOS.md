@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Produto** | Checa AI — checagem cruzada de fatos em larga escala |
-| **Repositório principal** | `thiago-cg/CrossCheckBR` |
+| **Repositório principal** | `thiago-cg/Checa-AI` |
 | **Repositório do modelo e dos dados** | `thiago-cg/FakenewsBR` |
 | **Versão do sistema** | `mvp-0.2.0`, código da `main` em `17fc2bd` (pull request nº 4) |
 | **Data deste documento** | 30 de setembro de 2026 |
