@@ -28,6 +28,2814 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-09-22T01:58:37.984761+00:00"
+  },
+  {
+   "id": "viomundo-com-br",
+   "nome": "Viomundo",
+   "tipo": "geral",
+   "homepage": "https://www.viomundo.com.br/",
+   "dominio": "viomundo.com.br",
+   "rss": [],
+   "sitemap": "https://www.viomundo.com.br/sitemap_index.xml",
+   "editorias": [
+    "politica",
+    "congresso-alames-cebes",
+    "blogdasaude",
+    "pitacos",
+    "apoiar",
+    "entrevistas",
+    "contramare",
+    "palavradasalvacao"
+   ],
+   "article_url_patterns": [
+    "/denuncias/",
+    "/denuncias/arthur-chioro-tiro-de-bolsonaro-contra-medicos-cubanos-saira-pela-culatra-a-maioria-dos-medicos-brasileiros-nao-quer-ir-para-longe-e-nao-sabe-fazer-atencao-basica.html/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Chioro: Tiro de Bolsonaro contra médicos cubanos sairá pela culatra; a maioria dos médicos brasileiros não quer ir para longe e não sabe fazer atenção básica",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.viomundo.com.br/denuncias/arthur-chioro-tiro-de-bolsonaro-contra-medicos-cubanos-saira-pela-culatra-a-maioria-dos-medicos-brasileiros-nao-quer-ir-para-longe-e-nao-sabe-fazer-atencao-basica.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:33:52.247496+00:00"
+  },
+  {
+   "id": "brasilnocentro-com-br",
+   "nome": "Brasil no Centro",
+   "tipo": "geral",
+   "homepage": "https://brasilnocentro.com.br/",
+   "dominio": "brasilnocentro.com.br",
+   "rss": [],
+   "sitemap": "https://brasilnocentro.com.br/sitemap.xml",
+   "editorias": [
+    "pesquisas-eleitorais",
+    "artigos",
+    "noticias",
+    "miguel-reale-junior-cuidado-com-o-precipicio",
+    "fabiano-lana-o-brasil-nao-pode-merecer-flavio-mas-o-petismo-merece",
+    "marcus-pestana-as-distorcoes-do-sistema-eleitoral-para-o-congresso",
+    "jorge-lopes-cancado-a-nova-geracao-tucana-que-emerge-das-urnas",
+    "fabiano-lana-o-maior-inimigo-do-esquerdista-e-sua-autoanalise-como-moral-superior"
+   ],
+   "article_url_patterns": [
+    "/pf-deflagra-operacao-sobre-dark-horse-e-mira-mario-frias-e-produtora/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "PF deflagra operação sobre “Dark Horse” e mira Mario Frias e produtora",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://brasilnocentro.com.br/pf-deflagra-operacao-sobre-dark-horse-e-mira-mario-frias-e-produtora/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:35:45.059933+00:00"
+  },
+  {
+   "id": "brasilnoticia-com-br",
+   "nome": "BRASIL NOTÍCIA",
+   "tipo": "geral",
+   "homepage": "https://brasilnoticia.com.br/",
+   "dominio": "brasilnoticia.com.br",
+   "rss": [
+    "https://brasilnoticia.com.br/feed/",
+    "https://brasilnoticia.com.br/comments/feed/"
+   ],
+   "sitemap": "https://brasilnoticia.com.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "brasilia",
+    "politica-mt",
+    "cidades",
+    "author",
+    "justica",
+    "mundo",
+    "politica-df"
+   ],
+   "article_url_patterns": [
+    "/brasilia/",
+    "/brasilia/pf-quer-rastrear-recursos-enviados-aos-eua-para-filme-sobre-bolsonaro/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody']"
+   },
+   "titulo_exemplo": "PF quer rastrear recursos enviados aos EUA para filme sobre Bolsonaro",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://brasilnoticia.com.br/brasilia/pf-quer-rastrear-recursos-enviados-aos-eua-para-filme-sobre-bolsonaro/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:35:46.843194+00:00"
+  },
+  {
+   "id": "opopular-com-br",
+   "nome": "O Popular",
+   "tipo": "geral",
+   "homepage": "https://opopular.com.br/",
+   "dominio": "opopular.com.br",
+   "rss": [],
+   "sitemap": "https://opopular.com.br/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/mundo/",
+    "/mundo/video-mulher-fica-presa-em-tobog-de-cruzeiro-em-alto-mar-1.2416404/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://opopular.com.br/mundo/video-mulher-fica-presa-em-tobog-de-cruzeiro-em-alto-mar-1.2416404"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:38:44.373212+00:00"
+  },
+  {
+   "id": "diariodonordeste-verdesmares-com-br",
+   "nome": "Di&aacute;rio do Nordeste",
+   "tipo": "geral",
+   "homepage": "https://diariodonordeste.verdesmares.com.br/",
+   "dominio": "diariodonordeste.verdesmares.com.br",
+   "rss": [
+    "https://diariodonordeste.verdesmares.com.br/cmlink/feed-webstories-7.5124750",
+    "https://diariodonordeste.verdesmares.com.br/cmlink/feed-app-7.4879158",
+    "https://diariodonordeste.verdesmares.com.br/cmlink/feed-neg%C3%B3cios-7.4834673",
+    "https://diariodonordeste.verdesmares.com.br/cmlink/feed-7.4674196",
+    "https://diariodonordeste.verdesmares.com.br/cmlink/feed-1.3009099",
+    "https://diariodonordeste.verdesmares.com.br/cmlink/dow-jones-1.2963165"
+   ],
+   "sitemap": "https://diariodonordeste.verdesmares.com.br/sitemap.xml",
+   "editorias": [
+    "seguranca",
+    "pontopoder",
+    "jogada",
+    "negocios",
+    "ceara",
+    "ultima-hora",
+    "autores",
+    "entretenimento"
+   ],
+   "article_url_patterns": [
+    "/entretenimento/",
+    "/entretenimento/zoeira/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Hytalo Santos se pronuncia após suposta briga em baile funk no RJ",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://diariodonordeste.verdesmares.com.br/entretenimento/zoeira/hytalo-santos-se-pronuncia-apos-suposta-briga-em-baile-funk-no-rj-1.3573245"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:38:57.882817+00:00"
+  },
+  {
+   "id": "diariodopoder-com-br",
+   "nome": "Diário do Poder - Poder, política e bastidores",
+   "tipo": "geral",
+   "homepage": "https://diariodopoder.com.br/",
+   "dominio": "diariodopoder.com.br",
+   "rss": [
+    "https://diariodopoder.com.br/feed"
+   ],
+   "sitemap": "https://diariodopoder.com.br/sitemap.xml",
+   "editorias": [
+    "brasil-e-regioes",
+    "coluna-claudio-humberto",
+    "opiniao",
+    "diario-motor",
+    "dinheiro",
+    "esporte",
+    "tag",
+    "exteriores"
+   ],
+   "article_url_patterns": [
+    "/coluna-claudio-humberto/",
+    "/coluna-claudio-humberto/gestao-lula-inundou-o-planalto-com-terceirizados/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Governo Lula inundou o Planalto com terceirizados",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://diariodopoder.com.br/coluna-claudio-humberto/gestao-lula-inundou-o-planalto-com-terceirizados"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:41:01.410146+00:00"
+  },
+  {
+   "id": "cremeb-org-br",
+   "nome": "Portal Cremeb BA",
+   "tipo": "geral",
+   "homepage": "https://www.cremeb.org.br/",
+   "dominio": "cremeb.org.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "index.php"
+   ],
+   "article_url_patterns": [
+    "/index.php/",
+    "/index.php/noticias/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, .entry-content"
+   },
+   "titulo_exemplo": "Notícias",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.cremeb.org.br/index.php/noticias/cfm-esclarece-pontos-da-resolucao-que-trata-da-recusa-terapeutica-e-objecao-de-consciencia/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:42:37.128320+00:00"
+  },
+  {
+   "id": "caras-com-br",
+   "nome": "CARAS Brasil",
+   "tipo": "geral",
+   "homepage": "https://caras.com.br/",
+   "dominio": "caras.com.br",
+   "rss": [
+    "https://caras.com.br/feed"
+   ],
+   "sitemap": "https://caras.com.br/sitemap.xml",
+   "editorias": [
+    "tags",
+    "atualidades",
+    "canal",
+    "casa-dos-famosos",
+    "realeza",
+    "bem-estar",
+    "moda",
+    "beleza"
+   ],
+   "article_url_patterns": [
+    "/atualidades/",
+    "/atualidades/alexandre-pato-relembra-como-conheceu-rebeca-abravanel-de-forma-inusitada.phtml/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Alexandre Pato relembra como conheceu Rebeca Abravanel de forma inusitada",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://caras.com.br/atualidades/alexandre-pato-relembra-como-conheceu-rebeca-abravanel-de-forma-inusitada.phtml"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:52:41.233104+00:00"
+  },
+  {
+   "id": "ce-gov-br",
+   "nome": "Secretaria da Saúde do Ceará",
+   "tipo": "geral",
+   "homepage": "https://www.ce.gov.br/",
+   "dominio": "ce.gov.br",
+   "rss": [
+    "https://www.ce.gov.br/feed/"
+   ],
+   "sitemap": "https://www.ce.gov.br/sitemap.xml",
+   "editorias": [
+    "categoria",
+    "2026",
+    "todas-noticias",
+    "acesso-a-informacao",
+    "acessibilidade",
+    "agenda",
+    "o-governo",
+    "nucleo-de-comunicacao"
+   ],
+   "article_url_patterns": [
+    "/saude/",
+    "/saude/2024/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Secretaria da Saúde do Ceará",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.ce.gov.br/saude/2024/05/02/hospital-sao-jose-orienta-riscos-automedicacao-suspeita-dengue/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-13T17:57:31.085906+00:00"
+  },
+  {
+   "id": "crmsc-org-br",
+   "nome": "CRMSC",
+   "tipo": "geral",
+   "homepage": "https://crmsc.org.br/",
+   "dominio": "crmsc.org.br",
+   "rss": [],
+   "sitemap": "https://crmsc.org.br/sitemap.xml",
+   "editorias": [
+    "noticias",
+    "consulta-de-pareceres",
+    "historia",
+    "diretoria",
+    "camaras-tecnicas",
+    "conselheiros",
+    "comissoes",
+    "regionais"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/momento-da-etica-reestreia-com-informacoes-recentes-sobre-transfusoes-em-pacientes-testemunhas-de-jeova/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://crmsc.org.br/noticias/momento-da-etica-reestreia-com-informacoes-recentes-sobre-transfusoes-em-pacientes-testemunhas-de-jeova/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T12:37:20.560641+00:00"
+  },
+  {
+   "id": "reporterbrasil-org-br",
+   "nome": "Repórter Brasil",
+   "tipo": "geral",
+   "homepage": "https://reporterbrasil.org.br/",
+   "dominio": "reporterbrasil.org.br",
+   "rss": [
+    "https://reporterbrasil.org.br/feed/"
+   ],
+   "sitemap": "https://reporterbrasil.org.br/sitemap.xml",
+   "editorias": [
+    "jornalismo",
+    "educacao",
+    "pesquisa",
+    "2026",
+    "eleicoes-2026",
+    "paudarco",
+    "apoie",
+    "enp-educarb"
+   ],
+   "article_url_patterns": [
+    "/2019/",
+    "/2019/01/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Sulfoxaflor ligado ao extermínio de abelhas",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://reporterbrasil.org.br/2019/01/governo-liberou-registros-de-agrotoxicos-altamente-toxicos/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T12:38:03.643624+00:00"
+  },
+  {
+   "id": "valor-globo-com",
+   "nome": "Valor Econômico",
+   "tipo": "geral",
+   "homepage": "https://valor.globo.com/",
+   "dominio": "valor.globo.com",
+   "rss": [
+    "https://valor.globo.com/rss/valor"
+   ],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/mundo/",
+    "/mundo/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main, .mc-article-body"
+   },
+   "titulo_exemplo": "Data center é desativado temporariamente na Rússia após ataques de drones da Ucrânia",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://valor.globo.com/mundo/noticia/2026/10/12/data-center-desativado-temporariamente-na-rssia-aps-ataques-de-drones-da-ucrnia.ghtml"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T17:29:50.097084+00:00"
+  },
+  {
+   "id": "catracalivre-com-br",
+   "nome": "Catraca Livre",
+   "tipo": "geral",
+   "homepage": "https://catracalivre.com.br/",
+   "dominio": "catracalivre.com.br",
+   "rss": [],
+   "sitemap": "https://catracalivre.com.br/sitemap.xml",
+   "editorias": [
+    "viagem-livre",
+    "agenda",
+    "gira",
+    "receitas",
+    "musica",
+    "colunistas",
+    "as-melhores-solucoes-sustentaveis",
+    "saude-bem-estar"
+   ],
+   "article_url_patterns": [
+    "/saude-bem-estar/",
+    "/saude-bem-estar/beber-cafe-pode-reduzir-o-risco-de-certos-tipos-de-cancer-saiba-qual-a-quantidade/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Beber café pode reduzir o risco de certos tipos de câncer; saiba qual a quantidade",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://catracalivre.com.br/saude-bem-estar/beber-cafe-pode-reduzir-o-risco-de-certos-tipos-de-cancer-saiba-qual-a-quantidade/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T17:41:16.622820+00:00"
+  },
+  {
+   "id": "revistaforum-com-br",
+   "nome": "Revista Fórum",
+   "tipo": "geral",
+   "homepage": "https://revistaforum.com.br/",
+   "dominio": "revistaforum.com.br",
+   "rss": [],
+   "sitemap": "https://revistaforum.com.br/sitemap_index.xml",
+   "editorias": [
+    "editoria",
+    "politica",
+    "opiniao",
+    "tecnologia",
+    "politica-de-privacidade",
+    "meio-ambiente-e-sustentabilidade",
+    "global",
+    "historia"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/lula-festeja-fim-escala-6x1/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "Lula convoca população a festejar o fim da escala 6&#215;1 e faz alerta sobre voto do PL de Flávio Bolsonaro",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://revistaforum.com.br/politica/lula-festeja-fim-escala-6x1/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T18:19:32.817975+00:00"
+  },
+  {
+   "id": "tse-jus-br",
+   "nome": "Justiça Eleitoral",
+   "tipo": "geral",
+   "homepage": "https://www.tse.jus.br/",
+   "dominio": "tse.jus.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/comunicacao/",
+    "/comunicacao/noticias/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Página interna do portal",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.tse.jus.br/comunicacao/noticias/2026/Outubro/flavio-bolsonaro-e-lula-vao-disputar-o-2o-turno-para-a-presidencia-da-republica"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T18:41:44.398891+00:00"
+  },
+  {
+   "id": "www12-senado-leg-br",
+   "nome": "Senado Federal",
+   "tipo": "geral",
+   "homepage": "https://www12.senado.leg.br/",
+   "dominio": "www12.senado.leg.br",
+   "rss": [
+    "https://www12.senado.leg.br/hpsenado/RSS",
+    "https://www12.senado.leg.br/hpsenado/rss.xml",
+    "https://www12.senado.leg.br/hpsenado/atom.xml"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "institucional",
+    "noticias",
+    "transparencia",
+    "ecidadania",
+    "perguntas-frequentes",
+    "publicacoes",
+    "hpsenado",
+    "dados-abertos"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/materias/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "Flávio Bolsonaro e Lula disputam o segundo turno das eleições para presidente",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www12.senado.leg.br/noticias/materias/2026/10/04/flavio-bolsonaro-e-lula-disputam-o-segundo-turno-das-eleicoes-para-presidente"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T18:41:53.440350+00:00"
+  },
+  {
+   "id": "institutodelongevidade-org",
+   "nome": "Instituto de Longevidade MAG",
+   "tipo": "geral",
+   "homepage": "https://institutodelongevidade.org/",
+   "dominio": "institutodelongevidade.org",
+   "rss": [],
+   "sitemap": "https://institutodelongevidade.org/sitemap.xml",
+   "editorias": [
+    "longevidade-e-comportamento",
+    "longevidade-e-saude",
+    "longevidade-financeira",
+    "longevidade-e-cidades",
+    "longevidade-e-trabalho",
+    "nossas-iniciativas",
+    "o-instituto",
+    "beneficios"
+   ],
+   "article_url_patterns": [
+    "/longevidade-e-saude/",
+    "/longevidade-e-saude/alimentacao/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Relação entre álcool e envelhecimento é revelada em estudo japonês",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://institutodelongevidade.org/longevidade-e-saude/alimentacao/relacao-entre-alcool-e-envelhecimento"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T19:16:04.896258+00:00"
+  },
+  {
+   "id": "revistagalileu-globo-com",
+   "nome": "Brasileiros criam cerveja que repõe nutrientes e retarda o envelhecimento de cél",
+   "tipo": "geral",
+   "homepage": "https://revistagalileu.globo.com/",
+   "dominio": "revistagalileu.globo.com",
+   "rss": [
+    "https://revistagalileu.globo.com/rss/galileu"
+   ],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/Ciencia/",
+    "/Ciencia/Saude/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Brasileiros criam cerveja que repõe nutrientes e retarda o envelhecimento de células",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://revistagalileu.globo.com/Ciencia/Saude/noticia/2022/05/brasileiros-criam-cerveja-que-repoe-nutrientes-e-retarda-o-envelhecimento-de-celulas.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T19:16:04.946347+00:00"
+  },
+  {
+   "id": "tvbrusque-com-br",
+   "nome": "Reajuste no Bolsa Família",
+   "tipo": "geral",
+   "homepage": "https://www.tvbrusque.com.br/",
+   "dominio": "tvbrusque.com.br",
+   "rss": [],
+   "sitemap": "https://www.tvbrusque.com.br/sitemap.xml",
+   "editorias": [
+    "noticia",
+    "pagina",
+    "municipios",
+    "blogs-e-colunas",
+    "video",
+    "editorias",
+    "videos",
+    "ultimas-noticias"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/117926/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Reajuste no Bolsa Família",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.tvbrusque.com.br/noticia/117926/reajuste-no-bolsa-familia"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T19:17:19.480274+00:00"
+  },
+  {
+   "id": "infovaticana-com",
+   "nome": "Infovaticana Blogs",
+   "tipo": "geral",
+   "homepage": "https://infovaticana.com/",
+   "dominio": "infovaticana.com",
+   "rss": [],
+   "sitemap": "https://infovaticana.com/sitemap.xml",
+   "editorias": [
+    "2026",
+    "blogs",
+    "video",
+    "categoria",
+    "tag",
+    "acerca-de",
+    "ayudanos-a-seguir-trabajando-a-seguir-diciendo-lo-que-nadie-mas-dice",
+    "politica-de-cookies"
+   ],
+   "article_url_patterns": [
+    "/pt/",
+    "/pt/blogs/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "A farsa do processo Rupnik, a teia de instituições do Vaticano, a fecundação é algo normal?, a eterna comissão Orlandi, mais padres homossexuais?, a «missa aste",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://infovaticana.com/pt/blogs/specola/a-farsa-do-processo-rupnik-a-teia-de-instituicoes-do-vaticano-a-fecundacao-e-algo-normal-a-eterna-comissao-orlandi-mais-padres-homossexuais-a-missa-asteca-maria-mais-universal-que-o-catolicismo/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T19:18:07.811304+00:00"
+  },
+  {
+   "id": "crusoe-com-br",
+   "nome": "Variedades - Crusoé",
+   "tipo": "geral",
+   "homepage": "https://crusoe.com.br/",
+   "dominio": "crusoe.com.br",
+   "rss": [
+    "https://crusoe.com.br/home-2/feed/"
+   ],
+   "sitemap": "https://crusoe.com.br/sitemap.xml",
+   "editorias": [
+    "lista",
+    "noticias",
+    "diario",
+    "author",
+    "poder",
+    "ilha-de-cultura",
+    "reportagem",
+    "colunistas"
+   ],
+   "article_url_patterns": [
+    "/crusoe-variedades/",
+    "/crusoe-variedades/bebida-que-prolonga-a-vida-novo-estudo-aponta-o-substituto-da-cerveja-e-destilados/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": ".entry-content"
+   },
+   "titulo_exemplo": "Bebida que prolonga a vida? Novo estudo aponta o substituto da cerveja e destilados",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://crusoe.com.br/crusoe-variedades/bebida-que-prolonga-a-vida-novo-estudo-aponta-o-substituto-da-cerveja-e-destilados/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:05:43.548269+00:00"
+  },
+  {
+   "id": "extra-globo-com",
+   "nome": "Álcool pode aumentar expectativa de vida, diz pesquisa",
+   "tipo": "geral",
+   "homepage": "https://extra.globo.com/",
+   "dominio": "extra.globo.com",
+   "rss": [
+    "https://extra.globo.com/rss/extra"
+   ],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/saude-e-ciencia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "<a href=\"https://extra.globo.com/\">Extra Online</a>",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://extra.globo.com/noticias/saude-e-ciencia/alcool-pode-aumentar-expectativa-de-vida-diz-pesquisa-14097275.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:05:43.921624+00:00"
+  },
+  {
+   "id": "canaltech-com-br",
+   "nome": "Canaltech",
+   "tipo": "geral",
+   "homepage": "https://canaltech.com.br/",
+   "dominio": "canaltech.com.br",
+   "rss": [
+    "https://canaltech.com.br/rss/"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "produto",
+    "empresa",
+    "games",
+    "smartphone",
+    "carros",
+    "colunas",
+    "entretenimento",
+    "analises"
+   ],
+   "article_url_patterns": [
+    "/meio-ambiente/",
+    "/meio-ambiente/jatos-de-lava-video-mostra-momento-exato-da-erupcao-do-vulcao-kilauea-no-havai/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "Jatos de lava! Vídeo mostra momento exato da erupção do vulcão Kilauea, no Havaí",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://canaltech.com.br/meio-ambiente/jatos-de-lava-video-mostra-momento-exato-da-erupcao-do-vulcao-kilauea-no-havai/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:05:47.297915+00:00"
+  },
+  {
+   "id": "checamos-afp-com",
+   "nome": "Checamos",
+   "tipo": "geral",
+   "homepage": "https://checamos.afp.com/",
+   "dominio": "checamos.afp.com",
+   "rss": [],
+   "sitemap": "https://checamos.afp.com/sitemap.xml",
+   "editorias": [
+    "list",
+    "contact",
+    "sobre-afp",
+    "como-trabalhamos",
+    "normas-eticas-e-editoriais-da-afp",
+    "manual-de-estilo-de-verificacao-digital-da-afp",
+    "conheca-equipe",
+    "correcoes"
+   ],
+   "article_url_patterns": [
+    "/beber-agua-fervida-com-alho-nao-cura-o-novo-coronavirus-garantem-especialistas-e-autoridades-de/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Beber água fervida com alho não cura o novo coronavírus, garantem especialistas e autoridades de saúde",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://checamos.afp.com/beber-agua-fervida-com-alho-nao-cura-o-novo-coronavirus-garantem-especialistas-e-autoridades-de"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:05:55.550937+00:00"
+  },
+  {
+   "id": "observador-pt",
+   "nome": "Observador",
+   "tipo": "geral",
+   "homepage": "https://observador.pt/",
+   "dominio": "observador.pt",
+   "rss": [
+    "https://observador.pt/feed/"
+   ],
+   "sitemap": "https://observador.pt/sitemap.xml",
+   "editorias": [
+    "seccao",
+    "especiais",
+    "liveblogs",
+    "radio",
+    "jogos",
+    "2026",
+    "programas",
+    "apoio-a-cliente"
+   ],
+   "article_url_patterns": [
+    "/especiais/",
+    "/especiais/fact-checks-de-arma-biologica-a-cura-com-tigelas-de-agua-de-alho-9-mentiras-sobre-o-coronavirus/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Fact Checks. De arma biológica a cura com tigelas de água de alho: 9 mentiras sobre o&nbsp;coronavírus",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://observador.pt/especiais/fact-checks-de-arma-biologica-a-cura-com-tigelas-de-agua-de-alho-9-mentiras-sobre-o-coronavirus/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:05:55.655870+00:00"
+  },
+  {
+   "id": "revistamarieclaire-globo-com",
+   "nome": "Mulher é surpreendida por tubarão de 3 metros ao pular no mar: \"Não se desespere",
+   "tipo": "geral",
+   "homepage": "https://revistamarieclaire.globo.com/",
+   "dominio": "revistamarieclaire.globo.com",
+   "rss": [
+    "https://revistamarieclaire.globo.com/rss/marieclaire"
+   ],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/Noticias/",
+    "/Noticias/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Mulher é surpreendida por tubarão de 3 metros ao pular no mar: \"Não se desespere\"",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://revistamarieclaire.globo.com/Noticias/noticia/2020/08/mulher-e-surpreendida-por-tubarao-de-3-metros-ao-pular-no-mar-nao-se-desespere.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:18.178649+00:00"
+  },
+  {
+   "id": "atarde-com-br",
+   "nome": "A TARDE",
+   "tipo": "geral",
+   "homepage": "https://atarde.com.br/",
+   "dominio": "atarde.com.br",
+   "rss": [
+    "https://atarde.com.br/rss"
+   ],
+   "sitemap": "https://atarde.com.br/sitemap.xml",
+   "editorias": [
+    "colunistas",
+    "eleicoes",
+    "esportes",
+    "politica",
+    "jogos",
+    "cineinsite",
+    "salvador",
+    "bahia"
+   ],
+   "article_url_patterns": [
+    "/entretenimento/",
+    "/entretenimento/hytalo-santos-morreu-entenda-noticia-que-viralizou-nas-redes-1346855/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Hytalo Santos morreu? Entenda notícia que viralizou nas redes",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://atarde.com.br/entretenimento/hytalo-santos-morreu-entenda-noticia-que-viralizou-nas-redes-1346855"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:35.317625+00:00"
+  },
+  {
+   "id": "clickpetroleoegas-com-br",
+   "nome": "CPG Click Petróleo e Gás",
+   "tipo": "geral",
+   "homepage": "https://clickpetroleoegas.com.br/",
+   "dominio": "clickpetroleoegas.com.br",
+   "rss": [],
+   "sitemap": "https://clickpetroleoegas.com.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "tag",
+    "author",
+    "r-3328-bilhoes-em-um-so-leilao-tesouro-faz-maior-venda-de-prefixados-desde-2020-fixa-juros-ate-2037-e-deixa-uma-pergunta-para-o-investidor-quanto-a-inflacao-pode-corroer-desse-dinheiro-caes",
+    "brasil-perde-213-nas-exportacoes-de-caminhoes-e-326-nos-chassis-de-onibus-enquanto-montadoras-preparam-ofensiva-para-2027-diante-do-avanco-de-marcas-chinesas-na-america-latina-fcmo87",
+    "maior-construtora-americana-fecha-acordo-para-produzir-pecas-de-mais-de-1-250-casas-com-robos-e-inteligencia-artificial-apostando-em-fabricas-automatizadas-para-acelerar-obras-fcmo87",
+    "o-futuro-eletrico-da-gm-depende-de-uma-nova-bateria-e-desta-instalacao-fcmo87",
+    "blue-origin-anuncia-investimento-de-us-5548-milhoes-em-megafabrica-de-satelites-com-cerca-de-121-mil-m%c2%b2-que-promete-criar-mais-de-2-mil-empregos-enquanto-prepara-redes-de-comunic-fcmo87"
+   ],
+   "article_url_patterns": [
+    "/china-revoluciona-o-mercado-de-energia-limpa-ao-cobrir-uma-montanha-inteira-com-paineis-solares-de-perovskita-criando-a-maior-usina/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "China revoluciona o mercado de energia limpa ao cobrir uma montanha com 95.648 MIL painéis solares de perovskita",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://clickpetroleoegas.com.br/china-revoluciona-o-mercado-de-energia-limpa-ao-cobrir-uma-montanha-inteira-com-paineis-solares-de-perovskita-criando-a-maior-usina/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:39.288873+00:00"
+  },
+  {
+   "id": "elastica-abril-com-br",
+   "nome": "Elástica – Todos do mesmo lado",
+   "tipo": "geral",
+   "homepage": "https://elastica.abril.com.br/",
+   "dominio": "elastica.abril.com.br",
+   "rss": [
+    "https://elastica.abril.com.br/ultimas-noticias/rss"
+   ],
+   "sitemap": "https://elastica.abril.com.br/sitemap.xml",
+   "editorias": [
+    "especiais",
+    "expressao",
+    "quem-somos",
+    "manifesto",
+    "colaboradores",
+    "politica-de-privacidade",
+    "contas-abertas",
+    "newsletter"
+   ],
+   "article_url_patterns": [
+    "/especiais/",
+    "/especiais/golpe-gas-uber-mulheres-vitimas-o-que-fazer/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Golpe do perfume: entenda a polêmica de intoxicação no Uber",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://elastica.abril.com.br/especiais/golpe-gas-uber-mulheres-vitimas-o-que-fazer/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:41.917857+00:00"
+  },
+  {
+   "id": "cocapec-com-br",
+   "nome": "Café não causa câncer, diz Organização Mundial da Saúde",
+   "tipo": "geral",
+   "homepage": "https://cocapec.com.br/",
+   "dominio": "cocapec.com.br",
+   "rss": [],
+   "sitemap": "https://cocapec.com.br/sitemap.xml",
+   "editorias": [
+    "governanca-e-transparencia",
+    "unidades-de-negocios",
+    "servicos",
+    "nossos-cafes",
+    "agenda",
+    "noticias",
+    "institucional",
+    "estrutura-de-governanca"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/cafe-nao-causa-cancer-diz-organizacao-mundial-da-saude/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "<strong class=\"fw-600\">Café não causa câncer, diz Organização Mundial da Saúde</strong>",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://cocapec.com.br/noticias/cafe-nao-causa-cancer-diz-organizacao-mundial-da-saude"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:48.517624+00:00"
+  },
+  {
+   "id": "prefeitura-sp-gov-br",
+   "nome": "Secretaria Municipal da Saúde",
+   "tipo": "geral",
+   "homepage": "https://prefeitura.sp.gov.br/",
+   "dominio": "prefeitura.sp.gov.br",
+   "rss": [],
+   "sitemap": "https://prefeitura.sp.gov.br/sitemap.xml",
+   "editorias": [
+    "web",
+    "secretarias",
+    "subprefeitura",
+    "outros-%c3%b3rg%c3%a3os",
+    "todas-as-not%c3%adcias",
+    "home",
+    "%c3%b3rg%c3%a3os-p%c3%bablicos"
+   ],
+   "article_url_patterns": [
+    "/web/",
+    "/web/saude/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "<a title=\"Ir para a página inicial\" href=\"https://prefeitura.sp.gov.br/home\" accesskey=\"1\"> <span class=\"sr-only\">Prefeitura de São Paulo</span> <img data-lfr-e",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://prefeitura.sp.gov.br/web/saude/w/noticias/363019"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:49.019489+00:00"
+  },
+  {
+   "id": "saude-abril-com-br",
+   "nome": "Veja Saúde",
+   "tipo": "geral",
+   "homepage": "https://saude.abril.com.br/",
+   "dominio": "saude.abril.com.br",
+   "rss": [
+    "https://saude.abril.com.br/ultimas-noticias/rss"
+   ],
+   "sitemap": "https://saude.abril.com.br/sitemap.xml",
+   "editorias": [
+    "medicina",
+    "coluna",
+    "podcast",
+    "ofertas",
+    "mente-saudavel",
+    "alimentacao",
+    "leitura-saudavel",
+    "web-stories-abril"
+   ],
+   "article_url_patterns": [
+    "/medicina/",
+    "/medicina/a-picada-do-aedes-aegypti-coca-quem-ele-prefere-atacar-ele-so-age-de-dia-tudo-sobre-o-mosquito/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "A picada do Aedes aegypti coça? Quem ele prefere atacar? Ele só age de dia? Tudo sobre o mosquito",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://saude.abril.com.br/medicina/a-picada-do-aedes-aegypti-coca-quem-ele-prefere-atacar-ele-so-age-de-dia-tudo-sobre-o-mosquito/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:49.062268+00:00"
+  },
+  {
+   "id": "folhagospel-com",
+   "nome": "Folha Gospel",
+   "tipo": "geral",
+   "homepage": "https://folhagospel.com/",
+   "dominio": "folhagospel.com",
+   "rss": [
+    "https://folhagospel.com/feed/",
+    "https://folhagospel.com/comments/feed/"
+   ],
+   "sitemap": "https://folhagospel.com/sitemap.xml",
+   "editorias": [
+    "papa-leao-xiv-e-diagnosticado-com-cancer-de-pulmao-apos-cirurgia-para-retirar-nodulo",
+    "ex-muculmano-relata-conversao-radical-e-o-preco-de-seguir-o-cristianismo",
+    "em-carta-aos-evangelicos-lula-reforca-defesa-da-familia-combate-as-bets-e-fim-da-escala-6x1",
+    "militares-myanmar-violam-igreja-batista-kachin",
+    "chile-registra-quase-uma-nova-igreja-evangelica-por-dia-aponta-levantamento",
+    "fale-conosco",
+    "musica",
+    "ultimos-videos"
+   ],
+   "article_url_patterns": [
+    "/padre-reginaldo-manzotti-e-acusado-de-engravidar-jovem-de-21-anos/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Padre Reginaldo Manzotti é acusado de engravidar jovem de 21 anos",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://folhagospel.com/padre-reginaldo-manzotti-e-acusado-de-engravidar-jovem-de-21-anos/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:51.584129+00:00"
+  },
+  {
+   "id": "pt-aleteia-org",
+   "nome": "Aleteia: vida plena com valor",
+   "tipo": "geral",
+   "homepage": "https://pt.aleteia.org/",
+   "dominio": "pt.aleteia.org",
+   "rss": [],
+   "sitemap": "https://pt.aleteia.org/sitemap.xml",
+   "editorias": [
+    "tag",
+    "category",
+    "2026",
+    "type",
+    "apoie-a-aleteia",
+    "2022",
+    "2025",
+    "search"
+   ],
+   "article_url_patterns": [
+    "/2018/",
+    "/2018/01/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Site que investiga boatos conclui: “grávida” do Pe. Manzotti nem sequer existe",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://pt.aleteia.org/2018/01/11/site-que-investiga-boatos-conclui-gravida-do-pe-manzotti-nem-sequer-existe/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:51.717245+00:00"
+  },
+  {
+   "id": "revistaoeste-com",
+   "nome": "Revista Oeste",
+   "tipo": "geral",
+   "homepage": "https://revistaoeste.com/",
+   "dominio": "revistaoeste.com",
+   "rss": [],
+   "sitemap": "https://revistaoeste.com/sitemap.xml",
+   "editorias": [
+    "colunista",
+    "videos",
+    "autor",
+    "minha-conta",
+    "assinar",
+    "wp-login.php",
+    "edicoes-anteriores",
+    "preferencias"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/gastos-com-viagens-internacionais-de-lula-se-aproximam-de-r-1-bilhao/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main, .entry-content"
+   },
+   "titulo_exemplo": "Gastos de Lula com viagens internacionais se aproximam de R$ 1 bi",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://revistaoeste.com/politica/gastos-com-viagens-internacionais-de-lula-se-aproximam-de-r-1-bilhao/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:06:59.153540+00:00"
+  },
+  {
+   "id": "classepolitica-com-br",
+   "nome": "Classe Politica",
+   "tipo": "geral",
+   "homepage": "https://classepolitica.com.br/",
+   "dominio": "classepolitica.com.br",
+   "rss": [
+    "https://classepolitica.com.br/feed/",
+    "https://classepolitica.com.br/comments/feed/"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "categoria",
+    "noticia",
+    "busca"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/pf-deflagra-operacao-sobre-financiamento-do-filme-dark-horse-mario-frias-e-produtora-sao-alvos/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Classe Politica",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://classepolitica.com.br/noticia/pf-deflagra-operacao-sobre-financiamento-do-filme-dark-horse-mario-frias-e-produtora-sao-alvos?55604"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:10.335471+00:00"
+  },
+  {
+   "id": "agemt-pucsp-br",
+   "nome": "Novo documentário da Netflix traz à luz o caso Eliza Samudio | Agemt | Jornalism",
+   "tipo": "geral",
+   "homepage": "http://agemt.pucsp.br/",
+   "dominio": "agemt.pucsp.br",
+   "rss": [],
+   "sitemap": "http://agemt.pucsp.br/sitemap.xml",
+   "editorias": [
+    "noticias",
+    "taxonomy",
+    "node",
+    "user",
+    "sobre-a-agencia",
+    "mauricio-tragtenberg",
+    "editorias-lista",
+    "politica-lista"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/novo-documentario-da-netflix-traz-luz-o-caso-eliza-samudio/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "<!-- THEME DEBUG --> <!-- THEME HOOK: 'field' --> <!-- FILE NAME SUGGESTIONS: * field--node--title--noticias.html.twig x field--node--title.html.twig * field--n",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "http://agemt.pucsp.br/noticias/novo-documentario-da-netflix-traz-luz-o-caso-eliza-samudio"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:13.691696+00:00"
+  },
+  {
+   "id": "feebpr-org-br",
+   "nome": "Federação dos Empregados em Estabelecimentos Bancários do Estado do Paraná",
+   "tipo": "geral",
+   "homepage": "https://feebpr.org.br/",
+   "dominio": "feebpr.org.br",
+   "rss": [],
+   "sitemap": "https://feebpr.org.br/sitemap.xml",
+   "editorias": [
+    "noticias",
+    "bancos",
+    "institucional",
+    "filiados",
+    "fale-conosco",
+    "lucro-dos-bancos",
+    "politica-de-privacidade"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/XcU6-a-violencia-contra-mulheres-nao-discrimina-idade-local-hora-ou-classe-social/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "A violência contra mulheres não discrimina idade, local, hora ou classe social",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://feebpr.org.br/noticias/XcU6-a-violencia-contra-mulheres-nao-discrimina-idade-local-hora-ou-classe-social"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:13.747132+00:00"
+  },
+  {
+   "id": "gauchazh-clicrbs-com-br",
+   "nome": "GZH",
+   "tipo": "geral",
+   "homepage": "https://gauchazh.clicrbs.com.br/",
+   "dominio": "gauchazh.clicrbs.com.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "esportes",
+    "colunistas",
+    "politica",
+    "viral",
+    "saude",
+    "seguranca",
+    "cultura-e-lazer",
+    "gaucha"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Placa de Marielle quebrada e &quot;inspeção&quot; em colégios: quem é Daniel Silveira, deputado preso por ordem de ministro do STF",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://gauchazh.clicrbs.com.br/politica/noticia/2021/02/placa-de-marielle-quebrada-e-inspecao-em-colegios-quem-e-daniel-silveira-deputado-preso-por-ordem-de-ministro-do-stf-ckl9iftdh046101i1iylderc5.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:44.028214+00:00"
+  },
+  {
+   "id": "jovempan-com-br",
+   "nome": "Jovem Pan",
+   "tipo": "geral",
+   "homepage": "https://jovempan.com.br/",
+   "dominio": "jovempan.com.br",
+   "rss": [],
+   "sitemap": "https://jovempan.com.br/sitemap.xml",
+   "editorias": [
+    "afiliada",
+    "politica",
+    "mercado",
+    "eleicoes",
+    "esportes",
+    "colunistas",
+    "brasil",
+    "business"
+   ],
+   "article_url_patterns": [
+    "/brasil/",
+    "/brasil/protesto-distribui-mil-placas-com-nome-de-marielle-franco/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Protesto distribui mil placas com nome de Marielle Franco",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://jovempan.com.br/brasil/protesto-distribui-mil-placas-com-nome-de-marielle-franco/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:44.215068+00:00"
+  },
+  {
+   "id": "gazetadopovo-com-br",
+   "nome": "Gazeta do Povo",
+   "tipo": "geral",
+   "homepage": "https://www.gazetadopovo.com.br/",
+   "dominio": "gazetadopovo.com.br",
+   "rss": [],
+   "sitemap": "https://www.gazetadopovo.com.br/sitemap.xml",
+   "editorias": [
+    "eleicoes",
+    "republica",
+    "mundo",
+    "shorts",
+    "vozes",
+    "vida-e-cidadania",
+    "rodrigo-constantino",
+    "ideias"
+   ],
+   "article_url_patterns": [
+    "/vida-e-cidadania/",
+    "/vida-e-cidadania/breves/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Deputado venezuelano diz que yanomamis desnutridos vieram do seu país para o Brasil",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.gazetadopovo.com.br/vida-e-cidadania/breves/deputado-venezuelano-diz-que-yanomamis-desnutridos-vieram-do-seu-pais-para-o-brasil/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:48.382516+00:00"
+  },
+  {
+   "id": "dpontanews-com-br",
+   "nome": "D&#039;PontaNews",
+   "tipo": "geral",
+   "homepage": "https://dpontanews.com.br/",
+   "dominio": "dpontanews.com.br",
+   "rss": [
+    "https://dpontanews.com.br/feed/",
+    "https://dpontanews.com.br/web-stories/feed/"
+   ],
+   "sitemap": "https://dpontanews.com.br/sitemap.xml",
+   "editorias": [
+    "horoscopo",
+    "politica",
+    "ponta-grossa",
+    "agronegocio",
+    "esporte",
+    "todas-as-colunas",
+    "brasil",
+    "policial"
+   ],
+   "article_url_patterns": [
+    "/brasil/",
+    "/brasil/bolsa-familia-tera-reajuste-a-partir-de-outubro/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main, .entry-content"
+   },
+   "titulo_exemplo": "Bolsa Família terá reajuste a partir de outubro",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://dpontanews.com.br/brasil/bolsa-familia-tera-reajuste-a-partir-de-outubro/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:49.211235+00:00"
+  },
+  {
+   "id": "gazetadigital-com-br",
+   "nome": "Benef&iacute;cio do Bolsa Fam&iacute;lia &eacute; ajustado em 15%; o acr&eacute;scimo vale a partir de outubro | Gazeta Digital",
+   "tipo": "geral",
+   "homepage": "https://www.gazetadigital.com.br/",
+   "dominio": "gazetadigital.com.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "editorias",
+    "colunas-e-opiniao",
+    "variedades",
+    "expediente",
+    "clube",
+    "jornal-a-gazeta",
+    "video",
+    "videos"
+   ],
+   "article_url_patterns": [
+    "/editorias/",
+    "/editorias/economia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Benefício do Bolsa Família é ajustado em 15%; o acréscimo vale a partir de outubro",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.gazetadigital.com.br/editorias/economia/beneficio-do-bolsa-familia-e-ajustado-em-15-o-acrescimo-vale-a-partir-de-outubro/859743"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:07:49.395317+00:00"
+  },
+  {
+   "id": "conjur-com-br",
+   "nome": "Consultor Jurídico",
+   "tipo": "geral",
+   "homepage": "https://conjur.com.br/",
+   "dominio": "conjur.com.br",
+   "rss": [
+    "https://conjur.com.br/feed/",
+    "https://conjur.com.br/comments/feed/"
+   ],
+   "sitemap": "https://conjur.com.br/sitemap.xml",
+   "editorias": [
+    "2026-out-14",
+    "minha-area",
+    "2026-out-03",
+    "noticias",
+    "colunas",
+    "artigos",
+    "entrevistas",
+    "anuncie-na-conjur"
+   ],
+   "article_url_patterns": [
+    "/2025-dez-30/",
+    "/2025-dez-30/risco-de-morte-justifica-transfusao-em-testemunha-de-jeova-decide-tj-sp/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Risco de morte justifica transfusão em testemunha de Jeová, decide TJ-SP",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://conjur.com.br/2025-dez-30/risco-de-morte-justifica-transfusao-em-testemunha-de-jeova-decide-tj-sp/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:04.935773+00:00"
+  },
+  {
+   "id": "jornaldotocantins-com-br",
+   "nome": "Tocantins",
+   "tipo": "geral",
+   "homepage": "https://www.jornaldotocantins.com.br/",
+   "dominio": "jornaldotocantins.com.br",
+   "rss": [],
+   "sitemap": "https://www.jornaldotocantins.com.br/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/audio-de-renan-santos-a-daniel-vorcaro-foi-criado-por-ia-e-n-o-foi-vazado-pelo-intercept-1.3461493/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.jornaldotocantins.com.br/politica/audio-de-renan-santos-a-daniel-vorcaro-foi-criado-por-ia-e-n-o-foi-vazado-pelo-intercept-1.3461493"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:04.968059+00:00"
+  },
+  {
+   "id": "noticias-stf-jus-br",
+   "nome": "Supremo Tribunal Federal",
+   "tipo": "geral",
+   "homepage": "https://noticias.stf.jus.br/",
+   "dominio": "noticias.stf.jus.br",
+   "rss": [],
+   "sitemap": "https://noticias.stf.jus.br/sitemap.xml",
+   "editorias": [
+    "postsnoticias",
+    "page"
+   ],
+   "article_url_patterns": [
+    "/postsnoticias/",
+    "/postsnoticias/testemunhas-de-jeova-tem-direito-de-recusar-procedimento-que-envolva-transfusao-de-sangue-decide-stf/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://noticias.stf.jus.br/postsnoticias/testemunhas-de-jeova-tem-direito-de-recusar-procedimento-que-envolva-transfusao-de-sangue-decide-stf/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:05.052467+00:00"
+  },
+  {
+   "id": "ccih-med-br",
+   "nome": "Instituto CCIH+ — Educação em controle de infecção hospitalar &#8211; Quais medi",
+   "tipo": "geral",
+   "homepage": "https://ccih.med.br/",
+   "dominio": "ccih.med.br",
+   "rss": [],
+   "sitemap": "https://ccih.med.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "cdn-cgi",
+    "blog",
+    "pages",
+    "institucional",
+    "pos",
+    "cursos",
+    "classificacao-de-risco-dos-agentes-biologicos-e-prioridades-em-saude-publica"
+   ],
+   "article_url_patterns": [
+    "/uncategorized/",
+    "/uncategorized/riscos-da-automedicacao-contra-a-dengue/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Quais medicamentos não devem ser utilizados em pacientes com dengue?",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://ccih.med.br/uncategorized/riscos-da-automedicacao-contra-a-dengue/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:21.191642+00:00"
+  },
+  {
+   "id": "radiosarandi-com-br",
+   "nome": "Meu Site",
+   "tipo": "geral",
+   "homepage": "https://radiosarandi.com.br/",
+   "dominio": "radiosarandi.com.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "politica.php"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/3486/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Dr. Daniel Vieira Chaves destaca a importância de identificar sintomas e se hidratar em casos de dengue",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://radiosarandi.com.br/noticia/3486/Dr-Daniel-Vieira-Chaves-destaca-a-importancia-de-identificar-sintomas-e-se-hidratar-em-casos-de-dengue"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:21.512620+00:00"
+  },
+  {
+   "id": "diarioeconomico-co-mz",
+   "nome": "Diário Económico",
+   "tipo": "geral",
+   "homepage": "https://www.diarioeconomico.co.mz/",
+   "dominio": "diarioeconomico.co.mz",
+   "rss": [
+    "https://www.diarioeconomico.co.mz/feed/",
+    "https://www.diarioeconomico.co.mz/comments/feed/"
+   ],
+   "sitemap": "https://www.diarioeconomico.co.mz/sitemap.xml",
+   "editorias": [
+    "category",
+    "2026",
+    "tag",
+    "contact"
+   ],
+   "article_url_patterns": [
+    "/2026/",
+    "/2026/07/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, .entry-content"
+   },
+   "titulo_exemplo": "Lavrov: Rússia Está Pronta Para Ajudar Moçambique a Combater o Terrorismo",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.diarioeconomico.co.mz/2026/07/10/economia/lavrov-russia-esta-pronta-para-ajudar-mocambique-a-combater-o-terrorismo/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:24.200671+00:00"
+  },
+  {
+   "id": "dw-com",
+   "nome": "Rússia &quot;disponível&quot; para apoiar Moçambique contra terrorismo",
+   "tipo": "geral",
+   "homepage": "https://www.dw.com/",
+   "dominio": "dw.com",
+   "rss": [],
+   "sitemap": "https://www.dw.com/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/pt-002/",
+    "/pt-002/r%C3%BAssia-dispon%C3%ADvel-para-apoiar-mo%C3%A7ambique-contra-terrorismo/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Rússia &quot;disponível&quot; para apoiar Moçambique contra terrorismo",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.dw.com/pt-002/r%C3%BAssia-dispon%C3%ADvel-para-apoiar-mo%C3%A7ambique-contra-terrorismo/a-77894961"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:24.412564+00:00"
+  },
+  {
+   "id": "telesintese-com-br",
+   "nome": "TeleSíntese",
+   "tipo": "geral",
+   "homepage": "https://telesintese.com.br/",
+   "dominio": "telesintese.com.br",
+   "rss": [
+    "https://telesintese.com.br/feed/",
+    "https://telesintese.com.br/comments/feed/"
+   ],
+   "sitemap": "https://telesintese.com.br/sitemap.xml",
+   "editorias": [
+    "plantao-telesintese",
+    "futurecom-2",
+    "plantao-de-noticias",
+    "anuario-telesintese",
+    "artigos-do-leitor",
+    "author",
+    "microsoft-levara-chips-de-ia-a-escala-de-gigawatts",
+    "dsa-pede-a-anatel-compartilhamento-dos-6-ghz-para-preservar-wi-fi"
+   ],
+   "article_url_patterns": [
+    "/claro-tim-e-vivo-liberam-bonus-de-internet-no-rs-veja-outras-acoes/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Claro, TIM e Vivo liberam bônus de internet no RS; veja outras ações",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://telesintese.com.br/claro-tim-e-vivo-liberam-bonus-de-internet-no-rs-veja-outras-acoes/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:27.157022+00:00"
+  },
+  {
+   "id": "abcmais-com",
+   "nome": "abc+",
+   "tipo": "geral",
+   "homepage": "https://www.abcmais.com/",
+   "dominio": "abcmais.com",
+   "rss": [
+    "https://www.abcmais.com/feed/",
+    "https://www.abcmais.com/web-stories/feed/"
+   ],
+   "sitemap": "https://www.abcmais.com/sitemap.xml",
+   "editorias": [
+    "brasil",
+    "tag",
+    "politica",
+    "economia",
+    "policia",
+    "jornal",
+    "esportes",
+    "web-stories"
+   ],
+   "article_url_patterns": [
+    "/brasil/",
+    "/brasil/rio-grande-do-sul/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "CATÁSTROFE NO RS: Problemas de sinal? Vivo, Claro e Tim compartilham redes para usuários; saiba como ativar o serviço",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.abcmais.com/brasil/rio-grande-do-sul/catastrofe-no-rs-problemas-de-sinal-vivo-claro-e-tim-compartilham-redes-para-usuarios-saiba-como-ativar-o-servico/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:27.260072+00:00"
+  },
+  {
+   "id": "meutudo-com-br",
+   "nome": "meutudo.blog",
+   "tipo": "geral",
+   "homepage": "https://meutudo.com.br/",
+   "dominio": "meutudo.com.br",
+   "rss": [],
+   "sitemap": "https://meutudo.com.br/sitemap.xml",
+   "editorias": [
+    "seguros",
+    "consignado-privado",
+    "emprestimo-consignado-inss",
+    "emprestimo-fgts",
+    "cartao-de-credito-consignado",
+    "cartao-beneficio-consignado",
+    "guia-para-empresas",
+    "emprestimo-bpc-loas"
+   ],
+   "article_url_patterns": [
+    "/blog/",
+    "/blog/noticias/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "É #FATO que aposentados que forem às urnas terão a prova de vida automática pelo INSS",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://meutudo.com.br/blog/noticias/2026/09/28/e-fato-que-aposentados-que-forem-as-urnas-terao-a-prova-de-vida-automatica-pelo-inss/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:31.229931+00:00"
+  },
+  {
+   "id": "horadopovo-com-br",
+   "nome": "Hora do Povo",
+   "tipo": "geral",
+   "homepage": "https://horadopovo.com.br/",
+   "dominio": "horadopovo.com.br",
+   "rss": [
+    "https://horadopovo.com.br/feed/",
+    "https://horadopovo.com.br/comments/feed/"
+   ],
+   "sitemap": "https://horadopovo.com.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "kassio-proibe-circulacao-de-jornal-e-petroleiros-denunciam-censura",
+    "estudantes-franceses-rechacam-abandono-de-macron-a-educacao-corte-e-de-10-bi-de-euros",
+    "flavio-e-forcado-a-votar-fim-da-escala-6x1-mas-promete-a-faria-lima-derrubar-tudo-se-for-eleito",
+    "multidao-ocupa-brasilia-pela-reeleicao-de-lula-e-fim-da-escala-6-x-1",
+    "bolsonaro-nunca-mais-ato-leva-milhares-as-ruas-de-florianopolis",
+    "vitoria-lula-mostra-forca-e-obriga-flavio-a-aderir-ao-fim-da-escala-6x1",
+    "edicoes-anteriores"
+   ],
+   "article_url_patterns": [
+    "/blindado-que-atropelou-carro-em-kiev-e-ucraniano-e-nao-russo-como-dito-pela-midia-dos-eua/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Blindado que atropelou carro em Kiev é ucraniano e não russo como dito pela mídia dos EUA",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://horadopovo.com.br/blindado-que-atropelou-carro-em-kiev-e-ucraniano-e-nao-russo-como-dito-pela-midia-dos-eua/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:38.922236+00:00"
+  },
+  {
+   "id": "poligrafo-sapo-pt",
+   "nome": "Polígrafo",
+   "tipo": "geral",
+   "homepage": "https://poligrafo.sapo.pt/",
+   "dominio": "poligrafo.sapo.pt",
+   "rss": [],
+   "sitemap": "https://poligrafo.sapo.pt/sitemap_index.xml",
+   "editorias": [
+    "blog",
+    "fact-checks",
+    "fact-check",
+    "institucional",
+    "saude",
+    "especiais",
+    "eurofacts",
+    "artigos"
+   ],
+   "article_url_patterns": [
+    "/fact-check/",
+    "/fact-check/este-video-que-mostra-um-tanque-ucraniano-a-galgar-barricada-em-mariupol-e-recente/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Este vídeo que mostra um tanque ucraniano a galgar barricada em Mariupol é recente?",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://poligrafo.sapo.pt/fact-check/este-video-que-mostra-um-tanque-ucraniano-a-galgar-barricada-em-mariupol-e-recente/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:39.134472+00:00"
+  },
+  {
+   "id": "paiquerefm-com-br",
+   "nome": "Paiquerê FM News",
+   "tipo": "geral",
+   "homepage": "https://paiquerefm.com.br/",
+   "dominio": "paiquerefm.com.br",
+   "rss": [],
+   "sitemap": "https://paiquerefm.com.br/sitemap.xml",
+   "editorias": [
+    "promocoes",
+    "ao-vivo",
+    "noticias",
+    "news",
+    "menino-de-10-anos-fica-gravemente-ferido-apos-ser-atingido-por-linha-com-cerol-no-parana",
+    "defesa-civil-do-parana-promove-serie-de-lives-sobre-prevencao-a-desastres-nesta-semana",
+    "virginia-fonseca-compartilha-audio-de-ze-felipe-sobre-sua-personalidade-e-repercute-nas-redes-sociais",
+    "tecpar-lanca-primeiro-selo-brasileiro-para-certificacao-de-madeira-engenheirada"
+   ],
+   "article_url_patterns": [
+    "/biscoito-recheado-tem-petroleo-anvisa-esclarece-informacao-que-circula-nas-redes-sociais/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://paiquerefm.com.br/biscoito-recheado-tem-petroleo-anvisa-esclarece-informacao-que-circula-nas-redes-sociais/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:44.244687+00:00"
+  },
+  {
+   "id": "veja-abril-com-br",
+   "nome": "VEJA",
+   "tipo": "geral",
+   "homepage": "https://veja.abril.com.br/",
+   "dominio": "veja.abril.com.br",
+   "rss": [
+    "https://veja.abril.com.br/ultimas-noticias/rss"
+   ],
+   "sitemap": "https://veja.abril.com.br/sitemap.xml",
+   "editorias": [
+    "coluna",
+    "politica",
+    "cultura",
+    "brasil",
+    "noticias-sobre",
+    "economia",
+    "esporte",
+    "mundo"
+   ],
+   "article_url_patterns": [
+    "/saude/",
+    "/saude/presenca-de-petroleo-em-biscoito-recheado-o-que-diz-anvisa-sobre-videos-que-circulam-nas-redes-sociais/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Presença de petróleo em biscoito recheado? O que diz Anvisa sobre vídeos que circulam nas redes sociais",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://veja.abril.com.br/saude/presenca-de-petroleo-em-biscoito-recheado-o-que-diz-anvisa-sobre-videos-que-circulam-nas-redes-sociais/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:44.291062+00:00"
+  },
+  {
+   "id": "rollingstone-com-br",
+   "nome": "Rolling Stone Brasil",
+   "tipo": "geral",
+   "homepage": "https://rollingstone.com.br/",
+   "dominio": "rollingstone.com.br",
+   "rss": [
+    "https://rollingstone.com.br/feed/"
+   ],
+   "sitemap": "https://rollingstone.com.br/sitemap.xml",
+   "editorias": [
+    "canal",
+    "musica",
+    "cinema",
+    "entretenimento",
+    "rs-gaming",
+    "country",
+    "lab",
+    "edicoes"
+   ],
+   "article_url_patterns": [
+    "/entretenimento/",
+    "/entretenimento/mortos-por-engano-celebridades-mortas-em-fake-news-vao-de-cher-elizabeth-ii-lista/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Mortos por engano: Celebridades &#8216;mortas&#8217; em fake news vão de Cher a Elizabeth II [LISTA]",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://rollingstone.com.br/entretenimento/mortos-por-engano-celebridades-mortas-em-fake-news-vao-de-cher-elizabeth-ii-lista/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:46.615082+00:00"
+  },
+  {
+   "id": "forbes-com-br",
+   "nome": "Forbes Brasil",
+   "tipo": "geral",
+   "homepage": "https://forbes.com.br/",
+   "dominio": "forbes.com.br",
+   "rss": [
+    "https://forbes.com.br/feed/",
+    "https://forbes.com.br/web-stories/feed/"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "forbes-money",
+    "listas",
+    "forbes-life",
+    "carreira",
+    "forbes-mulher",
+    "forbes-tech",
+    "forbes-agro",
+    "noticias-sobre"
+   ],
+   "article_url_patterns": [
+    "/colunas/",
+    "/colunas/2026/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Existe Relação entre Café e Câncer? O Problema Pode Estar na Temperatura",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://forbes.com.br/colunas/2026/09/existe-relacao-entre-cafe-e-cancer-o-problema-pode-estar-na-temperatura/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:54.954688+00:00"
+  },
+  {
+   "id": "bhaz-com-br",
+   "nome": "BHAZ",
+   "tipo": "geral",
+   "homepage": "https://bhaz.com.br/",
+   "dominio": "bhaz.com.br",
+   "rss": [
+    "https://bhaz.com.br/feed/",
+    "https://bhaz.com.br/webstories/feed/"
+   ],
+   "sitemap": "https://bhaz.com.br/sitemap.xml",
+   "editorias": [
+    "noticias",
+    "evento",
+    "guia-bhaz",
+    "turismo",
+    "patrocinado",
+    "role-bhaz",
+    "arreda-pra-ca"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/brasil/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Multidão disputa oferenda de R$ 15 mil em cemitério no Rio e cena viraliza",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://bhaz.com.br/noticias/brasil/multidao-disputa-oferenda-em-cemiterio-no-rio-e-cena-viraliza/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:56.883520+00:00"
+  },
+  {
+   "id": "odia-ig-com-br",
+   "nome": "Vídeo: Multidão faz a festa com oferenda de R$ 15 mil no Cemitério de Inhaúma | ",
+   "tipo": "geral",
+   "homepage": "https://odia.ig.com.br/",
+   "dominio": "odia.ig.com.br",
+   "rss": [
+    "https://odia.ig.com.br/_conteudo/ultimas-noticias/rss.xml"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "esporte",
+    "diversao",
+    "rio-de-janeiro",
+    "colunas",
+    "economia",
+    "brasil",
+    "ultimas-noticias",
+    "mundo-e-ciencia"
+   ],
+   "article_url_patterns": [
+    "/rio-de-janeiro/",
+    "/rio-de-janeiro/2020/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Vídeo: Multidão faz a festa com oferenda de R$ 15 mil no Cemitério de Inhaúma",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://odia.ig.com.br/rio-de-janeiro/2020/11/6021612-video-multidao-faz-a-festa-com-oferenda-de-rs-15-mil-no-cemiterio-de-inhauma.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:08:56.918759+00:00"
+  },
+  {
+   "id": "jamildo-com",
+   "nome": "Jamildo",
+   "tipo": "geral",
+   "homepage": "https://jamildo.com/",
+   "dominio": "jamildo.com",
+   "rss": [
+    "https://jamildo.com/feed/"
+   ],
+   "sitemap": "https://jamildo.com/sitemap.xml",
+   "editorias": [
+    "canal",
+    "politica",
+    "institucional",
+    "cidades",
+    "economia",
+    "direitos-humanos",
+    "violencia-e-seguranca-publica",
+    "educacao"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/a-contagem-regressiva-comecou-o-que-pode-e-o-que-nao-pode-na-reta-final-das-eleicoes-2026.html/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody']"
+   },
+   "titulo_exemplo": "A contagem regressiva começou: o que pode e o que não pode na reta final das eleições 2026",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://jamildo.com/politica/a-contagem-regressiva-comecou-o-que-pode-e-o-que-nao-pode-na-reta-final-das-eleicoes-2026.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:03.562502+00:00"
+  },
+  {
+   "id": "agenciabrasil-ebc-com-br",
+   "nome": "Agência Brasil",
+   "tipo": "geral",
+   "homepage": "https://agenciabrasil.ebc.com.br/",
+   "dominio": "agenciabrasil.ebc.com.br",
+   "rss": [],
+   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
+   "editorias": [
+    "politica",
+    "geral",
+    "justica",
+    "internacional",
+    "economia",
+    "saude",
+    "radioagencia-nacional",
+    "ultimas"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "TSE desmente alegação de fraude na apuração dos votos",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/tse-desmente-alegacao-de-fraude-na-apuracao-dos-votos"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:20.209359+00:00"
+  },
+  {
+   "id": "radiocaxias-com-br",
+   "nome": "Eleições 2026: Golpe usa site falso do TSE para cobrar taxa de eleitores | Radio",
+   "tipo": "geral",
+   "homepage": "https://www.radiocaxias.com.br/",
+   "dominio": "radiocaxias.com.br",
+   "rss": [
+    "https://www.radiocaxias.com.br/feed/",
+    "https://www.radiocaxias.com.br/comments/feed/",
+    "https://www.radiocaxias.com.br/pagina-inicial/feed/"
+   ],
+   "sitemap": "https://www.radiocaxias.com.br/sitemap.xml",
+   "editorias": [
+    "categorias",
+    "esportes",
+    "noticias",
+    "caxias-play",
+    "audios",
+    "promocoes",
+    "programacao",
+    "publicidade-legal"
+   ],
+   "article_url_patterns": [
+    "/eleicoes-2026-golpe-usa-site-falso-do-tse-para-cobrar-taxa-de-eleitores/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main, .entry-content"
+   },
+   "titulo_exemplo": "Eleições 2026: Golpe usa site falso do TSE para cobrar taxa de eleitores",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.radiocaxias.com.br/eleicoes-2026-golpe-usa-site-falso-do-tse-para-cobrar-taxa-de-eleitores/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:21.009985+00:00"
+  },
+  {
+   "id": "apublica-org",
+   "nome": "Agência Pública",
+   "tipo": "geral",
+   "homepage": "https://apublica.org/",
+   "dominio": "apublica.org",
+   "rss": [
+    "https://apublica.org/feed/",
+    "https://apublica.org/comments/feed/"
+   ],
+   "sitemap": "https://apublica.org/sitemap.xml",
+   "editorias": [
+    "autor",
+    "editorial",
+    "tipo",
+    "tag",
+    "2026",
+    "especial",
+    "podcast",
+    "nota"
+   ],
+   "article_url_patterns": [
+    "/2019/",
+    "/2019/08/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main, .entry-content"
+   },
+   "titulo_exemplo": "Com aprovação de mais agrotóxicos, apicultores temem novo extermínio de abelhas",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://apublica.org/2019/08/com-aprovacao-de-mais-inseticidas-apicultores-temem-novo-exterminio-de-abelhas/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:21.216915+00:00"
+  },
+  {
+   "id": "oeco-org-br",
+   "nome": "((o))eco",
+   "tipo": "geral",
+   "homepage": "https://oeco.org.br/",
+   "dominio": "oeco.org.br",
+   "rss": [
+    "https://oeco.org.br/feed/",
+    "https://oeco.org.br/comments/feed/",
+    "https://oeco.org.br/web-stories/feed/"
+   ],
+   "sitemap": "https://oeco.org.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "author",
+    "analises",
+    "salada-verde",
+    "biome",
+    "reportagens",
+    "videos",
+    "noticias"
+   ],
+   "article_url_patterns": [
+    "/reportagens/",
+    "/reportagens/governo-registra-mais-tres-agrotoxicos-associados-a-mortandade-de-abelhas/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "Governo registra mais três agrotóxicos associados à mortandade de abelhas",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://oeco.org.br/reportagens/governo-registra-mais-tres-agrotoxicos-associados-a-mortandade-de-abelhas/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:21.588898+00:00"
+  },
+  {
+   "id": "ipco-org-br",
+   "nome": "Instituto Plinio Corrêa de Oliveira",
+   "tipo": "geral",
+   "homepage": "https://ipco.org.br/",
+   "dominio": "ipco.org.br",
+   "rss": [
+    "https://ipco.org.br/feed/",
+    "https://ipco.org.br/comments/feed/"
+   ],
+   "sitemap": "https://ipco.org.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "livros",
+    "instituto-plinio-correa-de-oliveira-artigos",
+    "carta-do-alem",
+    "ipco",
+    "categorias",
+    "calendario-dos-santos",
+    "neutralidade-eleitoral-ou-inclinacao-para-esquerda"
+   ],
+   "article_url_patterns": [
+    "/depois-de-adorar-pachamama-o-papa-francisco-agora-desrespeita-o-papel-co-redentor-de-maria/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main, .entry-content"
+   },
+   "titulo_exemplo": "Depois do culto à Pachamama, o Papa Francisco agora nega a co-Redenção de Nossa Senhora",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://ipco.org.br/depois-de-adorar-pachamama-o-papa-francisco-agora-desrespeita-o-papel-co-redentor-de-maria/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:25.009667+00:00"
+  },
+  {
+   "id": "acidigital-com",
+   "nome": "ACI Digital",
+   "tipo": "geral",
+   "homepage": "https://www.acidigital.com/",
+   "dominio": "acidigital.com",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "noticia",
+    "noticias",
+    "suscribir",
+    "vida",
+    "quemsomos.htm",
+    "privacidade.htm",
+    "arquivo",
+    "aids"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/49164/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Diocese argentina se desculpa por oração a Pachamama",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.acidigital.com/noticia/49164/diocese-argentina-se-desculpa-por-oracao-a-pachamama"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:25.094100+00:00"
+  },
+  {
+   "id": "vermelho-org-br",
+   "nome": "Vermelho",
+   "tipo": "geral",
+   "homepage": "https://vermelho.org.br/",
+   "dominio": "vermelho.org.br",
+   "rss": [],
+   "sitemap": "https://vermelho.org.br/sitemap.xml",
+   "editorias": [
+    "2026",
+    "politica",
+    "coluna",
+    "colunista",
+    "internacional",
+    "economia",
+    "movimentos",
+    "prosa-poesia-arte"
+   ],
+   "article_url_patterns": [
+    "/coluna/",
+    "/coluna/lula-bolsonaro-e-o-ensino-superior-pobre-pode-estudar-em-universidade/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Lula, Bolsonaro e o ensino superior: pobre pode estudar em universidade?",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://vermelho.org.br/coluna/lula-bolsonaro-e-o-ensino-superior-pobre-pode-estudar-em-universidade/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:29.513537+00:00"
+  },
+  {
+   "id": "belem-com-br",
+   "nome": "Belém.com.br",
+   "tipo": "geral",
+   "homepage": "https://belem.com.br/",
+   "dominio": "belem.com.br",
+   "rss": [],
+   "sitemap": "https://belem.com.br/sitemap.xml",
+   "editorias": [
+    "noticia",
+    "ver-noticia",
+    "conteudo",
+    "belem",
+    "para",
+    "noticias",
+    "inicio",
+    "brasil"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/10547/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Uso exagerado de paracetamol e ibuprofeno pode acarretar em intoxicação",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://belem.com.br/noticia/10547/uso-exagerado-de-paracetamol-e-ibuprofeno-pode-acarretar-em-intoxicacao"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:29.885843+00:00"
+  },
+  {
+   "id": "mundial-fm-br",
+   "nome": "Rádio Mundial",
+   "tipo": "geral",
+   "homepage": "https://mundial.fm.br/",
+   "dominio": "mundial.fm.br",
+   "rss": [
+    "https://mundial.fm.br/feed/"
+   ],
+   "sitemap": "https://mundial.fm.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "noticias",
+    "quem-somos",
+    "equipe",
+    "videos",
+    "fotos",
+    "contatos",
+    "hci-celebra-nove-decadas-de-historia-com-lancamento-de-livro-durante-a-expofest"
+   ],
+   "article_url_patterns": [
+    "/dipirona-e-paracetamol-contra-a-dengue-saiba-quais-remedios-tomar-para-aliviar-os-sintomas-da-doenca/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], .entry-content"
+   },
+   "titulo_exemplo": "",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://mundial.fm.br/dipirona-e-paracetamol-contra-a-dengue-saiba-quais-remedios-tomar-para-aliviar-os-sintomas-da-doenca/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:30.000791+00:00"
+  },
+  {
+   "id": "revistaquem-globo-com",
+   "nome": "Claudia Leitte desmente boatos de cachê na Copa: \"Não recebi um centavo\" - Quem ",
+   "tipo": "geral",
+   "homepage": "https://revistaquem.globo.com/",
+   "dominio": "revistaquem.globo.com",
+   "rss": [
+    "https://revistaquem.globo.com/rss/quem"
+   ],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/QUEM-News/",
+    "/QUEM-News/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Claudia Leitte desmente boatos de cachê na Copa: \"Não recebi um centavo\"",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://revistaquem.globo.com/QUEM-News/noticia/2016/08/claudia-leitte-desmente-boatos-sobre-show-na-copa-nao-recebi-um-centavo.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:45.764529+00:00"
+  },
+  {
+   "id": "purepeople-com-br",
+   "nome": "Claudia Leitte faz show e leva a Galinha Pintadinha para o palco em Pernambuco -",
+   "tipo": "geral",
+   "homepage": "https://www.purepeople.com.br/",
+   "dominio": "purepeople.com.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "noticia",
+    "tag",
+    "famosos",
+    "noticias"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/claudia-leitte-faz-show-e-leva-a-galinha-pintadinha-para-o-palco-em-pernambuco_a23909/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Claudia Leitte faz show e leva a Galinha Pintadinha para o palco em Pernambuco",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.purepeople.com.br/noticia/claudia-leitte-faz-show-e-leva-a-galinha-pintadinha-para-o-palco-em-pernambuco_a23909/1"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:45.843912+00:00"
+  },
+  {
+   "id": "pcdob-org-br",
+   "nome": "PCdoB",
+   "tipo": "geral",
+   "homepage": "https://pcdob.org.br/",
+   "dominio": "pcdob.org.br",
+   "rss": [],
+   "sitemap": "https://pcdob.org.br/sitemap_index.xml",
+   "editorias": [
+    "noticias",
+    "eleicoes-2026",
+    "filie-se",
+    "eleicoes",
+    "apresentacao",
+    "historia",
+    "identidade-visual",
+    "documentos"
+   ],
+   "article_url_patterns": [
+    "/2023/",
+    "/2023/01/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Para Bolsonaro, “competente” foi a cavalaria dos EUA “que dizimou seus índios”",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://pcdob.org.br/2023/01/para-bolsonaro-competente-foi-a-cavalaria-dos-eua-que-dizimou-seus-indios/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:48.586455+00:00"
+  },
+  {
+   "id": "cartacapital-com-br",
+   "nome": "CartaCapital",
+   "tipo": "geral",
+   "homepage": "https://www.cartacapital.com.br/",
+   "dominio": "cartacapital.com.br",
+   "rss": [
+    "https://www.cartacapital.com.br/feed/",
+    "https://www.cartacapital.com.br/comments/feed/"
+   ],
+   "sitemap": "https://www.cartacapital.com.br/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/blogs/",
+    "/blogs/daniel-camargos/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "O bolsonarismo ainda assombra as terras indígenas",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.cartacapital.com.br/blogs/daniel-camargos/o-bolsonarismo-ainda-assombra-as-terras-indigenas/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:09:48.630107+00:00"
+  },
+  {
+   "id": "cafefazenda-com-br",
+   "nome": "Café Fazenda Floresta",
+   "tipo": "geral",
+   "homepage": "https://cafefazenda.com.br/",
+   "dominio": "cafefazenda.com.br",
+   "rss": [],
+   "sitemap": "https://cafefazenda.com.br/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/blogs/",
+    "/blogs/news/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Como o Café Ajuda na Prevenção do Câncer",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://cafefazenda.com.br/blogs/news/como-o-cafe-ajuda-na-prevencao-do-cancer?srsltid=AU7gw4WscMxcPZuKNPDMJfcJIDzTpVCaWf0Q_LLP2el7auAifRYJbf9n"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:19:15.857535+00:00"
+  },
+  {
+   "id": "jornal-usp-br",
+   "nome": "Jornal da USP",
+   "tipo": "geral",
+   "homepage": "https://jornal.usp.br/",
+   "dominio": "jornal.usp.br",
+   "rss": [
+    "https://jornal.usp.br/feed/",
+    "https://jornal.usp.br/feed/podcast"
+   ],
+   "sitemap": "https://jornal.usp.br/sitemap.xml",
+   "editorias": [
+    "editorias",
+    "campus-ribeirao-preto",
+    "radio-usp",
+    "universidade",
+    "podcast",
+    "radio",
+    "podcasts",
+    "ciencias"
+   ],
+   "article_url_patterns": [
+    "/articulistas/",
+    "/articulistas/hamilton-roschel/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Blog",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://jornal.usp.br/articulistas/hamilton-roschel/cafe-e-cancer-de-vilao-a-mocinho-a-historia-que-a-ciencia-reescreveu/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-14T20:19:18.303077+00:00"
   }
  ]
 }
