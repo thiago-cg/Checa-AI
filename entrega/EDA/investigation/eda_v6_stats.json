@@ -1,0 +1,26 @@
+{
+  "total_rows": 91080,
+  "fake_count": 66772,
+  "true_count": 24308,
+  "fake_pct": 73.31137461572244,
+  "true_pct": 26.688625384277557,
+  "ratio": 2.746914596017772,
+  "info_count": 36896,
+  "const_count": 39373,
+  "vocab_fake": {
+    "total_tokens": 2359662,
+    "unique_types": 72238,
+    "ttr_pct": 3.06,
+    "hapax_count": 27111,
+    "hapax_pct": 37.53
+  },
+  "vocab_true": {
+    "total_tokens": 1236132,
+    "unique_types": 50038,
+    "ttr_pct": 4.05,
+    "hapax_count": 19420,
+    "hapax_pct": 38.81
+  },
+  "style_fake_upper": 0.029146738350391388,
+  "style_true_upper": 0.024283073842525482
+}
