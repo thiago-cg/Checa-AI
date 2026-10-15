@@ -37,6 +37,7 @@ Os detalhes estão em [Como funciona](https://mariadenis.github.io/crosscheckbr-
 | Dataset | [`entrega/dataset/`](entrega/dataset/) |
 | Treinamento do modelo | [`entrega/treinamento_modelo/`](entrega/treinamento_modelo/) |
 | Relatório técnico do modelo (FakenewsBR v6 + BERTimbau) | [`entrega/relatorico_tecnico/`](entrega/relatorico_tecnico/) |
+| Desenho do fluxo e arquitetura da aplicação | [`entrega/fluxo_aplicacao/`](entrega/fluxo_aplicacao/) (`FLUXO_APLICACAO.md` e HTML) |
 
 ## Estrutura do repositório
 

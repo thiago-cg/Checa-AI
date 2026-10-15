@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checa AI — Desenho do Fluxo e Arquitetura da Aplicação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #2d3748;
+      --border-color: #374151;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-purple: #c084fc;
+      --accent-green: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-red: #f87171;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      padding: 0;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 2.5rem 2rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .badge-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-purple { background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); border: 1px solid rgba(192, 132, 252, 0.3); }
+    .badge-green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); border: 1px solid rgba(52, 211, 153, 0.3); }
+    .badge-amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.3); }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #93c5fd, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 900px;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-desc {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .diagram-container {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .pillar-card {
+      background: rgba(31, 41, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pillar-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-indigo);
+    }
+
+    .pillar-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent-blue);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pillar-body {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Table Styling */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #1e293b;
+      color: var(--text-primary);
+      font-weight: 600;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+      color: var(--text-primary);
+    }
+
+    code {
+      font-family: var(--font-code);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--accent-indigo);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 4rem;
+    }
+
+    footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="badge-bar">
+        <span class="badge badge-blue">Checa AI • CrossCheckBR</span>
+        <span class="badge badge-purple">Entregável do Desafio</span>
+        <span class="badge badge-green">Branch: feat/entrega-fluxo-aplicacao</span>
+        <span class="badge badge-amber">v1.0 (15/10/2026)</span>
+      </div>
+      <h1>Desenho do Fluxo e Arquitetura da Aplicação</h1>
+      <p class="subtitle">
+        Mapeamento visual e técnico da esteira de checagem cruzada de fatos em língua portuguesa: da recepção multicanal à decisão bayesiana determinística com rigor de neutralidade e transparência pedagógica.
+      </p>
+
+      <nav class="tabs-nav" aria-label="Navegação por Seções">
+        <button class="tab-btn active" onclick="openTab(event, 'macro')">1. Macro-Fluxo (Visão Geral)</button>
+        <button class="tab-btn" onclick="openTab(event, 'sequencia')">2. Diagrama de Sequência</button>
+        <button class="tab-btn" onclick="openTab(event, 'bayesiano')">3. Motor Bayesiano e Regras</button>
+        <button class="tab-btn" onclick="openTab(event, 'etapas')">4. As 12 Etapas Detalhadas</button>
+        <button class="tab-btn" onclick="openTab(event, 'resiliencia')">5. Resiliência e Fallbacks</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: MACRO FLUXO -->
+    <div id="macro" class="tab-pane active">
+      <div class="card">
+        <h2>🌐 1. Macro-Fluxo de Ponta a Ponta</h2>
+        <p class="card-desc">
+          Visão holística da esteira de execução: recepção da entrada pelo usuário, classificação de formato, extração de alegações, triagem na base de checagens históricas (Gate E1), busca aberta e agregação imparcial.
+        </p>
+
+        <div class="diagram-container">
+          <pre class="mermaid">
+flowchart TD
+    User([👤 Usuário: Envia Texto, Título ou Link])
+    
+    subgraph S1["1. Interfaces de Entrada"]
+        TgBot["🤖 Telegram Bot\n(telegram_bot.py)"]
+        WebUI["🌐 Interface Web\n(GET /)"]
+        RestAPI["⚡ API REST\n(POST /checar)"]
+    end
+
+    User --> TgBot & WebUI & RestAPI
+
+    subgraph S2["2. Triagem e Pré-Processamento"]
+        ClassificaInput["Classificação de Tipo\n(Texto | Título | Link)"]
+        TriagemMidia{"É Mídia\n(Áudio/Vídeo)?"}
+        OrientacaoMidia["⚠️ Recusa com Orientação\n(Dica de busca reversa / colar texto)"]
+        SinaisPreliminares["Marcadores Temporais (E4)\nHeurística Rumor / Opinião / Vago"]
+    end
+
+    TgBot & WebUI & RestAPI --> ClassificaInput
+    ClassificaInput --> TriagemMidia
+    TriagemMidia -->|Sim| OrientacaoMidia
+    TriagemMidia -->|Não| SinaisPreliminares
+
+    subgraph S3["3. Fatos e Estilo (Desacoplados)"]
+        ExtracaoAfirmacoes["Extração de Afirmações Fatuais\n(LLM com fallback regex)"]
+        EstiloBERT["BERTimbau v6 (>= 80 pal.)\n+ Padrões Sensacionalistas\n(RN11: Não altera propensão)"]
+    end
+
+    SinaisPreliminares --> ExtracaoAfirmacoes
+    SinaisPreliminares --> EstiloBERT
+
+    subgraph S4["4. Base Primeiro (Gate E1)"]
+        BuscaBase["Base Histórica (22k checagens)\nÍndice BM25 + Google FactCheck"]
+        FaseBase["Julgamento 1:1 da Base"]
+        GateE1{"Checagem Aplicável\nna Base?"}
+    end
+
+    ExtracaoAfirmacoes --> BuscaBase --> FaseBase --> GateE1
+
+    subgraph S5["5. Busca Aberta Web (Fallback)"]
+        SerpAPI["Busca Aberta SerpAPI (Google BR)\n+ Agente ReAct (Ondas Extras)"]
+    end
+
+    GateE1 -->|NÃO: Sem checagem aplicável| SerpAPI
+    GateE1 -->|SIM: Encontrou checagem| PulaWeb["⚡ Pula Busca Web\n(Economia de cota e 30-40s)"]
+
+    subgraph S6["6. Dedupe, Leitura e Juiz"]
+        DedupeCanonica["Deduplicação Canônica de URLs\nFiltro de homepages e tags"]
+        DeepCrawl["Deep Crawl (Corpo Completo)\ncurl_cffi + ClaimReview"]
+        ClustersIndependencia["Clusters de Independência\n(Mesmo grupo econômico / agência)"]
+        JuizLLM["Avaliador 1:1 & Juiz LLM\n(SUSTENTA / REFUTA / RELATA)\nCitação Obrigatória (>= 0.90)"]
+    end
+
+    SerpAPI --> DedupeCanonica --> DeepCrawl --> ClustersIndependencia
+    PulaWeb --> ClustersIndependencia
+    ClustersIndependencia --> JuizLLM
+
+    subgraph S7["7. Decisão e Entrega"]
+        MotorDecisao["Motor Bayesiano (decisao.py)\nLog-Odds simétrico com Dirichlet\n1 voto por cluster | Travas de Data"]
+        FormataRelatorio["Relatório Neutro (RNF02)\nPropensão Baixa / Média / Alta / Indet\n+ 3 Perguntas-Guia de Reflexão"]
+        Retorno([📱 Resposta Entregue ao Usuário])
+    end
+
+    JuizLLM --> MotorDecisao
+    EstiloBERT -.-> FormataRelatorio
+    MotorDecisao --> FormataRelatorio --> Retorno
+          </pre>
+        </div>
+
+        <div class="grid-2">
+          <div class="pillar-card">
+            <div class="pillar-title">🛡️ Propensão em Vez de Veredito (RN01, RF12)</div>
+            <div class="pillar-body">
+              O sistema nunca emite juízos binários ("é mentira", "é verdade"). A estimativa quantifica a evidência pública disponível, sempre atribuindo selos às agências autoras originais (RN17).
+            </div>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-title">🧠 Fortalecimento do Pensamento Crítico (RF14)</div>
+            <div class="pillar-body">
+              Em vez de terceirizar o julgamento, o relatório encerra com 3 perguntas-guia metodológicas que orientam o cidadão a checar datas, fontes primárias e autoria de forma autônoma.
+            </div>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-title">⚡ Arquitetura "Base Primeiro" (Gate E1)</div>
+            <div class="pillar-body">
+              Checagens já consolidadas em nossa base com 21.976 registros evitam chamadas redundantes à web, reduzindo o tempo de resposta em mais de 60% e preservando cotas de busca.
+            </div>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-title">🔬 Rastreabilidade Absoluta (RNF01, RNF03)</div>
+            <div class="pillar-body">
+              Cada execução gera um log auditável em <code>runs/&lt;run_id&gt;/trace.jsonl</code>. Nenhuma decisão oculta é tomada: cada fonte possui trecho exato de verificação conferido na íntegra.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DIAGRAMA DE SEQUÊNCIA -->
+    <div id="sequencia" class="tab-pane">
+      <div class="card">
+        <h2>⏱️ 2. Diagrama de Sequência de Ponta a Ponta</h2>
+        <p class="card-desc">
+          Fluxo temporal detalhado demonstrando o intercâmbio de mensagens entre orquestrador, modelos de linguagem, crawlers de rede e motor determinístico.
+        </p>
+
+        <div class="diagram-container">
+          <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant C as Canal (Telegram / API)
+    participant P as Pipeline (Orquestrador)
+    participant A as Extrator Afirmações
+    participant B as Base Histórica (Índice + API)
+    participant G as Gate E1 (Aplicabilidade)
+    participant W as Busca Web (SerpAPI / Agente)
+    participant D as Crawler (curl_cffi)
+    participant J as Juiz LLM (OpenRouter / Local)
+    participant M as Modelo Estilo (BERTimbau v6)
+    participant DEC as Motor de Decisão (Bayesiano)
+    participant T as Telemetria (trace.jsonl)
+
+    U->>C: Envia mensagem (texto/link)
+    C->>P: executar(EntradaConsulta)
+    P->>T: iniciar_run(metadados, config)
+    
+    note over P,A: Fase 1: Pré-processamento e Afirmações
+    P->>P: Detecta marcas de rumor, opinião, vago e marcas de data (E4)
+    P->>A: extrair_afirmacoes(texto)
+    A-->>P: Lista de Afirmações [polaridade, núcleo, consulta]
+
+    par Investigação Factual vs Análise de Estilo
+        note over P,B: Fase 2: Base Primeiro (E1)
+        P->>B: buscar_checagens(núcleo)
+        B-->>P: Candidatos da Base
+        P->>D: _ler(candidatos_base)
+        D-->>P: Corpo das checagens
+        P->>J: _julgar(afirmações, corpo_base)
+        J-->>P: Posturas (SUSTENTA / REFUTA / RELATA) + Citações
+        P->>G: eh_aplicavel(julgamento, data_pub, janela)
+        alt Checagem Aplicável Encontrada na Base
+            G-->>P: True (Pula busca web aberta)
+        else Sem checagem aplicável
+            G-->>P: False (Aciona SerpAPI aberta)
+            P->>W: _buscar_web(afirmações)
+            W-->>P: URLs candidatas da web
+            P->>D: _ler(URLs candidatas)
+            D-->>P: Corpo das matérias
+            P->>J: _julgar(afirmações, corpo_web)
+            J-->>P: Posturas e Citações conferidas
+        end
+    and Análise de Estilo Paralela (RN11)
+        note over P,M: Fase 3: Estilo Textual (Isolado)
+        alt Texto >= 80 palavras
+            P->>M: predizer(texto)
+            M-->>P: P(fake) calibrado Platt
+        else Texto < 80 palavras
+            P-->>P: Etapa estilo pulada (RN04)
+        end
+        P->>P: Avalia padrões sensacionalistas
+    end
+
+    note over P,DEC: Fase 4: Agrupamento e Decisão
+    P->>P: Agrupa peças em clusters independentes (mesmo grupo/agência)
+    P->>DEC: decidir(Evidencias)
+    DEC->>DEC: Aplica travas RN02, RN03, RN13, RN15, RN16, RN18
+    DEC->>DEC: Calcula Log-Odds simétrico com prior Dirichlet
+    DEC-->>P: ResultadoDecisao(nível, log_odds, prob, motivo)
+
+    note over P,U: Fase 5: Conclusão, Auditoria e Entrega
+    P->>P: Formata relatório com neutralidade e perguntas-guia
+    P->>T: finalizar_run(relatorio)
+    P-->>C: RelatorioChecagem
+    C-->>U: Mensagem formatada no Telegram / Web
+    U-->>C: Clique opcional 👍 / 👎 (Feedback anônimo)
+    C->>P: registrar_feedback(voto)
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: MOTOR BAYESIANO E REGRAS -->
+    <div id="bayesiano" class="tab-pane">
+      <div class="card">
+        <h2>⚖️ 3. O Motor de Decisão Bayesiano e as Travas de Negócio</h2>
+        <p class="card-desc">
+          O cálculo da propensão é 100% determinístico e auditável através do algoritmo de Log-Odds simétrico com Dirichlet Prior em <code>factcheck_mvp/decisao.py</code>.
+        </p>
+
+        <div class="diagram-container">
+          <pre class="mermaid">
+flowchart TD
+    InputEvid["Evidências Julgadas por Afirmação\n(Fontes, Posturas, Selos, Datas, Confiabilidade)"]
+
+    subgraph Travas["Travas Lógicas de Segurança"]
+        T1["RN13: Fonte lida só pelo título NÃO vota\n(Evita erros por manchetes enganosas)"]
+        T2["RN02: Postura prevalece sobre selo da agência\n(Ex: 'FALSO' em matéria que refuta o boato)"]
+        T3["RN03: 1 voto por cluster independente\n(Agrupa Folha/UOL, G1/Globo, syndications)"]
+        T4["RN15: Agência checadora curada que refuta\nanula confirmações de não-agências"]
+        T5["RN16 / E4: Data fora da janela temporal\nrecebe desconto de bits e perde peso"]
+        T6["RN18: Rede social ou site pouco acessado\nsozinho NUNCA decide Alta ou Baixa"]
+    end
+
+    InputEvid --> T1 --> T2 --> T3 --> T4 --> T5 --> T6
+
+    subgraph Calculo["Cálculo Bayesiano de Log-Odds"]
+        SomaBits["Soma de Evidências Ponderadas\nL = Σ (w_i × dir_i)\nDireção: SUSTENTA (-), REFUTA (+)"]
+        ProbCalibrada["Calibração Logística de Probabilidade\np = 1 / (1 + e^-L)"]
+    end
+
+    T6 --> SomaBits --> ProbCalibrada
+
+    subgraph Enquadramento["Classificação Final de Propensão"]
+        CheckLimiar{"Limiares de Decisão (τ = 1.10)"}
+        Alta["🔴 Alta Propensão de ser Fake News\n(L >= +1.10)"]
+        Media["🟡 Média Propensão de ser Fake News\n(Evidência mista ou moderada)"]
+        Baixa["🟢 Baixa Propensão de ser Fake News\n(L <= -1.10)"]
+        Indet["⚪ Propensão Indeterminada\n(Sem fontes, inconclusivo ou não checável)"]
+    end
+
+    ProbCalibrada --> CheckLimiar
+    CheckLimiar -->|L >= 1.10| Alta
+    CheckLimiar -->|-1.10 < L < 1.10| Media
+    CheckLimiar -->|L <= -1.10| Baixa
+    CheckLimiar -->|Sem evidências ou juiz off| Indet
+          </pre>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de Fonte</th>
+                <th>Critério Tranco / Curadoria</th>
+                <th>Peso Relativo ($w$)</th>
+                <th>Regra Associada</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Agência de Checagem Curada</strong></td>
+                <td>Catálogo verificado (Lupa, Aos Fatos, Boatos.org, etc.)</td>
+                <td>$1.0$ a $1.2$ (Máximo)</td>
+                <td>RN15: Refutação anula confirmações leigas</td>
+              </tr>
+              <tr>
+                <td><strong>Grande Veículo Noticioso</strong></td>
+                <td>Top 100 Tranco (G1, UOL, Folha, Estadão, BBC)</td>
+                <td>$0.8$ a $1.0$</td>
+                <td>RN03: Agrupados por grupo econômico</td>
+              </tr>
+              <tr>
+                <td><strong>Portal de Notícias Regional</strong></td>
+                <td>Tranco moderado / Portal verificado</td>
+                <td>$0.5$ a $0.7$</td>
+                <td>Voto individual no cluster independente</td>
+              </tr>
+              <tr>
+                <td><strong>Site Desconhecido / Baixo Tráfego</strong></td>
+                <td>Fora dos principais índices Tranco</td>
+                <td>$0.3$</td>
+                <td>RN18: Não decide Alta/Baixa sozinho</td>
+              </tr>
+              <tr>
+                <td><strong>Rede Social / Conteúdo de Usuário</strong></td>
+                <td>YouTube, Instagram, TikTok, Facebook, Reddit</td>
+                <td>$\le 0.2$</td>
+                <td>RN18: Sem poder decisório isolado</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: AS 12 ETAPAS DETALHADAS -->
+    <div id="etapas" class="tab-pane">
+      <div class="card">
+        <h2>📋 4. As 12 Etapas Detalhadas do Pipeline</h2>
+        <p class="card-desc">
+          Mapeamento completo dos módulos de código em <code>factcheck_mvp/</code>, seus artefatos de entrada e saída, e os requisitos funcionais atendidos.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Etapa</th>
+                <th>Módulo Principal</th>
+                <th>Entrada</th>
+                <th>Saída</th>
+                <th>Requisito</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>01</strong></td>
+                <td>Recepção e Triagem</td>
+                <td><code>telegram_bot.py</code> / <code>api.py</code></td>
+                <td>Texto, título ou link</td>
+                <td><code>EntradaConsulta</code> tipada</td>
+                <td>RF01, RF02, RF03</td>
+              </tr>
+              <tr>
+                <td><strong>02</strong></td>
+                <td>Triagem Heurística</td>
+                <td><code>pipeline.py</code> / <code>aplicabilidade.py</code></td>
+                <td>Texto bruto da entrada</td>
+                <td>Marcadores de data e restrições</td>
+                <td>RF19, RF20</td>
+              </tr>
+              <tr>
+                <td><strong>03</strong></td>
+                <td>Decomposição Factual</td>
+                <td><code>afirmacoes.py</code></td>
+                <td>Texto filtrado</td>
+                <td>Lista de <code>Afirmacao</code> (polaridade)</td>
+                <td>RF04, RF05</td>
+              </tr>
+              <tr>
+                <td><strong>04</strong></td>
+                <td>Base Primeiro (Gate E1)</td>
+                <td><code>indice.py</code> / <code>factcheck_api.py</code></td>
+                <td>Núcleo factual</td>
+                <td>Peças da base de 22 mil checagens</td>
+                <td>RF04, RF17</td>
+              </tr>
+              <tr>
+                <td><strong>05</strong></td>
+                <td>Julgamento da Base</td>
+                <td><code>pipeline.py</code> (<code>_fase_base</code>)</td>
+                <td>Peças da base</td>
+                <td><code>houve_aplicavel</code> (True / False)</td>
+                <td>RF17, RN14, RN16</td>
+              </tr>
+              <tr>
+                <td><strong>06</strong></td>
+                <td>Busca Aberta na Web</td>
+                <td><code>serpapi_layer.py</code> / <code>agente.py</code></td>
+                <td>Queries por afirmação</td>
+                <td>Resultados da SerpAPI (Google BR)</td>
+                <td>RF05</td>
+              </tr>
+              <tr>
+                <td><strong>07</strong></td>
+                <td>Dedupe e Filtragem</td>
+                <td><code>corroboracao.py</code> / <code>catalogo.py</code></td>
+                <td>URLs de busca e base</td>
+                <td>URLs únicas sem homepages/listagens</td>
+                <td>RF06, RN05, RN06</td>
+              </tr>
+              <tr>
+                <td><strong>08</strong></td>
+                <td>Deep Crawl & Extração</td>
+                <td><code>aprofundar.py</code> / <code>extracao.py</code></td>
+                <td>URLs candidatas</td>
+                <td>Corpo integral e JSON-LD ClaimReview</td>
+                <td>RF05, RF07</td>
+              </tr>
+              <tr>
+                <td><strong>09</strong></td>
+                <td>Clusters de Independência</td>
+                <td><code>corroboracao.py</code></td>
+                <td>Matérias lidas</td>
+                <td>Clusters independentes consolidados</td>
+                <td>RF06, RN03</td>
+              </tr>
+              <tr>
+                <td><strong>10</strong></td>
+                <td>Juiz LLM 1:1 com Citação</td>
+                <td><code>juiz_llm.py</code> / <code>avaliador.py</code></td>
+                <td>Par (Afirmação, Notícia)</td>
+                <td>Postura (SUSTENTA/REFUTA) + Citação</td>
+                <td>RF13, RNF07</td>
+              </tr>
+              <tr>
+                <td><strong>11</strong></td>
+                <td>Análise de Estilo Paralela</td>
+                <td><code>modelo_fake.py</code> / <code>padroes_llm.py</code></td>
+                <td>Texto integral (>= 80 pal.)</td>
+                <td>P(fake) calibrado Platt e Gatilhos</td>
+                <td>RF08, RF09, RF10, RN11</td>
+              </tr>
+              <tr>
+                <td><strong>12</strong></td>
+                <td>Agregação e Relatório</td>
+                <td><code>decisao.py</code> / <code>agregador.py</code></td>
+                <td>Evidências e Sinais</td>
+                <td><code>RelatorioChecagem</code> com perguntas-guia</td>
+                <td>RF11, RF12, RF14, RNF01</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: RESILIÊNCIA E FALLBACKS -->
+    <div id="resiliencia" class="tab-pane">
+      <div class="card">
+        <h2>🛡️ 5. Matriz de Resiliência e Fallbacks em Cascata</h2>
+        <p class="card-desc">
+          Para atender ao critério de alta confiabilidade operacional (RNF08), nenhuma falha de terceiro compromete a entrega da resposta. Todas as falhas são convertidas em limitações declaradas no recibo.
+        </p>
+
+        <div class="diagram-container">
+          <pre class="mermaid">
+graph TD
+    subgraph LLM["Cascata de Modelos de Linguagem (LLM)"]
+        L1["1. OpenRouter API\n(deepseek/deepseek-chat ou gemini-flash)"]
+        L2["2. Servidor Local Unsloth Studio\n(Qwen3.8-27B / LFM2.5-8B local)"]
+        L3["3. Regras Léxicas e Heurísticas Fixas\n(Regex determinístico sem inteligência artificial)"]
+        L1 -->|Chave esgotada / Timeout / 429| L2
+        L2 -->|Servidor local offline / Modelo descarregado| L3
+    end
+
+    subgraph Busca["Busca na Web (SerpAPI)"]
+        S1["1. Busca Aberta SerpAPI (Google BR)"]
+        S2["2. Degradação Graciosa: Segue com Base Histórica\nDeclara limitação no recibo: 'Busca web indisponível'"]
+        S1 -->|Cota diária excedida / Falha HTTP| S2
+    end
+
+    subgraph Leitura["Leitura de Links e Páginas Web"]
+        C1["1. curl_cffi com Impersonate de Navegador"]
+        C2["2. requests padrão com headers customizados"]
+        C3["3. Fonte vira 'Só Manchete' (não vota, RN13)"]
+        C1 -->|Bloqueio Cloudflare / Antibot| C2
+        C2 -->|Paywall rígido / Falha total de download| C3
+    end
+          </pre>
+        </div>
+
+        <div class="grid-2">
+          <div class="pillar-card">
+            <div class="pillar-title">🔄 Replay Offline Determinístico (replay.py)</div>
+            <div class="pillar-body">
+              Permite a auditoria completa e execução da suíte de 1.200+ testes automatizados sem consumir créditos de rede ou expor chaves sensíveis.
+            </div>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-title">🔒 Redação de Segredos (RNF07)</div>
+            <div class="pillar-body">
+              Tokens e segredos de ambiente presentes em prompts ou respostas são expurgados por filtros regex antes de serem gravados nos traces públicos.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      Checa AI • Projeto Desenvolvido para a Residência em Inteligência Artificial • 2026<br>
+      Documentação Técnica: <a href="FLUXO_APLICACAO.md">FLUXO_APLICACAO.md</a> | Requisitos: <a href="../requisitos/requisitos.md">requisitos.md</a> | Organização: <a href="../organizacao/organizacao.md">organizacao.md</a>
+    </p>
+  </footer>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#0f172a',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#38bdf8',
+        lineColor: '#64748b',
+        secondaryColor: '#1e1b4b',
+        tertiaryColor: '#0f172a'
+      }
+    });
+
+    function openTab(evt, tabId) {
+      const panes = document.querySelectorAll('.tab-pane');
+      panes.forEach(p => p.classList.remove('active'));
+
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+
+      // Re-render mermaid diagrams if needed
+      mermaid.init(undefined, document.querySelectorAll(`#${tabId} .mermaid`));
+    }
+  </script>
+</body>
+</html>
