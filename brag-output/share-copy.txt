@@ -1,0 +1,1 @@
+CrossCheckBR não diz “é falso”: estima a propensão de uma notícia ser desinformação e mostra o caminho — busca, leitura, juiz com citação conferida em código, um voto por cluster independente e log-odds com limiar ln 3. Vídeo técnico de ~8 min, passo a passo, para a feira de ciências.

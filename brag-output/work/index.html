@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>CrossCheckBR — como funciona</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ===== utilidades locais ===== */
+.gl{position:relative}
+.gl::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 46px 6px var(--gc,#a78bfa);opacity:var(--glow,0);pointer-events:none}
+.big{font-size:44px;font-weight:700;letter-spacing:-.01em}
+.lab{font-size:20px;color:var(--mute);font-weight:600}
+.row{display:flex;align-items:center}
+.node{position:absolute;border-radius:20px;border:1.8px solid var(--line);background:var(--panel2);padding:18px 20px}
+.node .nn{font-size:19px;letter-spacing:.14em;color:var(--mute);font-weight:700}
+.node .nt{font-size:30px;font-weight:700;margin-top:6px;line-height:1.1}
+.node .nd{font-size:20px;color:var(--mute);margin-top:8px;line-height:1.25}
+.node.llm{border-color:rgba(167,139,250,.65);background:linear-gradient(160deg,rgba(167,139,250,.20),rgba(26,38,72,.92))}
+.node.code{border-color:rgba(56,189,248,.5);background:linear-gradient(160deg,rgba(56,189,248,.13),rgba(26,38,72,.92))}
+.node.llm .nn{color:var(--llm)} .node.code .nn{color:var(--code)}
+.arrow-t{font-size:20px;font-weight:650}
+.ok{color:var(--baixa)} .warn{color:var(--media)} .bad{color:var(--alta)}
+.check{display:inline-block;width:30px;height:30px;border-radius:50%;text-align:center;line-height:30px;font-size:19px;font-weight:800}
+.check.y{background:rgba(52,211,153,.18);color:var(--baixa);border:1.5px solid rgba(52,211,153,.6)}
+.check.n{background:rgba(251,113,133,.16);color:var(--alta);border:1.5px solid rgba(251,113,133,.55)}
+.check.s{background:rgba(148,163,184,.12);color:var(--dim);border:1.5px solid rgba(148,163,184,.3)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="bg"></div><div id="grid"></div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+ <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9aa8c2"/></marker>
+ <marker id="ahv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#a78bfa"/></marker>
+ <marker id="ahc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#38bdf8"/></marker>
+ <marker id="aha" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#fbbf24"/></marker>
+</defs></svg>
+
+<!-- ================= 0. HOOK ================= -->
+<section class="scene" id="sc-hook">
+  <div class="abs rv panel" data-at="0.35" data-d="0.8" data-dy="30" data-out="s3-0.15" data-od="0.45" style="left:560px;top:200px;width:800px;height:420px">
+    <div class="row" style="padding:26px 34px;border-bottom:1.5px solid var(--line);gap:18px">
+      <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700">G</div>
+      <div><div style="font-size:28px;font-weight:650">Grupo da família</div><div class="lab" style="font-size:19px">mensagem encaminhada</div></div>
+    </div>
+    <div style="padding:46px 40px">
+      <div class="rv" data-at="1.3" data-d="0.7" data-dy="22" style="display:inline-block;background:rgba(56,189,248,.14);border:1.5px solid rgba(56,189,248,.4);border-radius:22px 22px 22px 6px;padding:26px 38px">
+        <div style="font-size:19px;color:var(--mute);margin-bottom:8px;font-style:italic">↪ Encaminhada</div>
+        <div style="font-size:64px;font-weight:700;letter-spacing:-.01em">Café cura câncer</div>
+      </div>
+    </div>
+  </div>
+  <div class="abs rv" data-at="s2" data-d="0.7" data-out="s3-0.15" data-od="0.45" style="left:0;right:0;top:716px;text-align:center;font-size:68px;font-weight:300;letter-spacing:.01em;color:var(--tx)">Verdade ou mentira<span style="color:var(--media);font-weight:700">?</span></div>
+
+  <div class="abs rv" data-at="s3+0.3" data-d="1.0" data-dy="18" data-s="0.97" style="left:0;right:0;top:250px;text-align:center;font-size:164px;font-weight:700;letter-spacing:-.025em;line-height:1">Cross<span style="color:var(--code)">Check</span><span style="color:var(--llm)">BR</span></div>
+  <div class="abs rv" data-at="s3+1.1" data-d="0.9" style="left:0;right:0;top:446px;text-align:center;font-size:40px;color:var(--mute);font-weight:400;letter-spacing:.01em">Checagem cruzada de fatos em português</div>
+
+  <div class="abs rv" data-at="s4" data-d="0.8" style="left:300px;right:300px;top:600px">
+    <div class="lab" style="text-align:center;letter-spacing:.2em;text-transform:uppercase;font-size:20px;margin-bottom:26px">propensão a ser desinformação</div>
+    <div style="position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,#34d399 0%,#34d399 24%,#fbbf24 38%,#fbbf24 58%,#fb7185 76%,#fb7185 100%);opacity:.9"></div>
+    <div class="row" style="justify-content:space-between;margin-top:22px;font-size:27px;font-weight:650">
+      <span class="rv" data-at="s4+0.6" style="color:var(--baixa)">baixa</span>
+      <span class="rv" data-at="s4+1.4" style="color:var(--media)">média</span>
+      <span class="rv" data-at="s4+2.2" style="color:var(--alta)">alta</span>
+      <span class="rv" data-at="s4+3.0" style="color:var(--ind)">● indeterminada</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 1. PRINCÍPIO ================= -->
+<section class="scene" id="sc-principio">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Princípio de projeto</span><span class="bar"></span><span>saída</span></div>
+    <h1>Propensão, não veredito</h1>
+  </div>
+  <div class="body">
+    <div class="row" style="gap:32px;align-items:stretch" id="lvl-cards">
+      <div class="panel rv" data-at="s1+0.4" style="width:396px;height:300px;padding:30px;border-color:rgba(52,211,153,.5)">
+        <div class="row" style="gap:14px"><span class="dotc" style="background:var(--baixa)"></span><span class="big" style="color:var(--baixa)">Baixa</span></div>
+        <div class="mono" style="margin-top:20px;font-size:25px;color:var(--mute)">L ≤ −1,10</div>
+        <div style="margin-top:16px;font-size:24px;line-height:1.3">Fontes independentes <b>sustentam</b> a afirmação.</div>
+      </div>
+      <div class="panel rv" data-at="s1+1.0" style="width:396px;height:300px;padding:30px;border-color:rgba(251,191,36,.5)">
+        <div class="row" style="gap:14px"><span class="dotc" style="background:var(--media)"></span><span class="big" style="color:var(--media)">Média</span></div>
+        <div class="mono" style="margin-top:20px;font-size:25px;color:var(--mute)">|L| &lt; 1,10</div>
+        <div style="margin-top:16px;font-size:24px;line-height:1.3">Evidência insuficiente ou <b>em conflito</b>.</div>
+      </div>
+      <div class="panel rv" data-at="s1+1.6" style="width:396px;height:300px;padding:30px;border-color:rgba(251,113,133,.5)">
+        <div class="row" style="gap:14px"><span class="dotc" style="background:var(--alta)"></span><span class="big" style="color:var(--alta)">Alta</span></div>
+        <div class="mono" style="margin-top:20px;font-size:25px;color:var(--mute)">L ≥ +1,10</div>
+        <div style="margin-top:16px;font-size:24px;line-height:1.3">Fontes independentes <b>contestam</b> a afirmação.</div>
+      </div>
+      <div class="panel rv pl gl" data-at="s1+2.4" data-pat="s2" style="width:396px;height:300px;padding:30px;border-color:rgba(148,163,184,.5);--gc:rgba(148,163,184,.55)" id="card-ind">
+        <div class="row" style="gap:14px"><span class="dotc" style="background:var(--ind)"></span><span class="big" style="color:var(--ind)">Indeterminada</span></div>
+        <div class="mono" style="margin-top:20px;font-size:25px;color:var(--mute)">nenhum voto</div>
+        <div style="margin-top:16px;font-size:24px;line-height:1.3">Nenhuma fonte <b>trata do assunto</b>.</div>
+      </div>
+    </div>
+    <div class="panel rv" data-at="s2" style="position:absolute;left:0;top:336px;width:1680px;height:120px;padding:0 44px;display:flex;align-items:center;gap:36px;border-color:rgba(148,163,184,.35)">
+      <div style="font-size:50px;font-weight:700;letter-spacing:-.01em;white-space:nowrap">ausência de evidência <span style="color:var(--ind)">≠</span> evidência</div>
+      <div style="font-size:24px;color:var(--mute);line-height:1.3">Nada empurra o nível sem uma fonte que tenha tomado posição sobre a afirmação.</div>
+    </div>
+    <div class="row rv" data-at="s3" style="position:absolute;left:0;top:486px;width:1680px;gap:30px;align-items:stretch">
+      <div class="panel llm" style="flex:1;height:196px;padding:26px 32px">
+        <span class="tag llm">O modelo de linguagem</span>
+        <div style="margin-top:18px;font-size:30px;font-weight:600">extrai · reescreve · classifica</div>
+        <div class="mute" style="margin-top:8px;font-size:22px">propõe — mas é sempre conferido pelo código</div>
+      </div>
+      <div class="panel code" style="flex:1;height:196px;padding:26px 32px">
+        <span class="tag code">O código determinístico</span>
+        <div style="margin-top:18px;font-size:30px;font-weight:600">pesa · soma · decide · redige</div>
+        <div class="mute" style="margin-top:8px;font-size:22px">o nível e o texto final nunca vêm do LLM</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2. VISÃO GERAL ================= -->
+<section class="scene" id="sc-visao">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Visão geral</span><span class="bar"></span><span>pipeline</span></div>
+    <h1>Dez etapas, cada uma com recibo</h1>
+  </div>
+  <div class="body" id="visao-body"></div>
+</section>
+
+<!-- ================= 3. RECEBIMENTO ================= -->
+<section class="scene" id="sc-recebimento">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 1</span><span class="bar"></span><span>recebimento</span></div>
+    <h1>Ler o texto antes de buscar</h1>
+    <div class="tags"><span class="tag code">código determinístico</span></div>
+  </div>
+  <div class="body">
+    <div class="row rv" data-at="s1" style="gap:16px">
+      <span class="chip" style="border-color:rgba(56,189,248,.5);color:#bfe9fd">texto</span>
+      <span class="chip" style="border-color:rgba(56,189,248,.5);color:#bfe9fd">título</span>
+      <span class="chip" style="border-color:rgba(56,189,248,.5);color:#bfe9fd">link</span>
+      <span class="chip" style="border-style:dashed;color:var(--dim)">foto / vídeo → só orientação</span>
+    </div>
+    <div class="panel rv" data-at="s1+0.8" style="position:absolute;left:0;top:86px;width:1090px;height:190px;padding:26px 34px">
+      <div class="ptitle">entrada · exemplo ilustrativo</div>
+      <div class="ty" data-at="s1+1.5" data-cps="26" style="margin-top:20px;font-size:35px;line-height:1.35;font-weight:500"><span class="ul" data-at="s2+0.2" style="--ulc:var(--media)">Me passaram que</span> o governo vai bloquear as contas de todo mundo <span class="ul" data-at="s2@3/4" style="--ulc:var(--code)">hoje</span>.</div>
+    </div>
+    <div class="panel rv" data-at="s2" style="position:absolute;left:1130px;top:0;width:550px;height:360px;padding:24px 30px">
+      <div class="ptitle">detectores</div>
+      <div class="row rv" data-at="s2@0/4+0.2" style="margin-top:20px;gap:16px"><span class="check y">✓</span><div><div style="font-size:25px;font-weight:600">marcador de tempo</div><div class="mono" style="font-size:19px;color:var(--code)">“hoje” → janela de 2 dias</div></div></div>
+      <div class="row rv" data-at="s2@1/4+0.2" style="margin-top:20px;gap:16px"><span class="check y" style="background:rgba(251,191,36,.16);color:var(--media);border-color:rgba(251,191,36,.6)">✓</span><div><div style="font-size:25px;font-weight:600">relato de segunda mão</div><div class="mono" style="font-size:19px;color:var(--media)">“Me passaram que…”</div></div></div>
+      <div class="row rv" data-at="s2@2/4+0.2" style="margin-top:20px;gap:16px"><span class="check s">–</span><div style="font-size:25px;color:var(--dim)">opinião ou sátira</div></div>
+      <div class="row rv" data-at="s2@3/4+0.2" style="margin-top:20px;gap:16px"><span class="check s">–</span><div style="font-size:25px;color:var(--dim)">afirmação vaga</div></div>
+    </div>
+    <div class="panel code rv" data-at="s3" style="position:absolute;left:0;top:306px;width:1090px;height:300px;padding:26px 34px">
+      <div class="ptitle">janela temporal (regra de data)</div>
+      <div style="position:relative;margin-top:14px;height:200px">
+        <div style="position:absolute;left:0;right:0;top:110px;height:3px;background:var(--line)"></div>
+        <div class="rv" data-at="s3+0.6" style="position:absolute;right:60px;top:64px;width:170px;height:92px;border-radius:12px;background:rgba(56,189,248,.18);border:1.5px solid rgba(56,189,248,.6)"></div>
+        <div class="rv" data-at="s3+0.9" style="position:absolute;right:60px;top:20px;width:170px;text-align:center;font-size:22px;color:var(--code);font-weight:700">janela: 2 dias</div>
+        <div class="rv" data-at="s3+0.6" style="position:absolute;right:40px;top:100px;width:22px;height:22px;border-radius:50%;background:var(--code);box-shadow:0 0 18px var(--code)"></div>
+        <div class="rv" data-at="s3+0.9" style="position:absolute;right:20px;top:136px;font-size:24px;font-weight:700;color:var(--code)">hoje</div>
+        <div class="rv" data-at="s3+1.6" style="position:absolute;left:90px;top:100px;width:22px;height:22px;border-radius:50%;background:var(--ind)"></div>
+        <div class="rv" data-at="s3+1.9" style="position:absolute;left:36px;top:140px;width:230px;font-size:21px;color:var(--mute);line-height:1.25">fonte de outro período</div>
+        <div class="rv" data-at="s3+2.4" style="position:absolute;left:300px;top:86px;width:520px;font-size:23px;line-height:1.35;color:var(--tx)">Fora da janela, o peso da fonte cai: ela provavelmente fala de <b>outro episódio</b>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4. AFIRMAÇÕES ================= -->
+<section class="scene" id="sc-afirmacoes">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 2</span><span class="bar"></span><span>afirmações</span></div>
+    <h1>Quebrar o texto em afirmações atômicas</h1>
+    <div class="tags"><span class="tag llm">usa LLM</span></div>
+  </div>
+  <div class="body">
+    <div class="panel rv" data-at="s1" style="position:absolute;left:0;top:0;width:500px;height:210px;padding:24px 28px">
+      <div class="ptitle">entrada do usuário</div>
+      <div style="margin-top:18px;font-size:34px;line-height:1.28;font-weight:500">“É falso que a vacina altera o DNA.”</div>
+    </div>
+    <svg class="abs rv" data-at="s1+0.8" width="170" height="120" style="left:510px;top:60px"><path class="dr" data-at="s1+0.8" data-d="0.8" d="M10 60 H150" stroke="#a78bfa" stroke-width="3" fill="none" marker-end="url(#ahv)"/></svg>
+    <span class="tag llm abs rv" data-at="s1+1.2" style="left:560px;top:16px">LLM</span>
+    <div class="panel llm rv" data-at="s1+1.0" style="position:absolute;left:690px;top:0;width:990px;height:384px;padding:24px 34px">
+      <div class="ptitle">saída validada (JSON) · até 3 afirmações</div>
+      <div class="ty mono" data-at="s2" data-cps="52" style="margin-top:14px;font-size:29px;line-height:1.5;white-space:pre"><span class="v">{</span>
+  <span class="k">"afirmacao"</span>: <span class="s">"A vacina não altera o DNA"</span>,
+  <span class="k">"nucleo"</span>: <span class="s">"A vacina altera o DNA"</span>,
+  <span class="k">"polaridade"</span>: <span class="s">"nega"</span>,
+  <span class="k">"consulta"</span>: <span class="s">"vacina covid altera DNA"</span>,
+  <span class="k">"marcadores_tempo"</span>: []
+<span class="v">}</span></div>
+    </div>
+    <div class="row rv" data-at="s3" style="position:absolute;left:0;top:414px;width:1680px;gap:18px;align-items:stretch">
+      <div class="panel" style="flex:1.25;height:150px;padding:20px 24px"><div class="ptitle">núcleo avaliado</div><div style="margin-top:12px;font-size:27px;font-weight:600">“A vacina altera o DNA”</div></div>
+      <div class="abs" style="position:relative;align-self:center;font-size:36px;color:var(--mute)">→</div>
+      <div class="panel llm rv" data-at="s3@1/4" style="flex:1;height:150px;padding:20px 24px"><div class="ptitle">juiz diz</div><div style="margin-top:12px;font-size:27px;font-weight:700"><span class="refuta">REFUTA</span> o núcleo <span class="mono" style="color:var(--mute)">(+1)</span></div></div>
+      <div style="align-self:center;font-size:36px;color:var(--mute)">×</div>
+      <div class="panel rv" data-at="s3@2/4" style="flex:1;height:150px;padding:20px 24px"><div class="ptitle">polaridade do usuário</div><div style="margin-top:12px;font-size:27px;font-weight:700">nega <span class="mono" style="color:var(--mute)">(−1)</span></div></div>
+      <div style="align-self:center;font-size:36px;color:var(--mute)">=</div>
+      <div class="panel code rv" data-at="s3@3/4" style="flex:1.25;height:150px;padding:20px 24px"><div class="ptitle">direção do voto</div><div style="margin-top:12px;font-size:27px;font-weight:700"><span class="mono" style="color:var(--baixa)">−1</span> <span class="mute" style="font-size:22px;font-weight:500">a favor do usuário</span></div></div>
+    </div>
+    <div class="row rv" data-at="s4" style="position:absolute;left:0;top:602px;width:1680px;gap:14px;align-items:center">
+      <div class="panel llm" style="padding:16px 22px;font-size:23px;font-weight:600">LLM gera JSON</div>
+      <span style="color:var(--mute);font-size:28px">→</span>
+      <div class="panel code" style="padding:16px 22px;font-size:23px;font-weight:600">Pydantic valida <span class="ok">✓</span></div>
+      <span style="color:var(--mute);font-size:28px">→</span>
+      <div class="panel rv" data-at="s4@1/3" style="padding:16px 22px;font-size:23px;font-weight:600"><span class="bad">✗</span> 1 nova tentativa com correção</div>
+      <span style="color:var(--mute);font-size:28px">→</span>
+      <div class="panel rv" data-at="s4@2/3" style="padding:16px 22px;font-size:23px;font-weight:600;border-color:rgba(251,191,36,.5)"><span class="warn">⚑</span> fallback regex · marcado no recibo</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. BUSCA ================= -->
+<section class="scene" id="sc-busca">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 3</span><span class="bar"></span><span>busca aberta</span></div>
+    <h1>Duas consultas por afirmação</h1>
+    <div class="tags"><span class="tag code">SerpAPI · código</span></div>
+  </div>
+  <div class="body">
+    <div class="panel rv" data-at="s1" style="position:absolute;left:0;top:104px;width:330px;height:130px;padding:18px 22px">
+      <div class="ptitle">afirmação</div>
+      <div class="mono" style="margin-top:12px;font-size:22px;color:#fcd34d;line-height:1.3">vacina covid<br>altera DNA</div>
+    </div>
+    <svg class="abs" width="80" height="340" style="left:335px;top:0">
+      <path class="dr" data-at="s1+0.6" data-d="0.7" d="M6 169 C40 169,40 70,74 70" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ahc)"/>
+      <path class="dr" data-at="s1+0.9" data-d="0.7" d="M6 169 C40 169,40 255,74 255" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ahc)"/>
+    </svg>
+    <div class="panel code rv" data-at="s1+0.9" style="position:absolute;left:420px;top:0;width:620px;height:150px;padding:20px 26px">
+      <div class="row" style="justify-content:space-between"><span class="ptitle">① consulta pura</span><span class="chip" style="font-size:18px;padding:3px 12px">Google News</span></div>
+      <div class="mono" style="margin-top:20px;font-size:25px;color:#e8edf7">vacina covid altera DNA</div>
+    </div>
+    <div class="panel code rv" data-at="s2" style="position:absolute;left:420px;top:176px;width:620px;height:170px;padding:20px 26px">
+      <div class="row" style="justify-content:space-between"><span class="ptitle">② dirigida às agências</span><span class="chip" style="font-size:18px;padding:3px 12px">Google orgânico</span></div>
+      <div class="mono" style="margin-top:18px;font-size:23px;line-height:1.35;color:#e8edf7">vacina covid altera DNA <span style="color:var(--media)">(site:agência-1 OR site:agência-2 OR …)</span></div>
+    </div>
+    <svg class="abs" width="60" height="340" style="left:1046px;top:0">
+      <path class="dr" data-at="s2+0.9" data-d="0.6" d="M4 75 H52" stroke="#9aa8c2" stroke-width="3" fill="none" marker-end="url(#ah)"/>
+      <path class="dr" data-at="s2+1.1" data-d="0.6" d="M4 262 C28 262,28 200,52 200" stroke="#9aa8c2" stroke-width="3" fill="none" marker-end="url(#ah)"/>
+    </svg>
+    <div class="panel rv" data-at="s2+0.8" style="position:absolute;left:1110px;top:0;width:570px;height:346px;padding:20px 24px" id="cand-panel">
+      <div class="row" style="justify-content:space-between"><span class="ptitle">candidatos</span><span class="mono" style="font-size:19px;color:var(--code)" id="cand-n">0 URLs</span></div>
+      <div id="cand-list" style="margin-top:14px"></div>
+    </div>
+    <div class="row rv" data-at="s2+1.4" style="position:absolute;left:0;top:372px;gap:14px">
+      <span class="lab">catálogo curado:</span>
+      <span class="chip" style="color:#cbd5e1">23 veículos</span>
+      <span class="chip" style="border-color:rgba(94,234,212,.55);color:var(--sustenta)">13 agências de checagem</span>
+    </div>
+    <div class="row" style="position:absolute;left:0;top:446px;width:1680px;gap:24px;align-items:stretch">
+      <div class="panel rv" data-at="s3" style="flex:1;height:226px;padding:22px 26px">
+        <div class="ptitle">rodízio de chaves</div>
+        <div class="row" style="margin-top:22px;gap:12px">
+          <span class="chip mono" style="font-size:19px;border-color:rgba(251,113,133,.5);color:var(--alta);text-decoration:line-through">chave 1 · 429</span>
+          <span style="color:var(--mute);font-size:24px" class="rv" data-at="s3+0.8">→</span>
+          <span class="chip mono rv" data-at="s3+0.8" style="font-size:19px;border-color:rgba(52,211,153,.55);color:var(--baixa)">chave 2 ✓</span>
+        </div>
+        <div class="mute" style="margin-top:20px;font-size:21px;line-height:1.3">HTTP 401/403/429: a mesma busca segue na próxima chave.</div>
+      </div>
+      <div class="panel rv" data-at="s3+1.6" style="flex:1;height:226px;padding:22px 26px">
+        <div class="ptitle">planejador de busca</div>
+        <div class="mono" style="margin-top:20px;font-size:19px;color:var(--alta);text-decoration:line-through;line-height:1.3">"vacina" covid DNA site:… 0 resultados</div>
+        <div class="rv" data-at="s3+2.4" style="margin-top:6px;font-size:22px;color:var(--mute)">↓ relaxa</div>
+        <div class="mono rv" data-at="s3+2.4" style="font-size:19px;color:var(--baixa)">vacina covid DNA → 8 resultados</div>
+        <div class="mute" style="margin-top:12px;font-size:20px;line-height:1.3">sem operadores, aspas ou ruído</div>
+      </div>
+      <div class="panel rv" data-at="s4" style="flex:1;height:226px;padding:22px 26px">
+        <div class="ptitle">atalho</div>
+        <div class="row" style="margin-top:18px;gap:16px"><div style="width:74px;height:38px;border-radius:19px;background:rgba(148,163,184,.25);position:relative"><div style="position:absolute;left:4px;top:4px;width:30px;height:30px;border-radius:50%;background:#64748b"></div></div><span style="font-size:23px;font-weight:700;color:var(--ind)">desligado nas avaliações</span></div>
+        <div style="margin-top:16px;font-size:23px;font-weight:600">índice local · BM25</div>
+        <div class="mute" style="margin-top:6px;font-size:21px;line-height:1.3">≈ 22 mil checagens históricas · desligado só para medir a busca aberta</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 6. LEITURA ================= -->
+<section class="scene" id="sc-leitura">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 4</span><span class="bar"></span><span>leitura das páginas</span></div>
+    <h1>Provar que o corpo foi lido</h1>
+    <div class="tags"><span class="tag code">código determinístico</span></div>
+  </div>
+  <div class="body">
+    <div class="panel rv" data-at="s2" style="position:absolute;left:0;top:0;width:800px;height:300px;padding:22px 28px">
+      <div class="ptitle">① deduplicação por URL canônica</div>
+      <div class="mono" style="margin-top:22px;font-size:21px;line-height:1.6;word-break:break-all"><span class="rv" data-at="s2+0.4" style="color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(251,113,133,.9)">https://www.</span><span style="color:#e8edf7">exemplo.com.br/noticia/cafe-cura</span><span class="rv" data-at="s2+0.4" style="color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(251,113,133,.9)">?utm_source=zap&amp;amp#fim</span></div>
+      <div class="rv" data-at="s2+1.4" style="margin-top:12px;font-size:21px;color:var(--mute)">↓ a mesma peça vinda de dois buscadores vira uma só</div>
+      <div class="mono rv" data-at="s2+1.8" style="margin-top:10px;font-size:23px;color:var(--baixa)">exemplo.com.br/noticia/cafe-cura</div>
+      <div class="row rv" data-at="s2+2.8" style="margin-top:18px;gap:12px"><span class="chip" style="font-size:19px;color:var(--alta);border-color:rgba(251,113,133,.45)">✗ homepage</span><span class="chip" style="font-size:19px;color:var(--alta);border-color:rgba(251,113,133,.45)">✗ listagem /tag/</span></div>
+    </div>
+    <div class="panel rv" data-at="s3" style="position:absolute;left:0;top:326px;width:800px;height:230px;padding:22px 28px">
+      <div class="ptitle">② download seguro</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+        <span class="chip rv" data-at="s3+0.2" style="font-size:20px">só http/https · 80/443</span>
+        <span class="chip rv" data-at="s3+0.5" style="font-size:20px">bloqueia IP privado</span>
+        <span class="chip rv" data-at="s3+0.8" style="font-size:20px">redirect revalidado</span>
+        <span class="chip rv" data-at="s3+1.1" style="font-size:20px">teto 5 MB · 15 s</span>
+      </div>
+      <div class="mute rv" data-at="s3+1.6" style="margin-top:16px;font-size:21px;line-height:1.3">Proteção anti-SSRF: a URL nunca leva o servidor à rede interna.</div>
+    </div>
+    <div class="panel code rv" data-at="s1+0.6" style="position:absolute;left:840px;top:0;width:840px;height:556px;padding:22px 30px">
+      <div class="ptitle">③ cascata de extração do texto</div>
+      <div class="rv" data-at="s4@0/5" style="margin-top:24px;display:flex;align-items:center;gap:16px"><span class="check n">✗</span><div><div style="font-size:26px;font-weight:600">JSON-LD · articleBody</div><div class="lab" style="font-size:19px">texto do próprio editor — ausente nesta página</div></div></div>
+      <div class="rv" data-at="s4@1/5" style="margin-top:22px;display:flex;align-items:center;gap:16px"><span class="check y">✓</span><div><div style="font-size:26px;font-weight:600">trafilatura <span class="ok" style="font-size:20px">≥ 500 caracteres</span></div><div class="lab" style="font-size:19px">primeiro nível que vence encerra a cascata</div></div></div>
+      <div class="rv" data-at="s4@2/5" style="margin-top:22px;display:flex;align-items:center;gap:16px;opacity:.6"><span class="check s">–</span><div style="font-size:24px;color:var(--mute)">seletor do catálogo <span class="lab" style="font-size:18px">(não precisou)</span></div></div>
+      <div class="rv" data-at="s4@2/5+0.2" style="margin-top:18px;display:flex;align-items:center;gap:16px;opacity:.6"><span class="check s">–</span><div style="font-size:24px;color:var(--mute)">regex de &lt;p&gt; <span class="lab" style="font-size:18px">(não precisou)</span></div></div>
+      <div class="rv" data-at="s4@3/5" style="margin-top:34px;padding:18px 22px;border-radius:14px;background:rgba(52,211,153,.12);border:1.5px solid rgba(52,211,153,.5);font-size:26px"><span class="mono ok" style="font-weight:700">corpo_lido = true</span> <span class="mute" style="font-size:21px">→ pode votar</span></div>
+      <div class="rv" data-at="s4@4/5" style="margin-top:16px;padding:18px 22px;border-radius:14px;background:rgba(251,191,36,.10);border:1.5px dashed rgba(251,191,36,.55);font-size:23px;line-height:1.3"><span class="warn" style="font-weight:700">Só o título/snippet?</span> <span class="mute">A peça é listada, mas <b style="color:var(--tx)">não vota</b>.</span></div>
+    </div>
+    <div class="rv" data-at="s1+0.4" style="position:absolute;left:0;top:586px;width:1680px;font-size:25px;color:var(--mute)">Falha na extração é <b style="color:var(--tx)">explícita</b>: nenhum texto parcial finge ser corpo lido.</div>
+  </div>
+</section>
+
+<!-- ================= 7. CLUSTERS ================= -->
+<section class="scene" id="sc-clusters">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 5</span><span class="bar"></span><span>independência</span></div>
+    <h1>Um cluster, um voto</h1>
+    <div class="tags"><span class="tag code">código determinístico</span></div>
+  </div>
+  <div class="body" id="cl-body">
+    <div class="rv" data-at="s1" style="position:absolute;left:0;top:0;font-size:30px;font-weight:600"><span class="mute">matérias encontradas:</span> <span class="mono" style="color:var(--tx)">10</span></div>
+    <div class="rv" data-at="s3+0.4" style="position:absolute;left:0;top:500px;width:1680px;text-align:center;font-size:58px;font-weight:300"><span class="mute">10 matérias</span> <span style="color:var(--mute)">→</span> <span class="mono cnt" data-at="s3+0.8" data-d="1.2" data-from="10" data-to="4" data-dec="0" data-suf=" votos" style="color:var(--code);font-weight:700">10 votos</span></div>
+  </div>
+</section>
+
+<!-- ================= 8. JUIZ ================= -->
+<section class="scene" id="sc-juiz">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 6</span><span class="bar"></span><span>juiz de quatro classes</span></div>
+    <h1>O LLM classifica — o código confere</h1>
+    <div class="tags"><span class="tag llm">usa LLM</span><span class="tag code">+ verificação em código</span></div>
+  </div>
+  <div class="body">
+    <div class="row rv" data-at="s1" style="position:absolute;left:0;top:0;gap:14px"><span class="lab">núcleo da afirmação:</span><span class="chip mono" style="color:#fcd34d;font-size:22px">A vacina altera o DNA</span></div>
+    <div class="panel rv" data-at="s1+0.5" style="position:absolute;left:0;top:64px;width:640px;height:450px;padding:22px 28px">
+      <div class="ptitle">trecho enviado (≤ 2.500 caracteres)</div>
+      <div style="margin-top:16px;font-size:26px;font-weight:700;line-height:1.2">Vacina não altera o DNA, dizem especialistas</div>
+      <div style="margin-top:14px;font-size:23px;line-height:1.45;color:#cbd5e6">A vacina de RNA mensageiro entrega instruções temporárias às células. <span class="rv" data-at="s2@3/4" data-dy="0" style="background:rgba(251,113,133,.26);color:#fff;font-weight:600;padding:1px 4px;border-radius:5px;-webkit-box-decoration-break:clone;box-decoration-break:clone">O RNA não entra no núcleo da célula e, portanto, não modifica o DNA.</span> A molécula é degradada em poucos dias.</div>
+      <div class="row" style="margin-top:20px;gap:8px;flex-wrap:wrap"><span class="chip rv" data-at="s1+1.3" style="font-size:17px;padding:3px 10px">título</span><span class="chip rv" data-at="s1+1.7" style="font-size:17px;padding:3px 10px">lide</span><span class="chip rv" data-at="s1+2.1" style="font-size:17px;padding:3px 10px">frases de conclusão</span><span class="chip rv" data-at="s1+2.5" style="font-size:17px;padding:3px 10px">frases com os termos</span></div>
+    </div>
+    <svg class="abs rv" data-at="s1+1.4" width="120" height="60" style="left:650px;top:230px"><path class="dr" data-at="s1+1.4" data-d="0.7" d="M6 30 H104" stroke="#a78bfa" stroke-width="3" fill="none" marker-end="url(#ahv)"/></svg>
+    <div class="abs rv panel llm" data-at="s1+1.6" style="left:770px;top:0;width:910px;height:90px;display:flex;align-items:center;justify-content:space-between;padding:0 24px">
+      <span class="pill sustenta rv" data-at="s2@0/4">SUSTENTA</span><span class="pill refuta rv gl pl" data-pat="s2@2/4" data-at="s2@1/4" style="--gc:rgba(251,113,133,.6)">REFUTA</span><span class="pill relata rv" data-at="s2@2/4">RELATA_SEM_ENDOSSO</span><span class="pill naotrata rv" data-at="s2@3/4">NAO_TRATA</span>
+    </div>
+    <div class="panel llm rv" data-at="s2@3/4" style="position:absolute;left:770px;top:112px;width:910px;height:186px;padding:20px 30px">
+      <div class="ptitle">saída do juiz</div>
+      <div class="mono" style="margin-top:12px;font-size:23px;line-height:1.5;white-space:pre-wrap"><span class="k">"classe"</span>: <span class="s">"REFUTA"</span>,
+<span class="k">"citacao"</span>: <span class="s">"não entra no núcleo da célula e, portanto, não modifica o DNA"</span></div>
+    </div>
+    <div class="panel code rv" data-at="s3" style="position:absolute;left:770px;top:318px;width:910px;height:196px;padding:18px 30px">
+      <div class="ptitle">verificação em código · citação ∈ texto visto pelo juiz (≥ 0,90)</div>
+      <div class="row rv" data-at="s3+0.5" style="margin-top:18px;gap:18px"><span class="lab" style="width:170px;font-size:19px">citação literal</span><div style="flex:1;height:18px;border-radius:9px;background:rgba(148,163,184,.15);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:9px;background:var(--baixa)"></div><div style="position:absolute;left:90%;top:-6px;bottom:-6px;width:3px;background:#fff"></div></div><span class="ok" style="font-size:24px;font-weight:700;width:300px">✓ classe mantida</span></div>
+      <div class="row rv" data-at="s3+1.8" style="margin-top:20px;gap:18px"><span class="lab" style="width:170px;font-size:19px">citação inventada</span><div style="flex:1;height:18px;border-radius:9px;background:rgba(148,163,184,.15);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:34%;border-radius:9px;background:var(--alta)"></div><div style="position:absolute;left:90%;top:-6px;bottom:-6px;width:3px;background:#fff"></div></div><span class="bad" style="font-size:22px;font-weight:700;width:300px">✗ rebaixada → NAO_TRATA</span></div>
+    </div>
+    <div class="rv" data-at="s4" style="position:absolute;left:0;top:560px;width:1680px;text-align:center;font-size:52px;font-weight:300;letter-spacing:-.005em">O modelo pode <b style="font-weight:700">errar</b>. Não pode <b style="font-weight:700;color:var(--llm)">inventar</b>.</div>
+  </div>
+</section>
+
+<!-- ================= 9. AGENTE ================= -->
+<section class="scene" id="sc-agente">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 7</span><span class="bar"></span><span>agente crítico</span></div>
+    <h1>Parar ou buscar mais?</h1>
+    <div class="tags"><span class="tag llm">reescreve com LLM</span><span class="tag code">decide por regras</span></div>
+  </div>
+  <div class="body">
+    <svg class="abs" width="900" height="470" style="left:0;top:0">
+      <path class="dr" data-at="s1@0/4+0.9" data-d="0.5" d="M178 150 H214" stroke="#9aa8c2" stroke-width="3" fill="none" marker-end="url(#ah)"/>
+      <path class="dr" data-at="s1@1/4+0.9" data-d="0.5" d="M392 150 H428" stroke="#9aa8c2" stroke-width="3" fill="none" marker-end="url(#ah)"/>
+      <path class="dr" data-at="s1@2/4+0.9" data-d="0.5" d="M606 150 H642" stroke="#9aa8c2" stroke-width="3" fill="none" marker-end="url(#ah)"/>
+      <path class="dr" data-at="s2" data-d="0.7" d="M742 214 V330" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ahc)"/>
+      <path class="dr" data-at="s3" data-d="1.1" d="M742 60 C742 -20, 88 -20, 88 98" stroke="#a78bfa" stroke-width="3" stroke-dasharray="8 8" fill="none" marker-end="url(#ahv)"/>
+    </svg>
+    <div class="node code rv" data-at="s1@0/4" style="left:0;top:100px;width:170px;height:100px;padding:14px 16px"><div class="nt" style="font-size:26px;margin:0">Busca</div></div>
+    <div class="node code rv" data-at="s1@1/4" style="left:218px;top:100px;width:170px;height:100px;padding:14px 16px"><div class="nt" style="font-size:26px;margin:0">Leitura</div></div>
+    <div class="node llm rv" data-at="s1@2/4" style="left:436px;top:100px;width:170px;height:100px;padding:14px 16px"><div class="nt" style="font-size:26px;margin:0">Juiz</div></div>
+    <div class="node llm rv" data-at="s1@3/4" style="left:654px;top:62px;width:180px;height:152px;padding:14px 16px;border-width:2.5px"><div class="nn">CRÍTICO</div><div class="nt" style="font-size:24px;margin-top:8px">Já basta?</div></div>
+    <div class="node code rv" data-at="s2+0.5" style="left:654px;top:340px;width:180px;height:90px;padding:14px 16px"><div class="nt" style="font-size:26px;margin:0">Decisão</div></div>
+    <div class="abs rv" data-at="s2+0.3" style="left:764px;top:252px;font-size:22px;font-weight:700;color:var(--code)">parar</div>
+    <div class="abs rv" data-at="s3+0.6" style="left:224px;top:18px;font-size:22px;font-weight:700;color:var(--llm);width:420px;text-align:center">nova onda: consulta reescrita</div>
+
+    <div class="panel rv" data-at="s2" style="position:absolute;left:940px;top:0;width:740px;height:226px;padding:20px 28px">
+      <div class="ptitle" style="color:var(--code)">para se…</div>
+      <div style="margin-top:14px;font-size:23px;line-height:1.5">
+        <div class="rv" data-at="s2@0/4+0.3">• há selo de checagem aplicável</div>
+        <div class="rv" data-at="s2@1/4+0.3">• ≥ 2 clusters independentes tomaram posição</div>
+        <div class="rv" data-at="s2@2/4+0.3">• o juiz está indisponível</div>
+        <div class="rv" data-at="s2@3/4+0.3">• o orçamento de buscas acabou <span class="mono mute" style="font-size:19px">(9 por consulta)</span></div>
+      </div>
+    </div>
+    <div class="panel llm rv" data-at="s3" style="position:absolute;left:940px;top:248px;width:740px;height:218px;padding:20px 28px">
+      <div class="ptitle" style="color:var(--llm)">senão: o LLM reescreve a consulta</div>
+      <div class="mono" style="margin-top:14px;font-size:20px;color:var(--mute)">antes:</div>
+      <div class="mono" style="font-size:23px;color:#e8edf7">vacina covid altera DNA</div>
+      <div class="mono rv" data-at="s3+1.4" style="margin-top:10px;font-size:20px;color:var(--mute)">depois (sabendo o que foi <span class="naotrata">NAO_TRATA</span>):</div>
+      <div class="mono rv" data-at="s3+1.8" style="font-size:23px;color:var(--baixa)">vacina RNA mensageiro material genético</div>
+    </div>
+    <div class="panel rv" data-at="s4" style="position:absolute;left:0;top:498px;width:1680px;height:190px;padding:18px 32px">
+      <div class="ptitle">autoconsistência · se um único julgamento decide, repete 3×</div>
+      <div class="row" style="margin-top:18px;gap:40px">
+        <div class="row" style="gap:12px;flex:1">
+          <span class="pill refuta">REFUTA</span><span class="pill refuta">REFUTA</span><span class="pill refuta">REFUTA</span>
+          <span style="font-size:26px;color:var(--mute)">→</span>
+          <span class="ok" style="font-size:25px;font-weight:700">unânime · mantém</span>
+        </div>
+        <div class="row rv" data-at="s4@2/4" style="gap:12px;flex:1.2">
+          <span class="pill refuta">REFUTA</span><span class="pill sustenta">SUSTENTA</span><span class="pill refuta">REFUTA</span>
+          <span style="font-size:26px;color:var(--mute)">→</span>
+          <span class="warn" style="font-size:23px;font-weight:700;line-height:1.2">instável · <span class="pill relata" style="font-size:16px">RELATA_SEM_ENDOSSO</span></span>
+        </div>
+      </div>
+      <div class="mute rv" data-at="s4@3/4" style="margin-top:14px;font-size:21px">Falha segura: a repetição nunca inverte a direção — só perde a posição.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 10. DECISÃO ================= -->
+<section class="scene" id="sc-decisao">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 8</span><span class="bar"></span><span>decisão</span></div>
+    <h1>Uma função pura calcula o nível</h1>
+    <div class="tags"><span class="tag code">sem LLM · sem rede</span></div>
+  </div>
+  <div class="body">
+    <div class="panel code rv" data-at="s1" style="position:absolute;left:0;top:0;width:790px;height:70px;display:flex;align-items:center;padding:0 26px">
+      <span class="mono" style="font-size:25px">decidir(<span style="color:#fcd34d">evidências</span>) → <span style="color:var(--code)">Decisão</span></span>
+    </div>
+    <div class="rv" data-at="s2" style="position:absolute;left:0;top:92px;width:790px;font-size:23px;line-height:1.5">
+      <span class="mono" style="color:var(--refuta)">REFUTA</span> → voto <b>+ peso</b> &nbsp;·&nbsp; <span class="mono" style="color:var(--sustenta)">SUSTENTA</span> → voto <b>− peso</b>
+    </div>
+    <div class="panel rv" data-at="s3" style="position:absolute;left:0;top:152px;width:790px;height:342px;padding:18px 26px">
+      <div class="ptitle">peso do voto por fonte</div>
+      <div id="wt-rows" style="margin-top:12px"></div>
+    </div>
+    <div class="panel rv" data-at="s4" style="position:absolute;left:0;top:512px;width:790px;height:176px;padding:14px 28px">
+      <div class="mono" style="font-size:27px;line-height:1.75"><span class="rv" data-at="s4+0.2">L = Σ votos<span style="color:var(--mute);font-size:20px"> (um por cluster)</span></span><br>
+      <span class="rv" data-at="s4+1.4">p = σ(L) = 1 / (1 + e<sup>−L</sup>)</span><br>
+      <span class="rv" data-at="s5" style="color:#fcd34d">τ = ln 3 ≈ 1,10 <span style="color:var(--mute);font-size:20px">(p = 0,25 / 0,75)</span></span></div>
+    </div>
+
+    <!-- eixo -->
+    <div class="panel rv" data-at="s2+0.8" style="position:absolute;left:830px;top:0;width:850px;height:430px">
+      <div class="ptitle abs" style="left:28px;top:20px">log-odds L</div>
+      <div id="axis" class="abs" style="left:45px;top:110px;width:760px;height:200px">
+        <div id="band-b" class="abs rv" data-at="s5" style="left:0;top:50px;width:241px;height:70px;background:rgba(52,211,153,.18);border:1.5px solid rgba(52,211,153,.5);border-radius:14px 0 0 14px"></div>
+        <div id="band-m" class="abs rv" data-at="s5+0.5" style="left:241px;top:50px;width:278px;height:70px;background:rgba(251,191,36,.12);border-top:1.5px solid rgba(251,191,36,.45);border-bottom:1.5px solid rgba(251,191,36,.45)"></div>
+        <div id="band-a" class="abs rv" data-at="s5+1.0" style="left:519px;top:50px;width:241px;height:70px;background:rgba(251,113,133,.18);border:1.5px solid rgba(251,113,133,.5);border-radius:0 14px 14px 0"></div>
+        <div class="abs rv" data-at="s5+0.2" style="left:0;top:150px;width:241px;text-align:center;font-size:24px;font-weight:700;color:var(--baixa)">BAIXA</div>
+        <div class="abs rv" data-at="s5+0.7" style="left:241px;top:150px;width:278px;text-align:center;font-size:24px;font-weight:700;color:var(--media)">MÉDIA</div>
+        <div class="abs rv" data-at="s5+1.2" style="left:519px;top:150px;width:241px;text-align:center;font-size:24px;font-weight:700;color:var(--alta)">ALTA</div>
+        <div class="abs" style="left:0;right:0;top:84px;height:3px;background:rgba(148,163,184,.5)"></div>
+        <div id="ticks"></div>
+        <div class="abs rv" data-at="s5+1.4" style="left:221px;top:188px;width:40px;text-align:center;font-size:22px;font-weight:700;color:#fcd34d">−τ</div>
+        <div class="abs rv" data-at="s5+1.4" style="left:499px;top:188px;width:40px;text-align:center;font-size:22px;font-weight:700;color:#fcd34d">+τ</div>
+        <div class="abs rv" data-at="s2+1.2" style="left:0;top:6px;font-size:20px;color:var(--sustenta)">← sustenta</div>
+        <div class="abs rv" data-at="s2+1.2" style="right:0;top:6px;font-size:20px;color:var(--refuta)">refuta →</div>
+        <div id="marker" class="abs" style="left:380px;top:62px;width:0;height:0;opacity:0">
+          <div style="position:absolute;left:-18px;top:-52px;width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 0 24px rgba(255,255,255,.8)"></div>
+          <div style="position:absolute;left:-2px;top:-20px;width:4px;height:78px;background:#fff"></div>
+        </div>
+      </div>
+      <div id="readout" class="abs mono" style="left:28px;right:28px;top:350px;font-size:28px;text-align:center;opacity:0"></div>
+    </div>
+    <div class="abs" style="left:830px;top:452px;width:850px">
+      <div class="panel rv" data-at="s6@1/10" style="padding:14px 24px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:23px">Cluster 1 · agência curada · <span class="refuta" style="font-weight:700">REFUTA</span></span><span class="mono" style="font-size:26px;color:var(--refuta)">+1,0</span></div>
+      <div class="panel rv" data-at="s6@5/10" style="padding:14px 24px;margin-top:14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:23px">Cluster 2 · outra fonte independente · <span class="refuta" style="font-weight:700">REFUTA</span></span><span class="mono" style="font-size:26px;color:var(--refuta)">+1,0</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 11. TRAVAS ================= -->
+<section class="scene" id="sc-travas">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 9</span><span class="bar"></span><span>travas de segurança</span></div>
+    <h1>Só podem deixar o sistema mais cauteloso</h1>
+    <div class="tags"><span class="tag code">código determinístico</span></div>
+  </div>
+  <div class="body">
+    <div class="row" style="gap:20px;align-items:stretch">
+      <div class="panel rv" data-at="s2" style="width:316px;height:410px;padding:24px 22px">
+        <div class="ptitle" style="color:var(--code)">confiabilidade</div>
+        <div style="margin-top:14px;font-size:25px;line-height:1.28;font-weight:650">Rede social ou site pouco acessado não crava sozinho</div>
+        <div style="margin-top:34px;position:relative;height:86px">
+          <div class="abs" style="left:0;top:34px;width:100%;height:18px;border-radius:9px;background:rgba(148,163,184,.15)"></div>
+          <div class="abs" style="left:0;top:34px;width:30%;height:18px;border-radius:9px;background:var(--media)"></div>
+          <div class="abs" style="left:73%;top:22px;width:3px;height:42px;background:#fff"></div>
+          <div class="abs" style="left:58%;top:70px;font-size:18px;color:#fcd34d;font-weight:700">τ = 1,10</div>
+          <div class="abs mono" style="left:0;top:0;font-size:18px;color:var(--media)">0,45</div>
+        </div>
+        <div class="mute" style="margin-top:18px;font-size:20px;line-height:1.3">|L| fica abaixo de τ sem uma fonte confiável atual → <b style="color:var(--media)">média</b></div>
+      </div>
+      <div class="panel rv" data-at="s3" style="width:316px;height:410px;padding:24px 22px">
+        <div class="ptitle" style="color:var(--code)">tempo</div>
+        <div style="margin-top:14px;font-size:25px;line-height:1.28;font-weight:650">Fonte de outro período perde peso</div>
+        <div style="margin-top:34px;position:relative;height:90px">
+          <div class="abs" style="left:0;right:0;top:44px;height:3px;background:var(--line)"></div>
+          <div class="abs" style="right:14px;top:30px;width:88px;height:30px;border-radius:8px;background:rgba(56,189,248,.2);border:1.5px solid rgba(56,189,248,.6)"></div>
+          <div class="abs" style="right:36px;top:38px;width:14px;height:14px;border-radius:50%;background:var(--code)"></div>
+          <div class="abs" style="left:18px;top:38px;width:14px;height:14px;border-radius:50%;background:var(--ind);opacity:.55"></div>
+          <div class="abs" style="left:0;top:62px;font-size:18px;color:var(--mute)">peso × r</div>
+          <div class="abs" style="right:6px;top:62px;font-size:18px;color:var(--code);font-weight:700">hoje</div>
+        </div>
+        <div class="mute" style="margin-top:18px;font-size:20px;line-height:1.3">Nunca sustenta sozinha um nível extremo.</div>
+      </div>
+      <div class="panel rv" data-at="s4" style="width:316px;height:410px;padding:24px 22px">
+        <div class="ptitle" style="color:var(--code)">conjunção</div>
+        <div style="margin-top:14px;font-size:25px;line-height:1.28;font-weight:650">Parte confirmada não apaga parte contestada</div>
+        <div style="margin-top:26px;font-size:20px;line-height:1.4">
+          <div class="row" style="gap:10px"><span class="pill refuta" style="font-size:15px">parte A</span><span class="mono refuta">contestada</span></div>
+          <div class="row" style="gap:10px;margin-top:10px"><span class="pill sustenta" style="font-size:15px">parte B</span><span class="mono sustenta">confirmada</span></div>
+          <div style="margin-top:16px;font-size:22px;font-weight:700">→ <span class="refuta">ALTA</span></div>
+        </div>
+        <div class="mute" style="margin-top:12px;font-size:20px;line-height:1.3">p = 1 − Π(1 − σ(L<sub>a</sub>)) só das partes contestadas.</div>
+      </div>
+      <div class="panel rv" data-at="s5" style="width:316px;height:410px;padding:24px 22px">
+        <div class="ptitle" style="color:var(--code)">similaridade</div>
+        <div style="margin-top:14px;font-size:25px;line-height:1.28;font-weight:650">Selo do índice precisa checar a mesma alegação</div>
+        <div style="margin-top:34px;position:relative;height:86px">
+          <div class="abs" style="left:0;top:34px;width:100%;height:18px;border-radius:9px;background:rgba(148,163,184,.15)"></div>
+          <div class="abs" style="left:0;top:34px;width:35%;height:18px;border-radius:9px;background:var(--alta)"></div>
+          <div class="abs" style="left:60%;top:22px;width:3px;height:42px;background:#fff"></div>
+          <div class="abs" style="left:45%;top:70px;font-size:18px;color:#fcd34d;font-weight:700">Dice ≥ 0,6</div>
+        </div>
+        <div class="mute" style="margin-top:18px;font-size:20px;line-height:1.3">Abaixo do limiar o selo não crava: teto <b style="color:var(--media)">média</b>.</div>
+      </div>
+      <div class="panel llm rv" data-at="s6" style="width:316px;height:410px;padding:24px 22px">
+        <div class="ptitle" style="color:var(--llm)">sintetizador</div>
+        <div style="margin-top:14px;font-size:25px;line-height:1.28;font-weight:650">Relê o conjunto e só pode rebaixar</div>
+        <div style="margin-top:22px;text-align:center;font-size:21px;font-weight:700;line-height:1">
+          <div class="pill pillx" style="background:rgba(251,113,133,.14);border:1.5px solid rgba(251,113,133,.5);color:var(--alta)">ALTA / BAIXA</div>
+          <div style="margin:8px 0;color:var(--mute)">↓</div>
+          <div class="pill" style="background:rgba(251,191,36,.14);border:1.5px solid rgba(251,191,36,.5);color:var(--media)">MÉDIA</div>
+          <div style="margin:8px 0;color:var(--mute)">↓</div>
+          <div class="pill" style="background:rgba(148,163,184,.14);border:1.5px solid rgba(148,163,184,.5);color:var(--ind)">INDETERMINADA</div>
+        </div>
+        <div class="bad" style="margin-top:14px;font-size:20px;font-weight:700;text-align:center">↑ nunca sobe</div>
+      </div>
+    </div>
+    <div class="rv" data-at="s6+1.2" style="position:absolute;left:0;top:470px;width:1680px;text-align:center;font-size:44px;font-weight:300">Cada trava só <b style="font-weight:700;color:var(--code)">corta</b> — nenhuma aumenta a certeza.</div>
+  </div>
+</section>
+
+<!-- ================= 12. RELATÓRIO ================= -->
+<section class="scene" id="sc-relatorio">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Etapa 10</span><span class="bar"></span><span>relatório</span></div>
+    <h1>A resposta mostra o caminho</h1>
+    <div class="tags"><span class="tag code">templates neutros</span></div>
+  </div>
+  <div class="body">
+    <div class="panel rv" data-at="s1" style="position:absolute;left:0;top:0;width:960px;height:530px;padding:24px 32px">
+      <div class="ptitle">exemplo ilustrativo de resposta</div>
+      <div class="row" style="margin-top:16px;gap:16px"><span class="dotc" style="background:var(--media);width:24px;height:24px"></span><span style="font-size:36px;font-weight:700">Propensão média de ser fake news</span></div>
+      <div style="margin-top:14px;font-size:22px;line-height:1.4;color:#cbd5e6">1 fonte independente contesta o que o texto afirma e 1 a confirma. <b style="color:var(--tx)">Isso não é um veredito:</b> compare as fontes abaixo e tire sua própria conclusão.</div>
+      <div class="rv" data-at="s2" style="margin-top:18px">
+        <div class="row" style="gap:12px;padding:10px 0;border-top:1.5px solid var(--line)"><span class="pill refuta" style="font-size:15px;width:106px;text-align:center">REFUTA</span><div style="font-size:21px;flex:1">Agência de checagem <span class="mute">(curada)</span> · corpo lido · <span class="mono mute" style="font-size:18px">12/10</span></div><span class="mono" style="color:var(--mute);font-size:18px">“…citação verificada…”</span></div>
+        <div class="row" style="gap:12px;padding:10px 0;border-top:1.5px solid var(--line)"><span class="pill sustenta" style="font-size:15px;width:106px;text-align:center">SUSTENTA</span><div style="font-size:21px;flex:1">Portal de notícias · corpo lido · <span class="mono mute" style="font-size:18px">11/10</span></div><span class="mono" style="color:var(--mute);font-size:18px">“…citação verificada…”</span></div>
+        <div class="row" style="gap:12px;padding:10px 0;border-top:1.5px solid var(--line)"><span class="pill naotrata" style="font-size:15px;width:106px;text-align:center">NAO_TRATA</span><div style="font-size:21px;flex:1;color:var(--dim)">Resto auditável · não decide</div></div>
+      </div>
+      <div class="rv" data-at="s2@2/3" style="margin-top:14px;padding:12px 16px;border-radius:12px;border:1.5px dashed rgba(148,163,184,.4);font-size:20px;color:var(--mute)">Sinais de estilo do texto <span class="mono" style="font-size:17px">(modelo · padrões)</span> — exibidos, <b style="color:var(--tx)">fora do nível</b></div>
+      <div class="rv" data-at="s2@2/3+1" style="margin-top:12px;font-size:19px;color:var(--mute)">Para avaliar você mesmo: ① compare datas ② quem assina? ③ aparece em +1 veículo independente?</div>
+    </div>
+    <div class="panel rv" data-at="s3" style="position:absolute;left:1000px;top:0;width:680px;height:530px;padding:22px 30px">
+      <div class="ptitle">recibo por etapa</div>
+      <div id="rec-rows" style="margin-top:10px"></div>
+    </div>
+    <div class="rv" data-at="s1+1.5" style="position:absolute;left:0;top:560px;width:960px">
+      <div class="lab" style="font-size:17px;letter-spacing:.14em;text-transform:uppercase">varredura bloqueia na saída</div>
+      <div class="row" style="gap:12px;margin-top:10px;flex-wrap:wrap">
+        <span class="chip mono" style="font-size:19px;color:var(--alta);border-color:rgba(251,113,133,.45);text-decoration:line-through">“é falso”</span>
+        <span class="chip mono" style="font-size:19px;color:var(--alta);border-color:rgba(251,113,133,.45);text-decoration:line-through">“fake news confirmada”</span>
+        <span class="chip mono" style="font-size:19px;color:var(--alta);border-color:rgba(251,113,133,.45);text-decoration:line-through">“sem dúvida”</span>
+        <span class="chip mono" style="font-size:19px;color:var(--alta);border-color:rgba(251,113,133,.45);text-decoration:line-through">“com certeza”</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 13. REPRODUTIBILIDADE ================= -->
+<section class="scene" id="sc-repro">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Método</span><span class="bar"></span><span>telemetria · replay · avaliação</span></div>
+    <h1>Para ser ciência, precisa ser reproduzível</h1>
+  </div>
+  <div class="body">
+    <div class="panel rv" data-at="s1" style="position:absolute;left:0;top:0;width:900px;height:340px;padding:18px 26px;background:rgba(7,11,24,.9)">
+      <div class="row" style="justify-content:space-between"><span class="ptitle" style="text-transform:none;letter-spacing:.04em;font-family:var(--mono);font-size:17px">runs/&lt;run_id&gt;/trace.jsonl</span><span class="lab" style="font-size:16px">resumo ilustrativo do formato</span></div>
+      <div class="ty mono" data-at="s1+0.5" data-cps="95" style="margin-top:12px;font-size:19px;line-height:1.68;white-space:pre;color:#cbd5e6"><span class="mute">    12 ms</span>  <span class="v">run_inicio</span>  entrada="Café cura câncer"
+<span class="mute">   131 ms</span>  <span class="k">etapa     </span>  recebimento · <span class="ok">ok</span>
+<span class="mute">  6491 ms</span>  <span class="v">llm       </span>  finalidade=afirmacoes · 2,2 s
+<span class="mute">  6524 ms</span>  <span class="k">http      </span>  200 · cache=hit
+<span class="mute">  9012 ms</span>  <span class="k">fonte     </span>  descartada · motivo=homepage
+<span class="mute">  9400 ms</span>  <span class="warn">fallback  </span>  onde=juiz · motivo=…
+<span class="mute">  9812 ms</span>  <span class="k">decisao   </span>  nivel=media</div>
+    </div>
+    <div class="panel rv" data-at="s2" style="position:absolute;left:940px;top:0;width:740px;height:340px;padding:20px 28px">
+      <div class="ptitle">camada de cassetes · todo I/O externo</div>
+      <div style="margin-top:16px">
+        <div class="row rv" data-at="s2@0/3" style="gap:16px;padding:10px 0"><span class="chip mono" style="width:150px;justify-content:center;color:var(--mute);white-space:nowrap">live</span><span style="font-size:22px">rede de verdade, nada gravado</span></div>
+        <div class="row rv" data-at="s2@1/3" style="gap:16px;padding:10px 0"><span class="chip mono" style="width:150px;justify-content:center;color:var(--alta);border-color:rgba(251,113,133,.5);white-space:nowrap">● record</span><span style="font-size:22px">rede + grava web e LLM em cassete</span></div>
+        <div class="row rv" data-at="s2@2/3" style="gap:16px;padding:10px 0"><span class="chip mono" style="width:150px;justify-content:center;color:var(--baixa);border-color:rgba(52,211,153,.5);white-space:nowrap">▶ replay</span><span style="font-size:22px">só lê cassetes · determinístico · sem rede</span></div>
+      </div>
+      <div class="mute rv" data-at="s2@2/3+0.8" style="margin-top:10px;font-size:19px;line-height:1.3">Prompt novo = cassete novo. Faltou gravar? <span class="mono" style="color:var(--media)">ReplayMiss</span>.</div>
+    </div>
+    <div class="row rv" data-at="s3" style="position:absolute;left:0;top:372px;width:900px;gap:12px;align-items:stretch">
+      <div class="panel" style="flex:1.1;padding:14px 16px;height:150px"><div class="ptitle" style="font-size:15px">casos rotulados</div><div style="margin-top:10px;font-size:21px;font-weight:600;line-height:1.25">dev <span class="mute">·</span> holdout</div></div>
+      <span style="align-self:center;color:var(--mute);font-size:26px">→</span>
+      <div class="panel" style="flex:1;padding:14px 16px;height:150px"><div class="ptitle" style="font-size:15px">pipeline</div><div style="margin-top:10px;font-size:21px;font-weight:600;line-height:1.25">em replay</div></div>
+      <span style="align-self:center;color:var(--mute);font-size:26px">→</span>
+      <div class="panel" style="flex:1.2;padding:14px 16px;height:150px"><div class="ptitle" style="font-size:15px">métricas</div><div style="margin-top:10px;font-size:19px;font-weight:600;line-height:1.3">acerto · <span class="bad">erro grave</span> · indeterminada</div></div>
+      <span style="align-self:center;color:var(--mute);font-size:26px">→</span>
+      <div class="panel" style="flex:1;padding:14px 16px;height:150px"><div class="ptitle" style="font-size:15px">linha de base</div><div style="margin-top:10px;font-size:21px;font-weight:600;line-height:1.25">delta + gate</div></div>
+    </div>
+    <div class="panel rv" data-at="s4" style="position:absolute;left:940px;top:372px;width:740px;height:300px;padding:20px 28px">
+      <div class="ptitle">erro grave</div>
+      <div class="row" style="margin-top:18px;gap:14px;font-size:22px;font-weight:600"><span class="pill refuta">falso</span><span class="mute">esperado</span><span style="color:var(--alta)">ALTA</span><span class="bad rv" data-at="s4+1.0" style="margin-left:auto">grave: <b>BAIXA</b></span></div>
+      <div class="row" style="margin-top:20px;gap:14px;font-size:22px;font-weight:600"><span class="pill sustenta">verdadeiro</span><span class="mute">esperado</span><span style="color:var(--baixa)">BAIXA</span><span class="bad rv" data-at="s4+1.6" style="margin-left:auto">grave: <b>ALTA</b></span></div>
+      <div class="row rv" data-at="s4+2.2" style="margin-top:20px;gap:14px;font-size:22px;font-weight:600"><span class="pill naotrata">sem evidência</span><span class="mute">esperado</span><span style="color:var(--ind)">INDETERMINADA</span></div>
+      <div class="mute rv" data-at="s4+2.8" style="margin-top:20px;font-size:20px;line-height:1.3">Erro grave pesa mais do que acerto.</div>
+    </div>
+    <div class="rv" data-at="s3+1.2" style="position:absolute;left:0;top:546px;width:900px;font-size:21px;line-height:1.35;color:var(--mute)">Itera-se só no <b style="color:var(--tx)">dev</b>; o <b style="color:var(--tx)">holdout</b> só é aberto no fim de cada rodada. Rótulos e baseline nunca são editados para “passar”.</div>
+  </div>
+</section>
+
+<!-- ================= 14. RESULTADOS ================= -->
+<section class="scene" id="sc-resultados">
+  <div class="hdr rv" data-at="0.15" data-d="0.8">
+    <div class="eyebrow"><span class="n">Resultados</span><span class="bar"></span><span>simulação · 50 frases</span></div>
+    <h1>E funciona? Com cautela — e sem erro grave</h1>
+  </div>
+  <div class="body">
+    <div class="panel rv" data-at="s1" style="position:absolute;left:0;top:0;width:1000px;height:470px;padding:22px 32px">
+      <div class="ptitle">acerto · variantes do sistema</div>
+      <div id="bars" style="margin-top:18px"></div>
+    </div>
+    <div class="panel rv" data-at="s2" style="position:absolute;left:1040px;top:0;width:640px;height:470px;padding:22px 32px">
+      <div class="ptitle">os 18 erros do controle</div>
+      <div style="margin-top:26px;height:54px;border-radius:12px;overflow:hidden;display:flex">
+        <div class="abs" id="seg-i" style="position:relative;height:100%;background:var(--ind);width:0"></div>
+        <div id="seg-m" style="position:relative;height:100%;background:var(--media);width:0"></div>
+      </div>
+      <div style="margin-top:22px;font-size:25px;line-height:1.5">
+        <div class="rv" data-at="s2+0.8"><span class="dotc" style="background:var(--ind)"></span>&nbsp; <b>15</b> indeterminada</div>
+        <div class="rv" data-at="s2+1.2"><span class="dotc" style="background:var(--media)"></span>&nbsp; <b>3</b> média</div>
+        <div class="rv" data-at="s2+1.6"><span class="dotc" style="background:var(--alta)"></span>&nbsp; <b class="bad">0</b> na direção errada</div>
+      </div>
+      <div class="rv" data-at="s2+2.4" style="margin-top:22px;font-size:22px;line-height:1.35;color:var(--mute)">O sistema prefere dizer <b style="color:var(--tx)">“não sei”</b> a errar de lado.</div>
+    </div>
+    <div class="rv" data-at="s3" style="position:absolute;left:0;top:498px;width:1680px;text-align:center;font-size:44px;font-weight:300">O gargalo não é <b style="font-weight:700">julgar</b> — é <b style="font-weight:700;color:var(--code)">recuperar evidência</b>.</div>
+    <div class="rv" data-at="s3+0.8" style="position:absolute;left:0;top:586px;width:1680px;text-align:center;font-size:20px;line-height:1.4;color:var(--mute)">n ≈ 44–45 casos avaliáveis · IC 95% do controle 44–72% · diferenças entre variantes não são estatisticamente comprovadas (McNemar, p = 1,0) · 1.226 testes automatizados</div>
+  </div>
+</section>
+
+<!-- ================= 15. FIM ================= -->
+<section class="scene" id="sc-fim">
+  <div class="abs rv" data-at="0.5" data-d="1.0" data-dy="20" data-s="0.97" style="left:0;right:0;top:170px;text-align:center;font-size:150px;font-weight:700;letter-spacing:-.025em;line-height:1">Cross<span style="color:var(--code)">Check</span><span style="color:var(--llm)">BR</span></div>
+  <div class="abs rv" data-at="s1+0.4" style="left:0;right:0;top:350px;text-align:center;font-size:44px;font-weight:300;color:var(--tx)">não decide por você.</div>
+  <div class="row abs" style="left:200px;right:200px;top:470px;justify-content:space-between">
+    <div class="panel rv" data-at="s2@0/3" style="width:480px;padding:26px 30px;text-align:center"><div class="big" style="font-size:36px;color:var(--code)">as fontes</div><div class="mute" style="margin-top:8px;font-size:22px">com postura e citação</div></div>
+    <div class="panel rv" data-at="s2@1/3" style="width:480px;padding:26px 30px;text-align:center"><div class="big" style="font-size:36px;color:var(--media)">os pesos</div><div class="mute" style="margin-top:8px;font-size:22px">cada voto, cada trava</div></div>
+    <div class="panel rv" data-at="s2@2/3" style="width:480px;padding:26px 30px;text-align:center"><div class="big" style="font-size:36px;color:var(--llm)">o caminho</div><div class="mute" style="margin-top:8px;font-size:22px">recibo de cada etapa</div></div>
+  </div>
+  <div class="abs rv" data-at="s3" style="left:0;right:0;top:668px;text-align:center;font-size:34px;font-weight:600;letter-spacing:.01em">Checagem cruzada, auditável, em português.</div>
+  <div class="abs rv" data-at="s3+0.8" style="left:0;right:0;top:742px;text-align:center"><span class="chip mono" style="font-size:20px;color:var(--mute)">Python</span> <span class="chip mono" style="font-size:20px;color:var(--mute)">FastAPI</span> <span class="chip mono" style="font-size:20px;color:var(--mute)">Telegram</span> <span class="chip mono" style="font-size:20px;color:var(--mute)">Pydantic</span> <span class="chip mono" style="font-size:20px;color:var(--mute)">BM25</span> <span class="chip mono" style="font-size:20px;color:var(--mute)">SerpAPI</span> <span class="chip mono" style="font-size:20px;color:var(--mute)">trafilatura</span></div>
+  <div class="abs rv mono" data-at="s3+1.4" style="left:0;right:0;top:812px;text-align:center;font-size:24px;color:var(--dim)">mariadenis.github.io/crosscheckbr-site</div>
+</section>
+
+<div id="sub"><div id="subtxt"></div></div>
+<div id="barwrap"><div id="bar"></div></div>
+</div>
+<script src="timing.js"></script>
+<script src="build.js"></script>
+<script src="engine.js"></script>
+<script src="scenes.js"></script>
+</body>
+</html>
