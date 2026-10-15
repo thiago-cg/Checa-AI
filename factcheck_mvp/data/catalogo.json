@@ -1626,6 +1626,76 @@
       "subsecoes": [],
       "origem_catalogo": "descoberta-automatica",
       "adicionado_em": "2026-09-28"
+    },
+    {
+      "id": "terra-com-br",
+      "nome": "Terra",
+      "tipo": "geral",
+      "homepage": "https://www.terra.com.br/",
+      "rss": [],
+      "sitemap": "https://www.terra.com.br/sitemap.xml",
+      "editorias": [
+        "diversao",
+        "noticias",
+        "vida-e-estilo",
+        "esportes",
+        "byte",
+        "meu-terra",
+        "apostas",
+        "nos"
+      ],
+      "article_url_patterns": [
+        "/vida-e-estilo/",
+        "/vida-e-estilo/saude/"
+      ],
+      "css_selectors": {
+        "titulo": "h1",
+        "corpo": "article, [itemprop='articleBody']"
+      },
+      "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+      "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True. [adicionado ao catálogo em 2026-09-23 (descoberta automática), curadoria posterior]",
+      "exemplo_urls": [
+        "https://www.terra.com.br/vida-e-estilo/saude/doencas-e-tratamentos/substancia-do-cha-de-camomila-pode-ajudar-no-combate-ao-cancer,cb648f5ce1dce310VgnVCM10000098cceb0aRCRD.html"
+      ],
+      "responsavel": null,
+      "subsecoes": [],
+      "origem_catalogo": "descoberta-automatica",
+      "adicionado_em": "2026-09-23"
+    },
+    {
+      "id": "sgc-com-br",
+      "nome": "Anvisa aprova novo medicamento para câncer de mama avançado - Portal SGC",
+      "tipo": "geral",
+      "homepage": "https://sgc.com.br/",
+      "rss": [],
+      "sitemap": null,
+      "editorias": [
+        "noticia",
+        "brasil",
+        "esporte",
+        "plantao-de-policia",
+        "entretenimento",
+        "blogs",
+        "ciencia-tecnologia",
+        "mundo"
+      ],
+      "article_url_patterns": [
+        "/noticia/",
+        "/noticia/7/"
+      ],
+      "css_selectors": {
+        "titulo": "h1",
+        "corpo": "[itemprop='articleBody']"
+      },
+      "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+      "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True. [adicionado ao catálogo em 2026-09-23 (descoberta automática), curadoria posterior]",
+      "exemplo_urls": [
+        "https://sgc.com.br/noticia/7/450144/anvisa-aprova-novo-medicamento-para-cancer-de-mama-avancado"
+      ],
+      "responsavel": null,
+      "subsecoes": [],
+      "origem_catalogo": "descoberta-automatica",
+      "adicionado_em": "2026-09-23"
     }
   ],
   "css_extraction_schemas": {
