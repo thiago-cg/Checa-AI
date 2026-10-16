@@ -1,4 +1,4 @@
-# brag-plan — CrossCheckBR (versão técnica para feira de ciências)
+# brag-plan — Checa-AI (versão técnica para feira de ciências)
 
 **Ângulo.** Um tour técnico, passo a passo, de como o sistema chega a uma *propensão* à desinformação — sem veredito binário. O fio condutor é o caso “Café cura câncer”, e cada cena mostra o componente real do pipeline (`factcheck_mvp/`).
 
