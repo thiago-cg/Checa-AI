@@ -1,9 +1,9 @@
-# Crosscheck BR — Engenharia de Requisitos
+# Checa AI — Engenharia de Requisitos
 
 | | |
 |---|---|
-| **Produto** | Crosscheck BR — checagem cruzada de fatos em larga escala |
-| **Repositório principal** | `thiago-cg/CrossCheckBR` |
+| **Produto** | Checa AI — checagem cruzada de fatos em larga escala |
+| **Repositório principal** | `thiago-cg/Checa-AI` |
 | **Repositório do modelo e dos dados** | `thiago-cg/FakenewsBR` |
 | **Versão do sistema** | `mvp-0.2.0`, código da `main` em `17fc2bd` (pull request nº 4) |
 | **Data deste documento** | 30 de setembro de 2026 |
@@ -41,7 +41,7 @@ RN: regra de negócio. HU: história de usuário. IND: indicador. P: pendência.
 
 ### 1.1 Descrição do produto
 
-O Crosscheck BR é um assistente de checagem de fatos. A pessoa envia o texto,
+O Checa AI é um assistente de checagem de fatos. A pessoa envia o texto,
 o título ou o link de uma notícia e recebe uma avaliação da **propensão** de
 aquele conteúdo ser desinformação, em uma escala de quatro valores: baixa,
 média, alta ou indeterminada. A resposta vem acompanhada das evidências
