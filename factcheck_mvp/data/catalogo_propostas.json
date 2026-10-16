@@ -896,45 +896,6 @@
    "coletado_em": "2026-10-14T20:05:55.550937+00:00"
   },
   {
-   "id": "observador-pt",
-   "nome": "Observador",
-   "tipo": "geral",
-   "homepage": "https://observador.pt/",
-   "dominio": "observador.pt",
-   "rss": [
-    "https://observador.pt/feed/"
-   ],
-   "sitemap": "https://observador.pt/sitemap.xml",
-   "editorias": [
-    "seccao",
-    "especiais",
-    "liveblogs",
-    "radio",
-    "jogos",
-    "2026",
-    "programas",
-    "apoio-a-cliente"
-   ],
-   "article_url_patterns": [
-    "/especiais/",
-    "/especiais/fact-checks-de-arma-biologica-a-cura-com-tigelas-de-agua-de-alho-9-mentiras-sobre-o-coronavirus/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, main"
-   },
-   "titulo_exemplo": "Fact Checks. De arma biológica a cura com tigelas de água de alho: 9 mentiras sobre o&nbsp;coronavírus",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://observador.pt/especiais/fact-checks-de-arma-biologica-a-cura-com-tigelas-de-agua-de-alho-9-mentiras-sobre-o-coronavirus/"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T20:05:55.655870+00:00"
-  },
-  {
    "id": "revistamarieclaire-globo-com",
    "nome": "Mulher é surpreendida por tubarão de 3 metros ao pular no mar: \"Não se desespere",
    "tipo": "geral",
@@ -2136,46 +2097,6 @@
    "coletado_em": "2026-10-14T20:08:46.615082+00:00"
   },
   {
-   "id": "forbes-com-br",
-   "nome": "Forbes Brasil",
-   "tipo": "geral",
-   "homepage": "https://forbes.com.br/",
-   "dominio": "forbes.com.br",
-   "rss": [
-    "https://forbes.com.br/feed/",
-    "https://forbes.com.br/web-stories/feed/"
-   ],
-   "sitemap": null,
-   "editorias": [
-    "forbes-money",
-    "listas",
-    "forbes-life",
-    "carreira",
-    "forbes-mulher",
-    "forbes-tech",
-    "forbes-agro",
-    "noticias-sobre"
-   ],
-   "article_url_patterns": [
-    "/colunas/",
-    "/colunas/2026/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, main"
-   },
-   "titulo_exemplo": "Existe Relação entre Café e Câncer? O Problema Pode Estar na Temperatura",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://forbes.com.br/colunas/2026/09/existe-relacao-entre-cafe-e-cancer-o-problema-pode-estar-na-temperatura/"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T20:08:54.954688+00:00"
-  },
-  {
    "id": "bhaz-com-br",
    "nome": "BHAZ",
    "tipo": "geral",
@@ -2291,43 +2212,6 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-10-14T20:09:03.562502+00:00"
-  },
-  {
-   "id": "agenciabrasil-ebc-com-br",
-   "nome": "Agência Brasil",
-   "tipo": "geral",
-   "homepage": "https://agenciabrasil.ebc.com.br/",
-   "dominio": "agenciabrasil.ebc.com.br",
-   "rss": [],
-   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
-   "editorias": [
-    "politica",
-    "geral",
-    "justica",
-    "internacional",
-    "economia",
-    "saude",
-    "radioagencia-nacional",
-    "ultimas"
-   ],
-   "article_url_patterns": [
-    "/politica/",
-    "/politica/noticia/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "[itemprop='articleBody'], main"
-   },
-   "titulo_exemplo": "TSE desmente alegação de fraude na apuração dos votos",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/tse-desmente-alegacao-de-fraude-na-apuracao-dos-votos"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T20:09:20.209359+00:00"
   },
   {
    "id": "radiocaxias-com-br",
@@ -2798,6 +2682,81 @@
    "coletado_em": "2026-10-14T20:19:15.857535+00:00"
   },
   {
+   "id": "mistobrasil-com",
+   "nome": "Misto Brasil",
+   "tipo": "geral",
+   "homepage": "https://mistobrasil.com/",
+   "dominio": "mistobrasil.com",
+   "rss": [
+    "https://mistobrasil.com/feed/",
+    "https://mistobrasil.com/comments/feed/"
+   ],
+   "sitemap": "https://mistobrasil.com/sitemap.xml",
+   "editorias": [
+    "2026",
+    "category",
+    "newsletter"
+   ],
+   "article_url_patterns": [
+    "/2026/",
+    "/2026/10/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], .entry-content"
+   },
+   "titulo_exemplo": "Projeto doa 20% das vendas de café para tratamento de câncer",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://mistobrasil.com/2026/10/12/projeto-doa-20-das-vendas-de-cafe-para-tratamento-de-cancer/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T15:33:26.902517+00:00"
+  },
+  {
+   "id": "forbes-com-br",
+   "nome": "Forbes Brasil",
+   "tipo": "geral",
+   "homepage": "https://forbes.com.br/",
+   "dominio": "forbes.com.br",
+   "rss": [
+    "https://forbes.com.br/feed/",
+    "https://forbes.com.br/web-stories/feed/"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "forbes-money",
+    "listas",
+    "forbes-life",
+    "carreira",
+    "forbes-mulher",
+    "forbes-tech",
+    "forbes-agro",
+    "noticias-sobre"
+   ],
+   "article_url_patterns": [
+    "/colunas/",
+    "/colunas/2026/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Existe Relação entre Café e Câncer? O Problema Pode Estar na Temperatura",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://forbes.com.br/colunas/2026/09/existe-relacao-entre-cafe-e-cancer-o-problema-pode-estar-na-temperatura/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T15:36:32.867288+00:00"
+  },
+  {
    "id": "jornal-usp-br",
    "nome": "Jornal da USP",
    "tipo": "geral",
@@ -2835,7 +2794,200 @@
    "responsavel": null,
    "subsecoes": [],
    "status": "pendente",
-   "coletado_em": "2026-10-14T20:19:18.303077+00:00"
+   "coletado_em": "2026-10-15T15:36:33.525630+00:00"
+  },
+  {
+   "id": "observador-pt",
+   "nome": "Observador",
+   "tipo": "geral",
+   "homepage": "https://observador.pt/",
+   "dominio": "observador.pt",
+   "rss": [
+    "https://observador.pt/feed/"
+   ],
+   "sitemap": "https://observador.pt/sitemap.xml",
+   "editorias": [
+    "seccao",
+    "2026",
+    "especiais",
+    "radio",
+    "jogos",
+    "liveblogs",
+    "apoio-a-cliente",
+    "opiniao"
+   ],
+   "article_url_patterns": [
+    "/factchecks/",
+    "/factchecks/fact-check-a-tv-globo-noticiou-a-morte-do-jogador-neymar/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Fact Check. A TV Globo noticiou a morte do jogador Neymar?",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://observador.pt/factchecks/fact-check-a-tv-globo-noticiou-a-morte-do-jogador-neymar/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T21:12:21.827499+00:00"
+  },
+  {
+   "id": "agenciabrasil-ebc-com-br",
+   "nome": "Agência Brasil",
+   "tipo": "geral",
+   "homepage": "https://agenciabrasil.ebc.com.br/",
+   "dominio": "agenciabrasil.ebc.com.br",
+   "rss": [],
+   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
+   "editorias": [
+    "politica",
+    "educacao",
+    "esportes",
+    "economia",
+    "justica",
+    "geral",
+    "internacional",
+    "meio-ambiente"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Senado aprova fim da escala 6x1 e redução da jornada de trabalho",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-de-trabalho"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T21:22:45.914567+00:00"
+  },
+  {
+   "id": "aseguirniteroi-com-br",
+   "nome": "A Seguir Niterói",
+   "tipo": "geral",
+   "homepage": "https://aseguirniteroi.com.br/",
+   "dominio": "aseguirniteroi.com.br",
+   "rss": [
+    "https://aseguirniteroi.com.br/feed/",
+    "https://aseguirniteroi.com.br/comments/feed/"
+   ],
+   "sitemap": "https://aseguirniteroi.com.br/sitemap.xml",
+   "editorias": [
+    "author",
+    "colunas-e-blogs",
+    "categoria-de-noticia",
+    "noticias",
+    "a-cidade",
+    "fale-conosco",
+    "colunas-blogs",
+    "fotos"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-para-40-horas/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Senado aprova fim da escala 6&#215;1 e redução da jornada para 40 horas",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://aseguirniteroi.com.br/noticias/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-para-40-horas/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T21:22:51.016424+00:00"
+  },
+  {
+   "id": "portalvv8-com-br",
+   "nome": "Família Bolsonaro garante força eleitoral e avança ao segundo turno contra Lula",
+   "tipo": "geral",
+   "homepage": "https://portalvv8.com.br/",
+   "dominio": "portalvv8.com.br",
+   "rss": [],
+   "sitemap": "https://portalvv8.com.br/sitemap.xml",
+   "editorias": [
+    "noticia",
+    "municipios",
+    "blogs-e-colunas",
+    "ultimas-noticias",
+    "editorias",
+    "paginas",
+    "enquetes",
+    "valinhos-sp"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/77433/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Família Bolsonaro garante força eleitoral e avança ao segundo turno contra Lula",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://portalvv8.com.br/noticia/77433/familia-bolsonaro-garante-forca-eleitoral-e-avanca-ao-segundo-turno-contra-lula"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T21:44:53.444649+00:00"
+  },
+  {
+   "id": "red-org-br",
+   "nome": "RED",
+   "tipo": "geral",
+   "homepage": "https://red.org.br/",
+   "dominio": "red.org.br",
+   "rss": [
+    "https://red.org.br/feed/",
+    "https://red.org.br/comments/feed/"
+   ],
+   "sitemap": "https://red.org.br/sitemap.xml",
+   "editorias": [
+    "noticias",
+    "category",
+    "2026",
+    "a-escala-7-x-0-e-a-remuneracao-por-horas-e-um-atentado-contra-a-classe-trabalhadora-brasileira",
+    "programasred",
+    "videos",
+    "podcasts",
+    "os-gringos-querem-o-fim-do-pix-jornal-das-trabalhadoras-e-trabalhadores"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/ricardo-berzoini-estrategia-pt-segundo-turno/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "CORRESPONDENTE POLÍTICO | Berzoini faz novos alertas: &#8220;Disseram que eu era pessimista&#8221;",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://red.org.br/noticias/ricardo-berzoini-estrategia-pt-segundo-turno/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-15T21:44:54.061195+00:00"
   }
  ]
 }

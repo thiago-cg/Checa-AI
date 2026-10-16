@@ -14,6 +14,8 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.error import NetworkError
+from telegram.request import HTTPXRequest
 from telegram.ext import (Application, CallbackQueryHandler, CommandHandler, ContextTypes,
                           MessageHandler, filters)
 
@@ -486,6 +488,22 @@ async def _feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         pass
 
 
+def _requisicao(pool: int) -> HTTPXRequest:
+    """Cliente HTTP do bot com nova tentativa na conexão: algumas redes derrubam parte das conexões
+    TLS com o Telegram (ConnectionResetError 10054), e sem isso a resposta ao usuário se perde."""
+    import httpx
+    transporte = httpx.AsyncHTTPTransport(retries=3, limits=httpx.Limits(max_connections=pool))
+    return HTTPXRequest(connection_pool_size=pool, httpx_kwargs={"transport": transporte})
+
+
+async def _erro(update: object, ctx: ContextTypes.DEFAULT_TYPE) -> None:
+    """Queda de rede com o Telegram é passageira (o polling tenta de novo): 1 linha, sem traceback."""
+    if isinstance(ctx.error, NetworkError):
+        log.warning("rede instável com o Telegram (%s); tentando de novo", type(ctx.error).__name__)
+        return
+    log.error("erro no bot", exc_info=ctx.error)
+
+
 def main() -> None:
     if not config.TELEGRAM_TOKEN:
         raise SystemExit("TELEGRAM_TOKEN vazio (veja .env.mvp.example).")
@@ -494,17 +512,20 @@ def main() -> None:
     _vigia_instancia_unica()
     from .api import pipeline as fabrica
 
-    app = Application.builder().token(config.TELEGRAM_TOKEN).build()
+    app = (Application.builder().token(config.TELEGRAM_TOKEN)
+           .request(_requisicao(256)).get_updates_request(_requisicao(1)).build())
     app.bot_data["pipeline"] = fabrica()
     app.add_handler(CommandHandler("start", _start))
     app.add_handler(CallbackQueryHandler(_feedback, pattern=r"^fb:"))
     app.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO | filters.ATTACHMENT
                                    | filters.VOICE | filters.AUDIO, _midia))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, _checar))
+    app.add_error_handler(_erro)
     log.info("bot no ar. /start para ajuda.")
     app.run_polling()
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    logging.getLogger("httpx").setLevel(logging.WARNING)  # o INFO do httpx loga a URL com o token
     main()
