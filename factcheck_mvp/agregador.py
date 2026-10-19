@@ -252,6 +252,76 @@ NOMES_ETAPAS = {
     "padroes": "Padrões de desinformação",
 }
 STATUS_ETAPA = {"ok": "✅", "parcial": "⚠️", "pulada": "⏭️", "falha": "❌"}
+
+# Etapas que a pessoa vê em "Como chegamos aqui". As demais (avaliador, modelo de estilo, padrões,
+# planejamento e revisão da busca, catálogo) são internas: ficam só nos detalhes técnicos e no trace.
+ETAPAS_PARA_PESSOA = ("recebimento", "afirmacoes", "base-checagem", "descoberta", "deep-crawl", "juiz",
+                      "corroboracao", "agregacao")
+
+# Limitações do pipeline em linguagem simples (prefixo do texto original -> texto para a pessoa; None = interna,
+# não aparece). Limitação sem tradução aqui passa como está.
+_LIMITACOES_PARA_PESSOA = (
+    ("Web pulada: checagem aplicável na base",
+     "Já existe uma checagem de agência sobre isso, então não buscamos outras notícias na web."),
+    ("Modelo de estilo ainda é um placeholder", None),
+    ("Relato de segunda-mão",
+     "A mensagem é um relato de segunda mão (\"me disseram que…\"): checamos o fato principal."),
+    ("Texto com marcas de opinião/sátira",
+     "O texto parece opinião ou humor: isso não dá para checar como fato."),
+    ("Afirmação vaga",
+     "A afirmação é vaga: diga qual dado e qual período (por exemplo, a inflação de 2025) que checamos de novo."),
+    ("Descoberta web atingiu o teto",
+     "A busca na web demorou demais e foi interrompida: o resultado pode estar incompleto."),
+    ("Sem julgamento de conteúdo",
+     "O serviço que analisa as notícias está indisponível agora: tente de novo mais tarde."),
+    ("Descoberta web desligada",
+     "A busca na web está desligada: usamos só as checagens já publicadas."),
+    ("SerpAPI falhou",
+     "A busca na web falhou agora: usamos só as checagens já publicadas."),
+    ("SerpAPI sem resultados",
+     "A busca na web não encontrou notícias sobre isso."),
+)
+
+
+def mostra_selo(fonte: Any, direcoes: Dict[str, float]) -> bool:
+    """O selo da agência só aparece quando a fonte confirma ou contesta a afirmação: ao lado de uma página
+    que só relata (ou trata de outro boato), a pessoa leria que o selo vale para a mensagem dela."""
+    return bool(getattr(fonte, "veredito", None)) and postura_legivel(fonte, direcoes) in (
+        "contesta o que o texto afirma", "confirma o que o texto afirma")
+
+
+def limitacoes_para_pessoa(limitacoes: List[str]) -> List[str]:
+    """Limitações reescritas para quem lê, sem as internas e sem repetição (mesma ordem)."""
+    saida: List[str] = []
+    for lim in limitacoes or []:
+        texto = next((novo for prefixo, novo in _LIMITACOES_PARA_PESSOA if lim.startswith(prefixo)), lim)
+        if texto and texto not in saida:
+            saida.append(texto)
+    return saida
+
+
+def preparar_para_pessoa(rel: Any) -> Any:
+    """Preenche no relatório os campos para a pessoa (a página em JavaScript usa só o JSON)."""
+    direcoes = direcoes_por_url(getattr(rel, "decisao", None))
+    rel.resumo_pessoa = resumo_para_pessoa(rel.decisao, rel.why_1linha or rel.justificativa)
+    rel.limitacoes_pessoa = limitacoes_para_pessoa(rel.limitacoes)
+    rel.etapas_pessoa = [f"{STATUS_ETAPA.get(e.status, '')} {NOMES_ETAPAS.get(e.nome, e.nome)}".strip()
+                         for e in (rel.etapas or []) if e.nome in ETAPAS_PARA_PESSOA]
+    for f in rel.fontes or []:
+        f.selo_visivel = mostra_selo(f, direcoes)
+    return rel
+
+
+def resumo_para_pessoa(decisao: Any, reserva: str = "") -> str:
+    """Uma explicação em português comum: o motivo da decisão (já escrito para pessoas), com a lembrança
+    de que não é veredito (RF14). Sem `decisao` (relatório antigo), usa o texto de reserva."""
+    motivo = str((decisao or {}).get("motivo") or "").strip() if isinstance(decisao, dict) else ""
+    base = (motivo[:1].upper() + motivo[1:]) if motivo else (reserva or "").strip()
+    if base and not base.endswith((".", "!", "?")):
+        base += "."
+    return (base + " Isso não é um veredito: compare as fontes abaixo e decida por conta própria.").strip()
+
+
 _POSTURA_SEM_VOTO = {
     "RELATA_SEM_ENDOSSO": "relata o assunto sem tomar posição",
     "NAO_TRATA": "não trata do assunto",

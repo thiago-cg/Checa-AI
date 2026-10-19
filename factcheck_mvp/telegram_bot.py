@@ -269,7 +269,9 @@ def formatar(rel: RelatorioChecagem) -> str:
     emoji = {"baixa": "🟢", "media": "🟡", "alta": "🔴", "indeterminada": "⚪"}.get(rel.propensao, "⚪")
     header = getattr(rel, "header", "") or f"{emoji} Propensão {rel.propensao.upper()}"
     why = getattr(rel, "why_1linha", "")
-    linhas = [header, "", why or rel.justificativa, ""]
+    from .agregador import resumo_para_pessoa
+    # Uma explicação em português comum (o motivo da decisão) + "não é um veredito" (RF14).
+    linhas = [header, "", resumo_para_pessoa(getattr(rel, "decisao", None), why or rel.justificativa), ""]
     # Filtro único de homepages/seções (fonte: pipeline._eh_generica, sem drift)
     try:
         from .pipeline import _eh_generica as _gen
@@ -291,8 +293,8 @@ def formatar(rel: RelatorioChecagem) -> str:
         linhas.append("")
     # Top 2-3 lado a lado: portal | o que a fonte faz | lida ou só manchete | link + citação
     if uteis:
-        from .agregador import (data_publicacao_exibida, direcoes_por_url, linha_raciocinio, postura_legivel,
-                                rotulo_selo, texto_de_linha)
+        from .agregador import (data_publicacao_exibida, direcoes_por_url, linha_raciocinio, mostra_selo,
+                                postura_legivel, rotulo_selo, texto_de_linha)
         from .confiabilidade import ROTULO
         direcoes = direcoes_por_url(getattr(rel, "decisao", None))
         nao_lidas = _urls_nao_analisadas(rel)
@@ -304,7 +306,7 @@ def formatar(rel: RelatorioChecagem) -> str:
         linhas.append("O que as fontes dizem:")
         for i, f in enumerate(uteis[:3], 1):
             # I1: nome, selo, título, citação e URL vindos da página entram achatados (uma linha cada).
-            selo = f" [{texto_de_linha(rotulo_selo(f))}]" if f.veredito else ""
+            selo = f" [{texto_de_linha(rotulo_selo(f))}]" if mostra_selo(f, direcoes) else ""
             if getattr(f, "corpo_lido", False) and f.url not in nao_lidas:
                 corpo = "📄 texto lido"
             else:
@@ -348,13 +350,16 @@ def formatar(rel: RelatorioChecagem) -> str:
             break
     linhas.append("")
     if rel.etapas:  # RF11 no canal principal: etapa + status em linguagem simples
-        from .agregador import NOMES_ETAPAS, STATUS_ETAPA
+        from .agregador import ETAPAS_PARA_PESSOA, NOMES_ETAPAS, STATUS_ETAPA
         linhas.append("Como chegamos aqui: " + " · ".join(
-            f"{STATUS_ETAPA.get(e.status, '')} {NOMES_ETAPAS.get(e.nome, e.nome)}" for e in rel.etapas))
+            f"{STATUS_ETAPA.get(e.status, '')} {NOMES_ETAPAS.get(e.nome, e.nome)}"
+            for e in rel.etapas if e.nome in ETAPAS_PARA_PESSOA))
         linhas.append("")
-    if rel.limitacoes:
+    from .agregador import limitacoes_para_pessoa
+    lims = limitacoes_para_pessoa(rel.limitacoes)
+    if lims:
         linhas.append("Limitações desta análise:")
-        linhas += [f"• {lim}" for lim in rel.limitacoes[:3]]
+        linhas += [f"• {lim}" for lim in lims[:3]]
         linhas.append("")
     linhas.append("Para avaliar você mesmo:")
     linhas += [f"• {p}" for p in rel.perguntas_guia[:3]]

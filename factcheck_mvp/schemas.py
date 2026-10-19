@@ -131,6 +131,8 @@ class FonteEvidencia(BaseModel):
     afirmacao: Optional[str] = None  # afirmação (texto do usuário) a que a fonte foi julgada
     # B1a: porquê da classe dado pelo avaliador (direção). Limite ~240 chars só no prompt; sem corte.
     raciocinio: Optional[str] = None
+    # O selo só aparece quando a fonte confirma ou contesta a afirmação (agregador.mostra_selo).
+    selo_visivel: Optional[bool] = None
 
 
 class SinalAnalise(BaseModel):
@@ -173,3 +175,8 @@ class RelatorioChecagem(BaseModel):
     # Decisão completa (decisao.Decisao serializada): votos por cluster, vereditos,
     # log-odds, faixas. O nível, o header e a justificativa saem deste objeto.
     decisao: Optional[Dict[str, Any]] = None
+    # Texto para a pessoa (página e robô), preenchido por agregador.preparar_para_pessoa: uma explicação
+    # em português comum, limitações sem as internas e as etapas que fazem sentido mostrar.
+    resumo_pessoa: str = ""
+    limitacoes_pessoa: List[str] = Field(default_factory=list)
+    etapas_pessoa: List[str] = Field(default_factory=list)

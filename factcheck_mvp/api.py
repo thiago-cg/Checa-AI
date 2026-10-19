@@ -142,7 +142,8 @@ async def checar(entrada: EntradaConsulta, request: Request):
             pronta = await _ler_link(entrada)
             if pronta is None:
                 raise HTTPException(status_code=422, detail=LINK_SEM_TEXTO_MSG)
-            return await pipeline().executar(pronta)
+            from .agregador import preparar_para_pessoa
+            return preparar_para_pessoa(await pipeline().executar(pronta))
     except (asyncio.TimeoutError, TimeoutError):
         raise HTTPException(status_code=504, detail="checagem excedeu o tempo; tente um texto mais curto")
     except HTTPException:
@@ -194,6 +195,8 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_ms
     template = tmpl_path.read_text(encoding="utf-8") if tmpl_path.exists() else ""
 
     if rel:
+        from .agregador import preparar_para_pessoa
+        preparar_para_pessoa(rel)
         direcoes = direcoes_por_url(rel.decisao)
         nao_lidas = _urls_nao_analisadas(rel)
         uteis = [f for f in rel.fontes if f.relevante is not False][:5]
@@ -219,10 +222,13 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_ms
             _rac = linha_raciocinio(getattr(f, "raciocinio", None))
             _html_rac = f"<span class='text-slate-500 dark:text-slate-400 block mt-1'>{esc(_rac)}</span><br/>" if _rac else ""
             _cit = texto_de_linha(f.quote)[:300]
+            _tit = texto_de_linha(f.titulo)[:200]
+            if _cit and " ".join(_cit.lower().split()) == " ".join(_tit.lower().split()):
+                _cit = ""  # trecho igual ao título não se repete
             return (f"<div class='p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 my-3 text-sm'>"
                     f"<b>{esc(texto_de_linha(f.portal_nome) or 'web')}</b> "
                     f"<span style='color:{cor.get(post, '#94a3b8')}'>{esc(post)}</span>"
-                    f"{' · ' + esc(texto_de_linha(rotulo_selo(f))) if f.veredito else ''}"
+                    f"{' · ' + esc(texto_de_linha(rotulo_selo(f))) if f.selo_visivel else ''}"
                     f" · {leitura}"
                     f"{' · ' + esc(ROTULO[f.confiabilidade]) if f.confiabilidade in ROTULO else ''}<br/>"
                     f"{esc(texto_de_linha(f.titulo)[:200])}<br/>"
@@ -232,9 +238,10 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_ms
                     f"<br/>{_link_html(f.url)}</div>")
 
         fontes = "".join(_cartao(f) for f in uteis)
-        etapas = "".join(f"<li>{STATUS_ETAPA.get(e.status, '')} <b>{esc(NOMES_ETAPAS.get(e.nome, e.nome))}</b>: "
-                         f"{esc(e.detalhe)}</li>" for e in rel.etapas)
-        lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes[:5])
+        etapas = "".join(f"<li>{esc(t)}</li>" for t in rel.etapas_pessoa)
+        etapas_tecnicas = "".join(f"<li>{STATUS_ETAPA.get(e.status, '')} <b>{esc(NOMES_ETAPAS.get(e.nome, e.nome))}</b>: "
+                                  f"{esc(e.detalhe)}</li>" for e in rel.etapas)
+        lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes_pessoa[:5])
         guia = "".join(f"<li>{esc(p)}</li>" for p in rel.perguntas_guia)
         aviso = ("<p class='text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-2'>"
                  "<i>Não encontrado na base de checagens; resultado de outras fontes</i></p>"
@@ -245,21 +252,20 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_ms
             f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
             f"<div>"
             f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Resultado da checagem</h4></div>"
-            f"<div><span class='px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-petroleo-600 dark:text-petroleo-300 text-xs font-semibold'>{esc(rel.header or rel.propensao)}</span></div>"
             f"</div>"
             f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
             f"<span class='text-xs text-slate-500 block mb-1'>Conteúdo submetido para análise:</span>"
             f"<p class='text-sm text-slate-700 dark:text-slate-300 italic '>“{esc(entrada_txt)}”</p></div>"
             f"<h2 class='text-xl font-bold text-slate-900 dark:text-white mt-6'>{esc(rel.header or rel.propensao)}</h2>"
-            f"<p class='text-petroleo-600 dark:text-petroleo-300 font-semibold my-1'><b>{esc(rel.why_1linha or '')}</b></p>"
+            f"<p class='resumo text-slate-700 dark:text-slate-300 leading-relaxed my-3'>{esc(rel.resumo_pessoa)}</p>"
             f"{aviso}"
-            f"<p class='text-slate-700 dark:text-slate-300 leading-relaxed my-3'>{esc(rel.justificativa)}</p>"
             f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>O que as fontes dizem</h3>"
             f"{fontes or '<p class=\"text-sm text-slate-500 dark:text-slate-400 italic\">Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
             f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Para avaliar você mesmo</h3><ul class='list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1'>{guia}</ul>"
             f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-petroleo-600 dark:text-petroleo-300'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
-            f"{_descontos_html(rel.decisao)}</details>"
-            f"<details class='mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-slate-500 dark:text-slate-400'>Limitações desta análise</summary><ul class='mt-2 list-disc pl-5 space-y-1 text-slate-500 dark:text-slate-400'>{lims}</ul></details>"
+            f"<details class=\"tecnico mt-3 text-xs text-slate-500 dark:text-slate-400\"><summary class='cursor-pointer'>Detalhes técnicos</summary><ul class='mt-2 space-y-1'>{etapas_tecnicas}</ul>"
+            f"{_descontos_html(rel.decisao)}</details></details>"
+            f"{'<h3 class=' + chr(39) + 'text-base font-bold text-slate-900 dark:text-white mt-6 mb-2' + chr(39) + '>Limitações desta análise</h3><ul class=' + chr(39) + 'list-disc pl-5 text-sm text-slate-600 dark:text-slate-400 space-y-1' + chr(39) + '>' + lims + '</ul>' if lims else ''}"
             f"</div>"
         )
     else:
@@ -326,7 +332,8 @@ async def checar_web(request: Request, conteudo: str = Form(...)):
             if pronta is None:
                 return HTMLResponse(_render_html(conteudo, erro_msg=LINK_SEM_TEXTO_MSG), status_code=422)
             rel = await pipeline().executar(pronta)
-        return HTMLResponse(_render_html(conteudo, rel))
+        from .agregador import preparar_para_pessoa
+        return HTMLResponse(_render_html(conteudo, preparar_para_pessoa(rel)))
     except Exception:
         log.exception("falha no pipeline web")
         return HTMLResponse(_render_html(conteudo, erro_msg="Falha no pipeline web"), status_code=502)

@@ -410,7 +410,7 @@
         <div class="flex justify-start">
           <div class="max-w-[90%] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white text-xs sm:text-sm p-4 rounded-2xl rounded-tl-none space-y-3 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span class="text-petroleo-600 dark:text-petroleo-300 text-xs font-semibold">Checa AI Laudo</span>
+              <span class="text-petroleo-600 dark:text-petroleo-300 text-xs font-semibold">Checa AI</span>
               <span class="px-2 py-0.5 rounded text-[10px] bg-red-500/10 text-red-500 dark:text-red-400 border border-red-500/20 font-semibold">🔴 Alta Propensão</span>
             </div>
             <p class="text-slate-700 dark:text-slate-300">
@@ -490,7 +490,7 @@
         <ul class="space-y-2 text-xs">
           <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#metodologia'>Metodologia Detalhada</a></li>
           <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#agencias'>Agências e Portais Integrados</a></li>
-          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#relatorio'>Exemplo de Laudo Técnico</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#relatorio'>Exemplo de resultado</a></li>
           <li><a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition" href='https://t.me/fn_tic_bot' target="_blank" rel="noopener">Canal &amp; Bot no Telegram</a></li>
           <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='https://mariadenis.github.io/crosscheckbr-site/' target="_blank" rel="noopener">Site Institucional</a></li>
         </ul>
@@ -694,20 +694,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderClientRelatorio(entradaTexto, rel) {
     if (!relatorioArea) return;
 
-    let badgeClass = 'bg-slate-500/10 border-slate-500/30 text-slate-700 dark:text-slate-300';
-    let propTxt = 'Propensão Indeterminada';
-    const p = (rel.propensao || '').toLowerCase();
-    if (p === 'alta') {
-      badgeClass = 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400';
-      propTxt = 'Propensão Elevada de Desinformação';
-    } else if (p === 'media') {
-      badgeClass = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
-      propTxt = 'Propensão Média de Desinformação';
-    } else if (p === 'baixa') {
-      badgeClass = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
-      propTxt = 'Propensão Baixa de Desinformação';
-    }
-
     const uteis = (rel.fontes || []).filter(f => f.relevante !== false).slice(0, 5);
     let fontesHtml = '';
     if (uteis.length === 0) {
@@ -718,8 +704,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const tit = escapeHtml(f.titulo || '');
         const quote = escapeHtml(f.quote || '');
         const leitura = (f.corpo_lido ? '📄 texto lido' : ('📰 só manchete — ' + 'não analisada ' + 'integralmente'));
-        const veredito = f.veredito ? ` · <span class="text-petroleo-600 dark:text-petroleo-300 font-semibold">${escapeHtml(f.veredito)}</span>` : '';
-        const quoteHtml = quote ? `<p class="text-xs text-slate-600 dark:text-slate-300 italic my-1.5 pl-2 border-l-2 border-slate-300 dark:border-slate-700">“${quote}”</p>` : '';
+        const veredito = (f.veredito && f.selo_visivel !== false) ? ` · <span class="text-petroleo-600 dark:text-petroleo-300 font-semibold">${escapeHtml(f.veredito)}</span>` : '';
+        const mesmo = (a, b) => a.toLowerCase().replace(/\s+/g, ' ').trim() === b.toLowerCase().replace(/\s+/g, ' ').trim();
+        const quoteHtml = (quote && !mesmo(quote, tit)) ? `<p class="text-xs text-slate-600 dark:text-slate-300 italic my-1.5 pl-2 border-l-2 border-slate-300 dark:border-slate-700">“${quote}”</p>` : '';
         const urlSafe = (f.url && (f.url.startsWith('http://') || f.url.startsWith('https://')))
           ? `<a href='${escapeHtml(f.url)}' target="_blank" rel="noopener" class="text-xs text-petroleo-600 dark:text-petroleo-300 hover:underline inline-flex items-center gap-1 mt-2">Acessar fonte original →</a>`
           : `<span class="text-xs text-slate-500">${escapeHtml(f.url || '')}</span>`;
@@ -738,14 +725,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }).join('');
     }
 
-    const etapasHtml = (rel.etapas || []).map(e => `
-      <li class="flex items-start gap-2 text-xs">
-        <span class="text-emerald-600 dark:text-emerald-400">✓</span>
-        <span class="text-slate-700 dark:text-slate-300"><strong>${escapeHtml(e.nome || '')}</strong>: ${escapeHtml(e.detalhe || '')}</span>
-      </li>
+    const etapasHtml = (rel.etapas_pessoa || []).map(t => `
+      <li class="text-xs text-slate-700 dark:text-slate-300">${escapeHtml(t)}</li>
+    `).join('');
+    const etapasTecnicasHtml = (rel.etapas || []).map(e => `
+      <li class="text-[11px] text-slate-500 dark:text-slate-400"><strong>${escapeHtml(e.nome || '')}</strong>: ${escapeHtml(e.detalhe || '')}</li>
     `).join('');
 
-    const limsHtml = (rel.limitacoes || []).map(l => `
+    const limsHtml = (rel.limitacoes_pessoa || rel.limitacoes || []).map(l => `
       <li class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(l)}</li>
     `).join('');
 
@@ -765,12 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
           <div>
             
-            <h4 class="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Laudo de Propensão de Desinformação</h4>
-          </div>
-          <div>
-            <span class="px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}">
-              ${propTxt}
-            </span>
+            <h4 class="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Resultado da checagem</h4>
           </div>
         </div>
 
@@ -781,9 +763,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div class="mt-6 space-y-3">
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">${escapeHtml(rel.header || rel.propensao || '')}</h2>
-          <p class="text-sm font-semibold text-petroleo-600 dark:text-petroleo-300">${escapeHtml(rel.why_1linha || '')}</p>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${escapeHtml(rel.resumo_pessoa || rel.why_1linha || '')}</p>
           ${avisoWeb}
-          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${escapeHtml(rel.justificativa || '')}</p>
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
@@ -804,23 +785,24 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
           <details class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
             <summary class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold cursor-pointer select-none">
-              ▸ Como chegamos aqui (Recibo por etapas auditável)
+              ▸ Como chegamos aqui
             </summary>
             <ul class="mt-3 space-y-1.5 pl-2">${etapasHtml}</ul>
+            <details class="mt-3 pl-2">
+              <summary class="text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">Detalhes técnicos</summary>
+              <ul class="mt-2 space-y-1">${etapasTecnicasHtml}</ul>
+            </details>
           </details>
 
           ${limsHtml ? `
-          <details class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-            <summary class="text-xs text-slate-500 dark:text-slate-400 font-semibold cursor-pointer select-none">
-              ▸ Limitações desta análise
-            </summary>
-            <ul class="mt-3 list-disc pl-5 space-y-1">${limsHtml}</ul>
-          </details>` : ''}
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Limitações desta análise</span>
+            <ul class="mt-2 list-disc pl-5 space-y-1">${limsHtml}</ul>
+          </div>` : ''}
         </div>
 
         <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
           <span>Relatório gerado em ${escapeHtml(rel.gerado_em || '')}</span>
-          <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Auditoria IFCN Ativa</span>
         </div>
       </div>
     `;
