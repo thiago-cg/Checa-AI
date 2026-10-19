@@ -100,7 +100,7 @@ _RX_REDACAO = [
     (re.compile(r"\bsk-(?:or-v1-)?[A-Za-z0-9_-]{16,}"), "sk-REDACTED"),
 ]
 _ENV_SEGREDOS = ("SERPAPI_KEY", "OPENROUTER_API_KEY", "TELEGRAM_TOKEN", "UNSLOTH_API_KEY",
-                 "LANGFUSE_SECRET_KEY", "GOOGLE_FACTCHECK_API_KEY")
+                 "LANGFUSE_SECRET_KEY", "GOOGLE_FACTCHECK_API_KEY", "DDGS_PROXY")
 
 
 def redigir(texto: str) -> str:

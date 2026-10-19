@@ -31,7 +31,9 @@ def _cota_serpapi_conta() -> int | None:
     Nunca imprime a chave."""
     try:
         from factcheck_mvp import config  # noqa: F401  (carrega o .env)
-        from factcheck_mvp import serpapi_chaves
+        from factcheck_mvp import busca_web, serpapi_chaves
+        if busca_web.provedor_configurado() != "serpapi":  # ddgs não tem cota de conta
+            return None
         st = serpapi_chaves._status(True)
         if not st:
             return None
@@ -90,11 +92,14 @@ def main(argv=None) -> int:
               "  .venv/bin/uvicorn factcheck_mvp.api:app --port 8000")
         return 2
     cota = _cota_serpapi_conta()
-    print(f"\nEstimativa de chamadas à SerpAPI: ~{est['tipico']} (máximo {est['maximo']})")
+    uso_hoje = saude.get("busca_uso_hoje", saude.get("serpapi_uso_hoje"))
+    cap_dia = saude.get("busca_cap", saude.get("serpapi_cap"))
+    print(f"\nEstimativa de buscas web (provedor {saude.get('busca_provedor', 'serpapi')}): "
+          f"~{est['tipico']} (máximo {est['maximo']})")
     print(f"  cota restante na conta: {cota if cota is not None else '?'} · "
-          f"teto diário do projeto: {saude.get('serpapi_uso_hoje')}/{saude.get('serpapi_cap')} usados hoje")
-    if saude.get("serpapi_cap") and est["tipico"] > saude["serpapi_cap"] - (saude.get("serpapi_uso_hoje") or 0):
-        print("  ATENÇÃO: a estimativa passa do teto diário do projeto (SERPAPI_DAILY_CAP): depois dele a\n"
+          f"teto diário do projeto: {uso_hoje}/{cap_dia} usados hoje")
+    if cap_dia and est["tipico"] > cap_dia - (uso_hoje or 0):
+        print("  ATENÇÃO: a estimativa passa do teto diário do projeto (BUSCA_DAILY_CAP): depois dele a\n"
               "  busca na web é pulada e os resultados mudam. Suba o teto no .env ou use --max-buscas.")
     if not a.confirmar:
         print("\nNada foi executado. Para rodar, repita com --confirmar (e, se quiser, --max-buscas N).")
@@ -115,7 +120,8 @@ def main(argv=None) -> int:
 
     def uso():
         try:
-            return httpx.get(f"{a.url}/saude", timeout=15).json().get("serpapi_uso_hoje")
+            d = httpx.get(f"{a.url}/saude", timeout=15).json()
+            return d.get("busca_uso_hoje", d.get("serpapi_uso_hoje"))
         except Exception:
             return None
 

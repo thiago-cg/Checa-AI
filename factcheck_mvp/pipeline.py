@@ -3,7 +3,7 @@
 Núcleo = CHECAGEM CRUZADA via busca aberta (fase 2):
 
   afirmações JSON {afirmacao, nucleo, polaridade, consulta}
-   → [índice ClaimReview, só se INDICE_CHECAGENS=1]  +  busca aberta (SerpAPI, agente)
+   → [índice ClaimReview, só se INDICE_CHECAGENS=1]  +  busca aberta (SerpAPI ou ddgs, agente)
    → dedupe canônico (URL normalizada; índice+web = 1 peça)
    → deep crawl de todas as relevantes (qualquer URL pública; ClaimReview da página)
    → seleção (só ordena: overlap nunca exclui do crawl nem do juiz)
@@ -41,10 +41,17 @@ from .schemas import (
     RelatorioChecagem,
     SinalAnalise,
 )
-from .serpapi_layer import SerpAPIClient, construir_queries, normalizar_item, rotear_fonte
+from . import busca_web
+from .busca_web import ClienteBusca
+from .serpapi_layer import construir_queries, normalizar_item, rotear_fonte
 
 log = logging.getLogger("factcheck.pipeline")
 Progresso = Callable[[str], Awaitable[None]]
+
+# Textos neutros de provedor da descoberta web (serpapi ou ddgs). O gate "sem resultados" compara por
+# estas constantes: não troque a string em um lado só.
+LIM_BUSCA_DESLIGADA = "Descoberta web desligada (BUSCA_WEB=0 ou sem SERPAPI_KEY no provedor serpapi)."
+LIM_BUSCA_SEM_RESULTADOS = "Busca web sem resultados para as afirmações."
 
 RUMOR_RE = re.compile(r"ouvi dizer|dizem que|me (contaram|mandaram|falaram|enviaram)|"
                       r"não tenho (certeza|fonte)|será que|boato|no zap|encaminhada", re.I)
@@ -216,12 +223,22 @@ def _contar_lidas(pecas: List[Dict[str, Any]]) -> int:
 
 class Pipeline:
     def __init__(self, catalogo: Catalogo, indice_vereditos: Indice, indice_noticias: Indice,
-                 serpapi: Optional[SerpAPIClient] = None, detector: Optional[DetectorFake] = None):
+                 serpapi: Optional[ClienteBusca] = None, detector: Optional[DetectorFake] = None):
         self.catalogo = catalogo
         self.idx_ver = indice_vereditos   # atalho opcional: buscar_checagens (INDICE_CHECAGENS)
         self.idx_not = indice_noticias    # legado (amostras de homepages): não decide mais nada
-        self.serpapi = serpapi or SerpAPIClient()
+        # Cliente de busca do BUSCA_PROVEDOR (serpapi ou ddgs). `serpapi` é o nome antigo, mantido por compat.
+        self.serpapi = serpapi or busca_web.cliente_padrao()
         self.detector = detector or carregar_detector()
+
+    @property
+    def busca(self) -> ClienteBusca:
+        """Mesmo objeto de `serpapi`: o cliente de busca web, qualquer que seja o provedor."""
+        return self.serpapi
+
+    @busca.setter
+    def busca(self, cliente: ClienteBusca) -> None:
+        self.serpapi = cliente
 
     async def executar(self, entrada: EntradaConsulta, progresso: Progresso = _nada,
                        usar_llm: bool = True) -> RelatorioChecagem:
@@ -234,6 +251,7 @@ class Pipeline:
                        "SERP_ESTRATEGIA": getattr(config, "SERP_ESTRATEGIA", ""),
                        "SERP_ENGINE": getattr(config, "SERP_ENGINE", ""),
                        "serpapi_ativo": bool(getattr(self.serpapi, "ativo", False)),
+                       "busca_provedor": busca_web.provedor_configurado(),
                        "openrouter_ativo": bool(config.OPENROUTER_API_KEY),
                        "OPENROUTER_MODEL": config.OPENROUTER_MODEL,
                        "UNSLOTH_BASE_URL": config.UNSLOTH_BASE_URL,
@@ -342,7 +360,7 @@ class Pipeline:
             for b in blocos:
                 brutas += b
         except asyncio.TimeoutError:
-            telemetria.fallback("serpapi", "teto 60s da busca estática")
+            telemetria.fallback(busca_web.provedor_configurado(), "teto 60s da busca estática")
             limitacoes.append("Descoberta web atingiu o teto de 60s (resultado parcial).")
         pecas = []
         for d in brutas:
@@ -514,7 +532,7 @@ class Pipeline:
                                                            cache=cache_julg)
 
         # Gate (E1): checagem aplicável na base → pula web e ondas extras.
-        # Telemetria do gate é evento("etapa"), nunca fallback. Com SERPAPI_KEY ausente
+        # Telemetria do gate é evento("etapa"), nunca fallback. Com a busca desligada
         # mantém a mensagem existente (web já desligada; fluxo normal só com a base).
         pulou_web = bool(houve_aplicavel and self.serpapi.ativo)
         if pulou_web:
@@ -553,15 +571,16 @@ class Pipeline:
                 etapa("juiz", *observabilidade.etapa_juiz(0, {}, False, {}, 0, 0, ""))
 
         if not pulou_web:
-            # 4. Busca aberta (SerpAPI) — fluxo inalterado quando a base não resolve
+            # 4. Busca aberta (serpapi ou ddgs, conforme BUSCA_PROVEDOR) — fluxo inalterado quando a base não resolve
             pecas = list(pecas_base)
             if self.serpapi.ativo:
                 await avisar("Consultando a web…")
                 pecas_web, estado_agente = await self._buscar_web(afs, avisar, etapa, limitacoes, excluidas)
                 pecas += pecas_web
             else:
-                etapa("descoberta", "pulada", "SERPAPI_KEY ausente: sem busca aberta.")
-                limitacoes.append("Descoberta web desligada (sem SERPAPI_KEY).")
+                etapa("descoberta", "pulada", "Busca web desligada (BUSCA_WEB=0 ou sem SERPAPI_KEY "
+                                              "no provedor serpapi): sem busca aberta.")
+                limitacoes.append(LIM_BUSCA_DESLIGADA)
 
             # 5. Dedupe canônico global (antes do juiz): mesma URL do índice e da web = 1 peça
             pecas, fusoes = corroboracao.fundir_por_url(pecas)
@@ -582,17 +601,17 @@ class Pipeline:
                 etapa("descoberta", "ok" if pecas else "parcial",
                       f"{len(pecas)} peça(s) única(s) após dedupe ({len(fusoes)} fundida(s)); "
                       f"{sum(1 for p in pecas if p.get('curada'))} de fonte curada."
-                      + (f" [serpapi: {getattr(self.serpapi, 'ultimo_motivo', '')}]" if not pecas else ""),
+                      + (f" [busca: {getattr(self.serpapi, 'ultimo_motivo', '')}]" if not pecas else ""),
                       [p["url"] for p in pecas[:5]])
                 if not pecas:
                     motivo = getattr(self.serpapi, "ultimo_motivo", "vazio")
                     if motivo == "cap":
-                        limitacoes.append(f"SerpAPI pausada: teto diário atingido "
-                                          f"({getattr(config, 'SERPAPI_DAILY_CAP', 100)}/dia).")
+                        cap = getattr(config, "BUSCA_DAILY_CAP", getattr(config, "SERPAPI_DAILY_CAP", 100))
+                        limitacoes.append(f"Busca web pausada: teto diário atingido ({cap}/dia).")
                     elif motivo == "erro":
-                        limitacoes.append("SerpAPI falhou nesta consulta (detalhe no log do servidor).")
+                        limitacoes.append("Busca web falhou nesta consulta (detalhe no log do servidor).")
                     else:
-                        limitacoes.append("SerpAPI sem resultados para as afirmações.")
+                        limitacoes.append(LIM_BUSCA_SEM_RESULTADOS)
 
             # 6. Crawl-primeiro: deep crawl de TODAS as relevantes, depois a seleção só ordena
             await self._ler(afs, pecas, avisar)
@@ -655,8 +674,8 @@ class Pipeline:
             await self._ondas_extras(afs, pecas, julg, selecionados, juiz_ok, estado_agente,
                                      usar_llm, avisar, etapa, limitacoes)
             juiz_ok = juiz_ok or any(r.get("classe") is not None for r in julg.values())
-            if pecas and "SerpAPI sem resultados para as afirmações." in limitacoes:
-                limitacoes.remove("SerpAPI sem resultados para as afirmações.")  # a onda extra achou
+            if pecas and LIM_BUSCA_SEM_RESULTADOS in limitacoes:
+                limitacoes.remove(LIM_BUSCA_SEM_RESULTADOS)  # a onda extra achou
 
         # 9. Descoberta de catálogo: só PROPÕE (nunca vira curada durante a consulta)
         await self._propor_catalogo(pecas, julg, etapa)

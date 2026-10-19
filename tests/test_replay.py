@@ -396,3 +396,119 @@ def test_relogio_cassete_invalido_em_record_e_refeito(tmp_path, monkeypatch, bru
     with replay.modo("replay"):
         assert replay.hoje("texto Z") == "2026-10-09"
     assert fb == []  # em record o cassete é refeito na hora: sem fallback
+
+
+# --------------------------------------------------------------- busca ddgs (cassete ddgs://)
+
+_BUSCA = {"q": "vacina", "region": "br-pt", "backend": "google", "max_results": 10,
+          "safesearch": "moderate", "timelimit": None}
+_DADOS = {"criado_em": "2026-10-19T12:00:00+00:00", "resultados": [{"title": "T", "href": "https://a.test/x"}]}
+
+
+def _sem_rede():
+    raise AssertionError("rede/ddgs chamado em replay")
+
+
+def test_busca_ddgs_grava_le_e_preserva_created_at(amb):
+    chamadas = []
+
+    def vivo():
+        chamadas.append(1)
+        return dict(_DADOS)
+    with replay.modo("record"):
+        d1 = replay.busca_ddgs("text", _BUSCA, vivo)
+    assert d1 == _DADOS and len(chamadas) == 1
+    docs = [json.loads(p.read_text(encoding="utf-8")) for p in (amb / "cass").glob("*.json")]
+    assert len(docs) == 1
+    assert docs[0]["req"]["url"] == "ddgs://text?backend=google&max_results=10&q=vacina&region=br-pt&safesearch=moderate"
+    with replay.modo("replay"):
+        d2 = replay.busca_ddgs("text", _BUSCA, _sem_rede)
+    assert d2 == _DADOS  # âncora de data (criado_em) reproduzida do cassete
+
+
+def test_busca_ddgs_chave_separa_funcao_e_backend(amb):
+    with replay.modo("record"):
+        replay.busca_ddgs("text", _BUSCA, lambda: dict(_DADOS))
+    with replay.modo("replay"):
+        with pytest.raises(replay.ReplayMiss):
+            replay.busca_ddgs("text", {**_BUSCA, "backend": "bing"}, _sem_rede)
+        with pytest.raises(replay.ReplayMiss):
+            replay.busca_ddgs("news", _BUSCA, _sem_rede)
+
+
+def test_busca_ddgs_replay_sem_cassete_levanta_miss_sem_chamar_rede(amb):
+    with replay.modo("replay"):
+        with pytest.raises(replay.ReplayMiss):
+            replay.busca_ddgs("text", _BUSCA, _sem_rede)
+
+
+def test_busca_ddgs_record_reusa_cassete(amb):
+    with replay.modo("record"):
+        replay.busca_ddgs("text", _BUSCA, lambda: dict(_DADOS))
+        d = replay.busca_ddgs("text", _BUSCA, _sem_rede)
+    assert d == _DADOS
+
+
+def test_busca_ddgs_rate_limit_nao_e_gravado_e_depois_grava(amb):
+    def limitado():
+        raise replay.BuscaLimitada("google: limitado")
+    with replay.modo("record"):
+        with pytest.raises(replay.BuscaLimitada):
+            replay.busca_ddgs("text", _BUSCA, limitado)
+    assert not list((amb / "cass").glob("*.json"))
+    with replay.modo("record"):
+        assert replay.busca_ddgs("text", _BUSCA, lambda: dict(_DADOS)) == _DADOS
+    assert len(list((amb / "cass").glob("*.json"))) == 1
+
+
+def test_busca_ddgs_conta_por_provedor_e_usa_busca_uso_arq(amb, monkeypatch):
+    arq = amb / "busca.json"
+    monkeypatch.setenv("BUSCA_USO_ARQ", str(arq))  # tem precedência sobre SERPAPI_USO_ARQ
+    with replay.modo("record"):
+        replay.busca_ddgs("text", _BUSCA, lambda: dict(_DADOS))
+    replay._reservar_busca("https://serpapi.com/search.json?q=x&engine=google")
+    uso = json.loads(arq.read_text(encoding="utf-8"))
+    assert uso["total_live"] == 2 and uso["por_provedor"] == {"ddgs": 1, "serpapi": 1}
+    assert uso["chamadas"][0]["provedor"] == "ddgs" and uso["chamadas"][0]["engine"] == "text"
+    assert not (amb / "uso.json").exists()
+    assert replay.uso_serpapi()["por_provedor"] == {"ddgs": 1, "serpapi": 1}
+
+
+def test_busca_ddgs_cassete_nao_conta_orcamento(amb):
+    replay.definir_teto_serpapi(1)
+    with replay.modo("record"):
+        replay.busca_ddgs("text", _BUSCA, lambda: dict(_DADOS))
+    with replay.modo("replay"):
+        replay.busca_ddgs("text", _BUSCA, _sem_rede)
+    assert replay.uso_serpapi()["usadas_processo"] == 1
+
+
+def test_teto_do_processo_vale_para_busca_ddgs(amb):
+    replay.definir_teto_serpapi(1)
+    replay.busca_ddgs("text", {**_BUSCA, "q": "a"}, lambda: dict(_DADOS))
+    with pytest.raises(replay.OrcamentoSerpAPIEsgotado):
+        replay.busca_ddgs("text", {**_BUSCA, "q": "b"}, lambda: dict(_DADOS))
+
+
+def test_eh_busca_live_cobre_serpapi_e_ddgs():
+    assert replay._eh_busca_live("https://serpapi.com/search.json?q=x")
+    assert replay._eh_busca_live("ddgs://text?q=x")
+    assert not replay._eh_busca_live("http://exemplo.test/api")
+    assert replay._provedor_de("ddgs://news?q=x") == "ddgs"
+    assert replay._provedor_de("https://serpapi.com/search.json") == "serpapi"
+
+
+def test_orcamento_serpapi_conta_so_serpapi_inclusive_arquivo_antigo(amb, monkeypatch, tmp_path):
+    """Arquivo antigo (sem por_provedor) era só SerpAPI; buscas ddgs saem da conta do orçamento pago."""
+    arq = tmp_path / "uso_antigo.json"
+    arq.write_text(json.dumps({"total_live": 5, "por_dia": {}, "por_run": {}, "chamadas": []}), encoding="utf-8")
+    monkeypatch.setenv("BUSCA_USO_ARQ", str(arq))
+    monkeypatch.setenv("SERPAPI_ORCAMENTO_RESTANTE", "6")
+    replay.definir_modo("live")
+    for i in range(3):  # 3 buscas ddgs: não gastam o orçamento
+        replay.busca_ddgs("text", {"q": f"x{i}", "backend": "bing"}, lambda: {"criado_em": "t", "resultados": []})
+    u = replay.uso_serpapi()
+    assert u["usadas"] == 5 and u["restantes"] == 1 and u["por_provedor"] == {"ddgs": 3}
+    replay._reservar_busca("https://serpapi.com/search.json?q=a")  # a 6ª da SerpAPI ainda cabe
+    with pytest.raises(replay.OrcamentoSerpAPIEsgotado):
+        replay._reservar_busca("https://serpapi.com/search.json?q=b")

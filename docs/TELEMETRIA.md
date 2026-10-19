@@ -38,7 +38,7 @@ telemetria.finalizar_run(relatorio.model_dump(mode="json"))
   (páginas inteiras no prompt do avaliador); `runs/` não é versionado.
 - Antes de gravar: redação de segredos (`api_key=`, `key=`, `token`, `/bot<token>/`,
   `Authorization`/`Bearer`, `sk-...` e os valores de `SERPAPI_KEY`/`OPENROUTER_API_KEY`/
-  `TELEGRAM_TOKEN` do ambiente) e truncamento de strings em 2000 chars (`…[+N chars]`).
+  `TELEGRAM_TOKEN`/`DDGS_PROXY` do ambiente, pois o proxy pode levar usuário e senha) e truncamento de strings em 2000 chars (`…[+N chars]`).
 - Nunca levanta: falha de disco vira silêncio.
 
 ### Arquivos
@@ -68,7 +68,8 @@ n_fallbacks, fallbacks_por_onde, descartes_por_motivo, n_erros, dur_ms, nivel}`.
 | `agente` | decisão do crítico pós-juiz, 1 por afirmação por rodada: `afirmacao`, `decisao` (parar\|nova_onda), `motivo`, `contagens{SUSTENTA, REFUTA, RELATA_SEM_ENDOSSO, NAO_TRATA, sem_juiz, clusters_postura, veredito_aplicavel}`, `extras_feitas`, `buscas_restantes` | `agente.criticar` |
 | `planejador` | decisão do planejador de busca (Missão F / A5; só com `BUSCA_PLANEJADOR=1`): `decisao` = `relaxou` (`onda`, `afirmacoes`, `de`, `para`, `nivel`, `motor`, `buscas_restantes`: consulta vazia trocada por uma mais frouxa) \| `trocou_motor` (`de`, `para`, `consulta`, `motivo`: `site:` vai ao Google orgânico quando o motor configurado é o News) \| `leu_mais` (`afirmacao`, `onda`, `novos`, `teto_por_busca`, `motivo`: resultados além dos 8 de payloads já pagos, sem busca nova) \| `parou_orcamento` (`onda`, `motivo`, `consultas`: relaxamento/busca cancelados por teto do caso ou da SerpAPI) | `planejador_busca`, `agente._relaxar_vazias` |
 | `llm` | `motor` (llm-local\|openrouter\|openrouter-decisions), `modelo`, `finalidade`, `latencia_ms`, `prompt_sha`, `n_chars_prompt`, `saida` (truncada), `erro`, `cache` (live\|hit\|miss), `status`, `sal` (só quando o cassete do juiz/sintetizador foi salgado: repetição ou voto extra), `temperatura` (só sob `replay.temperatura`, A3) | `replay.llm_post` |
-| `http` | `metodo`, `url` (redigida), `status`, `bytes`, `latencia_ms`, `cache` (live\|hit\|miss), `erro`, `truncado`, `gravado` | todo wrapper do `replay` |
+| `http` | `metodo`, `url` (redigida), `status`, `bytes`, `latencia_ms`, `cache` (live\|hit\|miss), `erro`, `truncado`, `gravado` | todo wrapper do `replay`; cada busca do ddgs sai com `url` `ddgs://<função>?…` (uma por backend tentado) |
+| `rate_limit` | `alvo` (`ddgs`), `backend`, `espera_s` (`DDGS_ESPERA_RATELIMIT_S`): o backend limitou a taxa e o próximo é tentado | `ddgs_layer` |
 | `fonte` | `url`, `estagio` (deep-crawl\|descoberta-site\|relatorio\|**data**), `decisao` (mantida\|descartada\|**descontada**), `motivo` (+ `tipo_fonte`, `corpo_lido`, `confianca` no estágio relatorio; no estágio `data`: `afirmacao`, `data_pub`, `data_pub_bruta`, `precisao`, `r`, `bits`) | aprofundar, descoberta_site, `Pipeline.executar`, `Pipeline._emitir_decisao` (estágio `data`, 1 por fonte com desconto temporal) |
 | `fonte` (`estagio=aplicabilidade`) | 1 por par (peça da base julgada, afirmação) na fase base: `url`, `afirmacao` (índice), `classe`, `corpo_lido`, `veredito`, `decisao` (aplicavel\|inaplicavel), `motivo` (de `e_aplicavel`: corpo não lido, juiz não trata do fato, sem citação verificada, sem selo com direção, data incompatível, aplicável). E4: `janela` (dias do marcador relativo; None = sem), `marco` (`[data_evento ISO, folga]` da data explícita do fato; None = sem), `excedente` (dias além da janela ou do marco; None = não mede), `referencia` (YYYY-MM-DD do "hoje" da checagem; None = ausente) | `Pipeline._fase_base` |
 | `bert_pagina` | `url`, `prob_fake` (média dos blocos de 192 tokens; só páginas com `corpo_lido`) | `Pipeline._ler` (B1b) |
@@ -116,6 +117,7 @@ modelo que falhou; teto diário), `juiz` (item julgado por fallback léxico; tim
 `juiz.lexico-top3` (C1 do review: 3 fontes marcadas relevantes sem leitura), `serpapi`
 (erro de rede/HTTP; `motivo="orcamento"` quando o teto recusou; cota da conta esgotada),
 `serpapi.cap` (teto diário interno), `serpapi.agencias` (catálogo indisponível: sem `site:` de agências),
+`ddgs` (falha do provedor ddgs: `motivo` com o detalhe, p.ex. `ratelimit em todos os backends`, `<backend>: timeout: nova tentativa`, ou `google_scholar sem equivalente no ddgs: busca orgânica (text)`, que cai para a busca orgânica; `top stories indisponíveis`), `ddgs.cap` (teto diário `BUSCA_DAILY_CAP`; a busca não sai), `busca` (`BUSCA_PROVEDOR` desconhecido: usa serpapi),
 `agente` (onda passou de `AGENTE_TIMEOUT_S`, parcial preservado; falha nas ondas extras),
 `agente.reformular` (LLM de reformulação falhou → consulta determinística), `autoconsistencia` (A3: repetição do juiz que falhou — conta como abstenção no voto —, peça do item decisivo ausente ou erro inesperado no gancho), `deep-crawl`, `aprofundar`,
 `descoberta-catalogo`, `descoberta-site`, `descoberta-site.jev`, `bert_pagina` (o detector falhou numa
@@ -250,13 +252,20 @@ o corpo é o payload inteiro (modelo, mensagens, temperatura, max_tokens): mudou
 SerpAPI a chave é só a query (q, engine, hl, gl, num…) — estável entre versões de código. Cassete
 gravado com `max_bytes` menor que o pedido e truncado ⇒ miss (regrave). Requisições que falharam
 por rede no record (timeout, SSL) não viram cassete: em replay aparecem como miss, com o mesmo efeito. Para regravar, apague o arquivo.
+
+Buscas do ddgs (`replay.busca_ddgs`): a chamada é feita pela biblioteca `ddgs` (que usa primp, fora do curl_cffi),
+então o cassete é gravado no nível da chamada, com a pseudo-URL `ddgs://<função>?…` (`text` ou `news`; backend,
+região, `max_results`, `safesearch`, `timelimit` na chave). O conteúdo é a lista de resultados em JSON, com
+`criado_em` (âncora de data do momento da busca live, para o replay reproduzir a mesma data relativa). Um backend
+por chamada, nunca `auto`. Resposta de rate limit não vira cassete. Trocar de provedor pede cassetes novos
+(`--modo record`).
 Autoconsistência (Missão F / A3): cada repetição do juiz roda com `replay.com_sal("autocN")` (chave de cassete própria: `record` grava, `replay` relê a mesma; repetição não gravada = `ReplayMiss`) e `with replay.temperatura(t):` (payload com `temperature=t` > 0, só chat com `messages`). Fora do bloco as chaves antigas continuam valendo.
 
 Headers de requisição nunca são gravados. Em replay, `aprofundar._ip_privado` não resolve DNS (o
 cassete só existe se a URL passou no SSRF ao gravar).
 
 Pontos migrados: `afirmacoes` (2), `padroes_llm` (2), `llm_openrouter` (chat + decisions),
-`serpapi_layer` (1), `aprofundar._baixar`, `descoberta_site._fetch_aberto`. **Código novo que faz I/O
+`serpapi_layer` (1), `ddgs_layer` (`replay.busca_ddgs`, 1 por chamada a backend), `aprofundar._baixar`, `descoberta_site._fetch_aberto`. **Código novo que faz I/O
 deve usar esses wrappers** (fora deles não há replay nem telemetria).
 
 ### Sal do cassete (repetições e autoconsistência)
@@ -267,15 +276,25 @@ modelo (live ou record grava um cassete próprio) e volta do cassete nas rodadas
 chave é a de sempre. O pipeline usa para as repetições da avaliação (`eval_repeticao >= 1`, ver `eval_modo.sal_do_juiz`)
 e para os votos extras da autoconsistência (A3). O evento `llm` registra o `sal`.
 
-### SerpAPI: contagem e cota
+### Buscas live: contagem e cota
 
-- Toda busca live é contada em `eval/serpapi_uso.json` (`total_live`, `por_dia`, `por_run`,
-  `chamadas[]`); cassete não conta. `replay.uso_serpapi()` devolve o resumo.
-- Teto opcional: `SERPAPI_ORCAMENTO_RESTANTE=N` (total no arquivo) e `replay.definir_teto_serpapi(n)`
-  (só o processo; `eval.run --max-buscas-serpapi N`). Estourou → `OrcamentoSerpAPIEsgotado` +
+- Toda busca live (SerpAPI ou ddgs) é contada em `eval/serpapi_uso.json` (`total_live`, `por_dia`, `por_run`,
+  `chamadas[]`, `por_provedor` = `{serpapi, ddgs}`); cassete não conta. `BUSCA_USO_ARQ` troca o arquivo
+  (`SERPAPI_USO_ARQ`, o nome antigo, ainda vale). `replay.uso_serpapi()` devolve o resumo.
+- Teto opcional: `SERPAPI_ORCAMENTO_RESTANTE=N` (buscas SerpAPI no arquivo = `total_live` menos
+  `por_provedor.ddgs`; protege a cota paga, o ddgs não gasta) e `replay.definir_teto_serpapi(n)` (só o processo,
+  todas as chamadas live dos dois provedores, 1 por backend tentado; `eval.run --max-buscas N`). Estourou → `OrcamentoSerpAPIEsgotado` +
   `fallback(onde="serpapi", motivo="orcamento")`. Sem a env, não há teto.
 - HTTP 401/403/429 da SerpAPI (conta sem buscas / chave inválida) → `CotaSerpAPIEsgotada` +
   `fallback` pedindo nova `SERPAPI_KEY` no `.env`; a resposta não vira cassete.
+- ddgs: sem cota. Todos os backends limitados ou sem resposta (com ≥ 1 limitado) → `BuscaLimitada` (subclasse
+  de `replay.HTTPError`) + `fallback(onde="ddgs", motivo="ratelimit em todos os backends: …")`, sem cassete.
+  `onde="ddgs"` = busca perdida (é o que o eval conta como falha da descoberta); desvios que não perdem a busca
+  têm `onde` próprio: `ddgs.cadeia` (`<backend>: ratelimit|timeout|…: próximo backend`, `timeout: nova
+  tentativa`), `ddgs.top` (top stories indisponíveis), `ddgs.scholar`, `ddgs.reserva` (busca feita na
+  SerpAPI). "No results found" no fim do prazo (`DDGS_TIMEOUT_S`) vira timeout: o ddgs descarta motor lento
+  como vazio. Teto diário (`BUSCA_DAILY_CAP`) → `fallback(onde="ddgs.cap")`. Só o bloqueio em todos os backends conta em `busca_bloqueada` (`metricas.json`),
+  com aviso no fim do eval (ver `eval/README.md`).
 
 ## 3. Eval
 

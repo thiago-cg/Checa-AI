@@ -283,7 +283,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 meta[rid] = {"sessao": sim.parent.name, "caso": fr.get("id"), "categoria": fr.get("categoria"),
                              "rotulo": fr.get("rotulo"), "obtido": c.get("nivel"),
                              "resultado": c.get("resultado"), "onde": c.get("onde_encontrado"),
-                             "buscas_serpapi": c.get("serpapi")}
+                             "buscas_serpapi": c.get("serpapi"),
+                             "buscas_web": c.get("busca_web", c.get("serpapi"))}
             a.tag.append(sim.parent.name)
         r = exportar_runs(ids, a.tag, meta)
         print(f"runs={r['runs']} eventos_ok={r['ok']} erros={r['erros']} tags={a.tag}")

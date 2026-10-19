@@ -83,3 +83,34 @@ def test_bot_avisa_quando_llm_indisponivel(monkeypatch):
     assert bot.aviso_llm() == ""
     monkeypatch.setattr(lor, "status_chave", lambda: {"ok": True})
     assert bot.aviso_llm() == ""
+
+
+def _pipe_fake_busca():
+    class _Busca:
+        ativo, engine_default, uso_hoje = True, "google", 7
+
+    class _Pipe:
+        catalogo, idx_ver, idx_not, serpapi = [], [], [], _Busca()
+    return _Pipe()
+
+
+def test_saude_busca_provedor_serpapi(monkeypatch):
+    monkeypatch.setattr(api, "pipeline", _pipe_fake_busca)
+    monkeypatch.setattr(lor, "status_chave", lambda: {"ok": True})
+    monkeypatch.setattr(config, "BUSCA_PROVEDOR", "serpapi")
+    monkeypatch.setattr(config, "BUSCA_DAILY_CAP", 55)
+    r = TestClient(api.app).get("/saude").json()
+    assert r["busca_provedor"] == "serpapi" and r["busca_backends"] is None
+    assert r["busca_uso_hoje"] == 7 and r["busca_cap"] == 55
+    assert r["serpapi"] is True and r["serpapi_uso_hoje"] == 7  # chaves antigas seguem
+
+
+def test_saude_busca_provedor_ddgs_lista_backends(monkeypatch):
+    monkeypatch.setattr(api, "pipeline", _pipe_fake_busca)
+    monkeypatch.setattr(lor, "status_chave", lambda: {"ok": True})
+    monkeypatch.setattr(config, "BUSCA_PROVEDOR", "ddgs")
+    monkeypatch.setattr(config, "DDGS_TEXT_BACKENDS", "google,bing")
+    monkeypatch.setattr(config, "DDGS_NEWS_BACKENDS", "bing,yahoo")
+    r = TestClient(api.app).get("/saude").json()
+    assert r["busca_provedor"] == "ddgs"
+    assert r["busca_backends"] == {"text": "google,bing", "news": "bing,yahoo"}

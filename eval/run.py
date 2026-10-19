@@ -3,7 +3,7 @@
   python3 -m eval.run [--modo replay|record|live] [--split dev|holdout|todos]
                       [--casos 'eval/casos*.jsonl' ...] [--filtro-tag negacao] [--ids a,b]
                       [--env CHAVE=VALOR ...] [--nome x] [--paralelo N]
-                      [--max-buscas-serpapi N] [--salvar-baseline] [--gate]
+                      [--max-buscas N] [--salvar-baseline] [--gate]
 
 Saída: eval/resultados/<timestamp>[-<nome>]/{metricas.json, casos.jsonl, relatorio.md}
 + resumo no stdout com delta vs eval/baseline.json (sobre os ids em comum).
@@ -50,7 +50,8 @@ MAPA_ESPERADO: Dict[str, Tuple[List[str], List[str]]] = {
     "verdadeiro": (["baixa"], []),
     "sem_evidencia": (["indeterminada"], []),
 }
-ENV_PADRAO = {"INDICE_CHECAGENS": "0"}  # perfil principal: busca aberta
+# perfil principal: busca aberta; sem reserva SerpAPI para o ddgs (a medição de um provedor não mistura o outro)
+ENV_PADRAO = {"INDICE_CHECAGENS": "0", "BUSCA_FALLBACK_SERPAPI": "0"}
 TAGS_DESTAQUE = ("fora_do_indice", "no_indice")
 
 
@@ -189,22 +190,72 @@ def parse_env(itens: Optional[List[str]]) -> Dict[str, str]:
     return out
 
 
+def _chamadas_por_busca() -> int:
+    """Chamadas live (unidades do teto) que 1 busca lógica pode gastar. SerpAPI: 1. ddgs: 1 por backend da
+    cadeia de texto, mais a cadeia de notícias das top stories (ou só a de notícias, no Google News)."""
+    from factcheck_mvp import busca_web
+    if busca_web.provedor_configurado() != "ddgs":
+        return 1
+    n_txt = len([b for b in str(getattr(config, "DDGS_TEXT_BACKENDS", "") or "").split(",") if b.strip()])
+    n_news = len([b for b in str(getattr(config, "DDGS_NEWS_BACKENDS", "") or "").split(",") if b.strip()])
+    organica = n_txt + (n_news if getattr(config, "DDGS_TOP_STORIES", False) else 0)
+    return max(1, organica, n_news)
+
+
 def _estimativa_buscas_por_caso() -> int:
-    """Teto de buscas SerpAPI live que 1 caso pode gastar (p/ não começar caso que estouraria)."""
+    """Teto de chamadas live de busca que 1 caso pode gastar (p/ não começar caso que estouraria)."""
     est = (getattr(config, "SERP_ESTRATEGIA", "") or "").strip().lower()
     if est == "agente":
-        return int(getattr(config, "AGENTE_MAX_BUSCAS", 8) or 8)
-    return 3 * int(getattr(config, "MAX_AFIRMACOES", 3) or 3)  # até 3 queries/afirmação (ambas)
+        buscas = int(getattr(config, "AGENTE_MAX_BUSCAS", 8) or 8)
+    else:
+        buscas = 3 * int(getattr(config, "MAX_AFIRMACOES", 3) or 3)  # até 3 queries/afirmação (ambas)
+    return buscas * _chamadas_por_busca()
 
 
 # --------------------------------------------------------------------------
 # Execução
 
+def _provedor_da_url(url: Any) -> Optional[str]:
+    """serpapi | ddgs | None: provedor de uma chamada de busca web (URL serpapi.com ou chave ddgs://)."""
+    u = str(url or "")
+    if u.startswith("ddgs://"):
+        return "ddgs"
+    if "serpapi.com" in u:
+        return "serpapi"
+    return None
+
+
+def _buscas_live_por_provedor(eventos: List[Dict[str, Any]]) -> Dict[str, int]:
+    """Buscas reais (cache == live) por provedor. Cassete (replay) não conta."""
+    out = {"serpapi": 0, "ddgs": 0}
+    for e in eventos:
+        if e.get("tipo") == "http" and e["dados"].get("cache") == "live":
+            p = _provedor_da_url(e["dados"].get("url"))
+            if p:
+                out[p] += 1
+    return out
+
+
+def _busca_bloqueada_n(eventos: List[Dict[str, Any]]) -> int:
+    """Buscas do ddgs barradas por rate limit em TODOS os backends (não ficaram vazias). O rate limit de um
+    backend só, com o próximo respondendo, é desvio normal da cadeia (`<backend>: ratelimit: próximo backend`)."""
+    return sum(1 for e in eventos if e.get("tipo") == "fallback"
+               and str(e["dados"].get("onde", "")).startswith("ddgs")
+               and "ratelimit em todos os backends" in str(e["dados"].get("motivo", "")).lower())
+
+
+def _falha_de_busca(onde: Any) -> bool:
+    """Fallback que significa busca perdida. No ddgs só `ddgs` (a busca falhou) e `ddgs.cap`; os desvios
+    (`ddgs.cadeia` entre backends, `ddgs.top`, `ddgs.scholar`, `ddgs.reserva`) não perdem a busca."""
+    o = str(onde or "")
+    return o.startswith("serpapi") or o in ("ddgs", "ddgs.cap")
+
+
 def _descoberta_status(eventos: List[Dict[str, Any]]) -> str:
     """rodou | parcial | falhou | pulada | ausente — a partir do trace.
 
     `falhou` = a descoberta tentou buscar mas TODAS as buscas foram recusadas (cota da SerpAPI,
-    timeout): o caso não mede a qualidade da busca/juiz. `parcial` = algumas falharam.
+    rate limit do ddgs, timeout): o caso não mede a qualidade da busca/juiz. `parcial` = algumas falharam.
 
     Só contam as etapas de busca web real: `descoberta` e `descoberta-agente`.
     `descoberta-catalogo` (proposta de catálogo) é ignorada.
@@ -216,10 +267,9 @@ def _descoberta_status(eventos: List[Dict[str, Any]]) -> str:
         return "ausente"
     if all(s == "pulada" for s in sts):
         return "pulada"
-    falhas = sum(1 for e in eventos if e.get("tipo") == "fallback"
-                 and str(e["dados"].get("onde", "")).startswith("serpapi"))
+    falhas = sum(1 for e in eventos if e.get("tipo") == "fallback" and _falha_de_busca(e["dados"].get("onde")))
     ok = sum(1 for e in eventos if e.get("tipo") == "http"
-             and "serpapi.com" in str(e["dados"].get("url", "")) and e["dados"].get("status") == 200)
+             and _provedor_da_url(e["dados"].get("url")) and e["dados"].get("status") == 200)
     if falhas and not ok:
         return "falhou"
     return "parcial" if falhas else "rodou"
@@ -304,9 +354,11 @@ async def avaliar_caso(pipe: Any, caso: Dict[str, Any], timeout: float, modo: st
     res["fallbacks_por_onde"] = m.get("fallbacks_por_onde", {})
     res["descartes_por_motivo"] = m.get("descartes_por_motivo", {})
     res["descoberta"] = _descoberta_status(eventos) if eventos else "desconhecida"
-    res["serpapi_live"] = sum(1 for e in eventos if e.get("tipo") == "http"
-                              and "serpapi.com" in str(e["dados"].get("url", ""))
-                              and e["dados"].get("cache") == "live")
+    por_prov = _buscas_live_por_provedor(eventos)
+    res["busca_live_por_provedor"] = por_prov
+    res["serpapi_live"] = por_prov["serpapi"]  # mesmo significado de antes: só serpapi.com
+    res["busca_live"] = sum(por_prov.values())  # serpapi.com + ddgs://, só live
+    res["busca_bloqueada"] = _busca_bloqueada_n(eventos)
     res["http_miss"] = sum(1 for e in eventos if e.get("tipo") == "http" and e["dados"].get("cache") == "miss")
     n_llm_miss = sum(1 for e in eventos if e.get("tipo") == "llm" and e["dados"].get("cache") == "miss")
     n_or_http_miss = sum(1 for e in eventos if e.get("tipo") == "http"
@@ -337,14 +389,14 @@ async def executar_casos(pipe: Any, casos: List[Dict[str, Any]], modo: str = "re
                 usadas = replay.uso_serpapi()["usadas_processo"]
                 if usadas + estimativa > max_buscas:
                     resultados[c["id"]] = {"id": c["id"], "rotulo": c["rotulo"], "nao_rodado": True,
-                                           "motivo": f"teto --max-buscas-serpapi ({usadas}+{estimativa}>{max_buscas})"}
-                    progresso(f"  - {c['id']}: NÃO RODADO (teto de buscas SerpAPI)")
+                                           "motivo": f"teto --max-buscas ({usadas}+{estimativa}>{max_buscas})"}
+                    progresso(f"  - {c['id']}: NÃO RODADO (teto de buscas web)")
                     return
             r = await avaliar_caso(pipe, c, timeout, modo)
             resultados[c["id"]] = r
             marca = "OK " if r["ok"] else ("~  " if r["parcial"] else ("!! " if r["grave"] else "x  "))
             progresso(f"  {marca}{c['id']:<28} nivel={str(r['nivel']):<13} esperado={'/'.join(r['esperado'])}"
-                      f" {_fmt_s(r['dur_ms'])} serp={r['serpapi_live']} fb={r['n_fallbacks']} run={r['run_id']}"
+                      f" {_fmt_s(r['dur_ms'])} busca={r['busca_live']} fb={r['n_fallbacks']} run={r['run_id']}"
                       + (f" ERRO {r['erro']}" if r.get("erro") else ""))
 
     await asyncio.gather(*[_um(c) for c in casos])
@@ -633,16 +685,19 @@ def resumo_texto(meta: Dict[str, Any], m: Dict[str, Any], delta: Optional[Dict[s
          f"p95={_fmt_s(m.get('latencia_p95_ms'))} erros_exec={m.get('n_erros_execucao')} "
          f"http_miss={m.get('http_miss_total')} llm_miss={m.get('llm_miss_total')}",
          f"  fallback(frac casos)={m.get('taxa_fallback_por_onde')}",
-         f"  serpapi: {m.get('serpapi', {}).get('live_no_eval')} busca(s) live neste eval "
-         f"({_saldo(m.get('serpapi', {}))})"]
+         f"  busca web: {m.get('serpapi', {}).get('live_no_eval')} busca(s) live neste eval "
+         f"({_saldo(m.get('serpapi', {}))}; por provedor {m.get('busca_live_por_provedor')})"]
     if m.get("cota_serpapi_esgotada"):
         L.append("  COTA SERPAPI ESGOTADA — troque SERPAPI_KEY; este eval NÃO julga busca/juiz.")
+    if m.get("busca_bloqueada"):
+        L.append(f"  BUSCA BLOQUEADA (rate limit do ddgs) em {m.get('busca_bloqueada_n')} chamada(s); "
+                 "este eval NÃO julga busca/juiz.")
     if m.get("destaque_indice"):
         L.append("  por tag índice: " + ", ".join(f"{t}: acerto={b.get('acerto')} grave={b.get('n_erro_grave')} n={b.get('n')}"
                                                  for t, b in m["destaque_indice"].items()))
     if _busca_indisponivel(m) >= 0.5:
-        L.append("  ATENÇÃO: busca web pulada/falhou na maioria dos casos (sem chave ou cota SerpAPI esgotada) "
-                 "— o eval NÃO julga mudanças de busca/juiz.")
+        L.append("  ATENÇÃO: busca web pulada/falhou na maioria dos casos (sem chave/BUSCA_WEB, cota ou rate limit "
+                 "esgotado) — o eval NÃO julga mudanças de busca/juiz.")
     if delta is not None:
         if delta.get("n_comuns"):
             L.append(f"  vs baseline '{delta.get('baseline_nome')}' ({delta['n_comuns']} comuns): "
@@ -658,7 +713,8 @@ def relatorio_md(meta: Dict[str, Any], m: Dict[str, Any], res: List[Dict[str, An
     L = [f"# Eval {meta['nome'] or meta['timestamp']}", "",
          f"- data: {meta['timestamp']} · git: `{meta['git']}` · modo: `{meta['modo']}` · split: `{meta['split']}`",
          f"- env: `{meta['env']}` · casos: {meta['arquivos_casos']} · filtros: tags={meta['filtro_tag']} ids={meta['ids']}",
-         f"- SerpAPI: {m['serpapi']['live_no_eval']} busca(s) live neste eval ({_saldo(m['serpapi'])})",
+         f"- Busca web: {m['serpapi']['live_no_eval']} busca(s) live neste eval ({_saldo(m['serpapi'])}; "
+         f"por provedor {m.get('busca_live_por_provedor')})",
          "", "## Métricas", "", "| métrica | valor |", "|---|---|"]
     for k in ("n", "n_nao_rodados", "n_nao_reproduzidos", "acerto", "acerto_com_parcial", "acuracia_balanceada",
               "cobertura", "auc_ordinal", "erro_grave", "n_erro_grave",
@@ -682,7 +738,10 @@ def relatorio_md(meta: Dict[str, Any], m: Dict[str, Any], res: List[Dict[str, An
             L.append(f"| {nome} | {b.get('acerto')} | {b.get('acuracia_balanceada')} | {b.get('n_erro_grave')} | "
                      f"{gd2.get('fe_k')}/{gd2.get('fe_n')} | {gd2.get('v_k')}/{gd2.get('v_n')} |")
     if _busca_indisponivel(m) >= 0.5:
-        L.append("- **ATENÇÃO:** busca web pulada/falhou na maioria dos casos (sem SERPAPI_KEY, orçamento ou cota esgotada): "
+        L.append("- **ATENÇÃO:** busca web pulada/falhou na maioria dos casos (sem chave, BUSCA_WEB, orçamento, cota "
+                 "ou rate limit esgotado): este eval não serve para julgar mudanças de busca/juiz.")
+    if m.get("busca_bloqueada"):
+        L.append(f"- **BUSCA BLOQUEADA:** rate limit do ddgs em {m.get('busca_bloqueada_n')} chamada(s): "
                  "este eval não serve para julgar mudanças de busca/juiz.")
     L += ["", "### Por rótulo", "", "| rótulo | n | acerto | erro grave | níveis |", "|---|---|---|---|---|"]
     for rot, b in m.get("por_rotulo", {}).items():
@@ -782,11 +841,19 @@ def rodar(casos: List[Dict[str, Any]], *, modo: str = "replay", paralelo: int = 
     m["serpapi"] = {"live_no_eval": uso_depois["usadas_processo"],
                     "usadas_total": uso_depois["usadas"], "restantes": uso_depois["restantes"],
                     "orcamento": uso_depois["orcamento"], "usadas_antes": uso_antes["usadas"]}
+    m["busca"] = dict(m["serpapi"])  # nome neutro (mesmo dicionário)
+    m["busca_live_por_provedor"] = {p: sum(r.get("busca_live_por_provedor", {}).get(p, 0) for r in res)
+                                    for p in ("serpapi", "ddgs")}
+    bloqueadas = sum(r.get("busca_bloqueada", 0) for r in res)
+    m["busca_bloqueada"], m["busca_bloqueada_n"] = bloqueadas > 0, bloqueadas
     cota = replay.cota_esgotada()
     m["cota_serpapi_esgotada"] = cota
     if cota:
         m["aviso"] = ("COTA SERPAPI ESGOTADA — troque SERPAPI_KEY no .env. "
                       "Casos sem busca não medem busca/juiz; este eval é inválido.")
+    if bloqueadas:
+        m["aviso"] = (m.get("aviso", "") + " " if m.get("aviso") else "") + (
+            f"BUSCA BLOQUEADA (rate limit do ddgs) em {bloqueadas} chamada(s): este eval não julga busca/juiz.")
     delta = None
     if Path(baseline).exists():
         try:
@@ -813,8 +880,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--nome", default="")
     ap.add_argument("--paralelo", type=int, default=1)
     ap.add_argument("--timeout-caso", type=float, default=300.0)
-    ap.add_argument("--max-buscas-serpapi", type=int, default=None,
-                    help="teto de buscas SerpAPI live neste eval (não inicia caso que poderia estourar)")
+    ap.add_argument("--max-buscas", "--max-buscas-serpapi", dest="max_buscas_serpapi", type=int, default=None, metavar="N",
+                    help="teto de buscas web live (serpapi/ddgs) neste eval (não inicia caso que poderia estourar)")
     ap.add_argument("--salvar-baseline", action="store_true", help="grava eval/baseline.json com este resultado")
     ap.add_argument("--gate", action="store_true", help="exit 1 se erro grave subir ou acerto cair > --gate-pp")
     ap.add_argument("--gate-pp", type=float, default=5.0)
@@ -837,13 +904,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
     env = parse_env(a.env)
     uso = replay.uso_serpapi()
-    print(f"{len(sel)} caso(s) | modo={a.modo} | env={env} | SerpAPI {_saldo(uso)}"
+    print(f"{len(sel)} caso(s) | modo={a.modo} | env={env} | busca web {_saldo(uso)}"
           + (f" | teto neste eval {a.max_buscas_serpapi}" if a.max_buscas_serpapi is not None else ""))
     out = rodar(sel, modo=a.modo, paralelo=a.paralelo, timeout=a.timeout_caso, env=env,
                 max_buscas=a.max_buscas_serpapi, nome=a.nome, split=a.split, filtro_tag=tags, ids=ids,
                 arquivos_casos=a.casos, isolar_catalogo=not a.catalogo_real)
     print(resumo_texto(out["meta"], out["metricas"], out["delta"]))
     print(f"  artefatos: {out['dir']}/relatorio.md")
+    if out["metricas"].get("busca_bloqueada"):
+        print("BUSCA BLOQUEADA (rate limit do ddgs): este eval NÃO julga mudanças de busca/juiz.", file=sys.stderr)
     if out.get("cota_esgotada"):
         print("COTA SERPAPI ESGOTADA — troque SERPAPI_KEY no .env; "
               "este eval NÃO julga mudanças de busca/juiz.", file=sys.stderr)
