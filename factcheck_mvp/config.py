@@ -197,6 +197,17 @@ SINTETIZADOR = _get("SINTETIZADOR", "1").strip().lower() in ("1", "true", "sim",
 SINTETIZADOR_MAX_ITENS = _int("SINTETIZADOR_MAX_ITENS", 12)    # itens julgados enviados por afirmação
 SINTETIZADOR_MAX_TOKENS = _int("SINTETIZADOR_MAX_TOKENS", 1200)
 SINTETIZADOR_TIMEOUT_S = _int("SINTETIZADOR_TIMEOUT_S", 90)    # 1 chamada LLM (por afirmação)
+# 19/10: adjudicador por afirmação (adjudicador.py). Uma chamada LLM por afirmação, ANTES da decisão, relê o
+# conjunto julgado e corrige a EVIDÊNCIA (revisão de classe com citação conferida, tipo temporal da afirmação,
+# data a que cada página se refere e relato de mudança de situação), nunca o nível. Padrão 0: prompt novo =
+# cassete novo; ligar depois de gravar (record) e medir.
+ADJUDICADOR = _bool("ADJUDICADOR", False)
+ADJUDICADOR_K = _int("ADJUDICADOR_K", 1)              # amostras; com K > 1 só vale o unânime (posição, mudança)
+ADJUDICADOR_TEMP = _float("ADJUDICADOR_TEMP", 0.5)    # temperatura das repetições (K > 1)
+ADJUDICADOR_MAX_ITENS = _int("ADJUDICADOR_MAX_ITENS", 12)
+ADJUDICADOR_TRECHO_MAX = _int("ADJUDICADOR_TRECHO_MAX", 1500)  # chars do texto de cada item enviado
+ADJUDICADOR_MAX_TOKENS = _int("ADJUDICADOR_MAX_TOKENS", 2500)
+ADJUDICADOR_TIMEOUT_S = _int("ADJUDICADOR_TIMEOUT_S", 120)
 
 # Missão F / A5: planejador de busca (factcheck_mvp/planejador_busca.py). Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar). Com 0 a busca é a de
 # antes (mesmas consultas, mesmo motor, mesmo número de ondas). Ligado: relaxa consulta vazia, manda `site:` ao

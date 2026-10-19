@@ -128,7 +128,7 @@ class modo:
 # Sal do cassete do LLM (auditoria E, A1/A3): quando definido, as chamadas de `FINALIDADES_COM_SAL` entram na
 # chave do cassete com o sal, então uma repetição (ou um voto extra da autoconsistência) não reaproveita o
 # julgamento gravado pelas outras: é uma amostra nova do modelo. Sem sal, a chave é a de sempre.
-FINALIDADES_COM_SAL = ("juiz", "sintetizador")
+FINALIDADES_COM_SAL = ("juiz", "sintetizador", "adjudicador")
 _sal_llm: contextvars.ContextVar = contextvars.ContextVar("replay_sal_llm", default="")
 
 
