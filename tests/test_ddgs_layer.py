@@ -77,6 +77,9 @@ def amb(tmp_path, monkeypatch):
         monkeypatch.setattr(config, nome, valor)
     FakeDDGS.reset()
     dl.resetar_pausa()
+    dl._avisados.clear()
+    # o FakeDDGS responde por qualquer nome de backend; a filtragem real tem testes próprios abaixo
+    monkeypatch.setattr(dl, "_habilitados", lambda funcao: None)
     monkeypatch.setattr(ddgs, "DDGS", FakeDDGS)
     sleeps, fb = [], []
     monkeypatch.setattr(dl, "_dormir", lambda s: sleeps.append(s))
@@ -677,3 +680,35 @@ def test_deteccao_de_bloqueio_so_em_versao_testada(amb, monkeypatch):
     assert any("não testado" in m for _, m in amb.fb)
     monkeypatch.setattr(ddgs, "__version__", dl.DDGS_VERSOES_TESTADAS[0])
     assert dl._instalar_deteccao_bloqueio() is True and BaseSearchEngine.request._crosscheck
+
+
+# --------------------------------------------------------------- backends desligados no ddgs
+def test_backend_desligado_no_ddgs_e_pulado_e_nunca_vira_auto(amb, monkeypatch):
+    """ddgs 9.16: `bing` de texto vem com disabled=True; passado à lib, ela caía em backend='auto'."""
+    monkeypatch.setattr(dl, "_habilitados", lambda funcao: {"duckduckgo", "yahoo"} if funcao == "text" else None)
+    monkeypatch.setattr(config, "DDGS_TEXT_BACKENDS", "bing,duckduckgo,yahoo")
+    FakeDDGS.roteiro[("text", "duckduckgo")] = TEXT
+    c = dl.DDGSClient(ativo=True)
+    r = c.buscar_ex({"q": "x y", "engine": "google"})
+    assert r.motivo == "ok" and r.payload["search_metadata"]["backend"] == "duckduckgo"
+    assert [ch["backend"] for ch in FakeDDGS.chamadas] == ["duckduckgo"]  # bing nunca chega à lib
+    avisos = [m for o, m in amb.fb if o == "ddgs.cadeia" and "bing" in m and "desligado" in m]
+    assert len(avisos) == 1
+    c.buscar_ex({"q": "outra", "engine": "google"})  # aviso só 1 vez por processo
+    assert len([m for o, m in amb.fb if o == "ddgs.cadeia" and "bing" in m and "desligado" in m]) == 1
+
+
+def test_nenhum_backend_valido_e_erro_nao_auto(amb, monkeypatch):
+    monkeypatch.setattr(dl, "_habilitados", lambda funcao: {"duckduckgo"})
+    monkeypatch.setattr(config, "DDGS_TEXT_BACKENDS", "bing,yandex")
+    r = dl.DDGSClient(ativo=True).buscar_ex({"q": "x y", "engine": "google"})
+    assert r.motivo == "erro" and FakeDDGS.chamadas == []
+    assert any(o == "ddgs" and "nenhum backend de text" in m for o, m in amb.fb)
+
+
+def test_habilitados_reflete_o_ddgs_instalado():
+    from ddgs.engines import ENGINES
+    assert dl._habilitados("text") == set(ENGINES["text"])
+    padrao = [b.strip() for b in "duckduckgo,yahoo,brave,google".split(",")]
+    assert dl.backends_validos("text", padrao) == padrao  # o padrão do config só tem motores habilitados
+    assert set(dl.backends_validos("news", ["bing", "duckduckgo", "yahoo"])) <= set(ENGINES["news"])

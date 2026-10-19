@@ -241,10 +241,16 @@ Produção: `ddgs_layer.py` (novo), `busca_web.py` (novo), `replay.py`, `config.
 - **Bloqueio silencioso no ddgs 9.16:** HTTP != 200 vira `None` e o erro sai como "No results found". DuckDuckGo
   respondia 202 (captcha "anomaly"), Google e Brave 429: tudo parecia busca vazia. Corrigido em
   `ddgs_layer._instalar_deteccao_bloqueio` (202/403/429 -> `RatelimitException`); depende da versão fixada.
-- **`(site:a OR site:b)`:** com parênteses o Bing devolve zero; sem eles, só as agências pedidas. `ddgs_layer.adaptar_consulta`
+- **`(site:a OR site:b)`:** com parênteses a busca devolvia zero; sem eles, só as agências pedidas. `ddgs_layer.adaptar_consulta`
   tira os parênteses do grupo de `site:` (a perna das agências voltou com Aos Fatos, UOL Confere, Estadão Verifica).
-- **Backends:** neste IP só o Bing respondeu (Google 0/85, Brave 0/84 desde a 1ª chamada). Ordem padrão de texto
-  passou a `bing,duckduckgo,brave,google`. A sonda da fase 1 foi contaminada por bloqueio (duas instâncias em
+  Atenção: esse teste pedia `backend=bing`, que no texto estava desligado (ver abaixo); quem respondeu foi o `auto`.
+- **`bing` de texto desligado no ddgs 9.16** (`disabled = True` em `ddgs/engines/bing.py`; `yandex` também). Pedido
+  à lib, ela avisava "backends do not exist or are disabled" e caía em `backend='auto'` (sorteio de motores:
+  replay não determinístico e `search_metadata.backend` errado). Tudo que acima foi atribuído ao "Bing" no texto veio
+  do `auto`. Corrigido: `ddgs_layer.backends_validos` só passa à lib motores de `ddgs.engines.ENGINES` (o resto é
+  pulado com `fallback(onde="ddgs.cadeia")`, 1 aviso por processo) e, sem nenhum válido, a busca é erro, nunca
+  `auto`. Ordem padrão de texto: `duckduckgo,yahoo,brave,google`; notícias seguem `bing,duckduckgo,yahoo` (o `bing`
+  de notícias está habilitado). Google 0/85 e Brave 0/84 com resposta na sonda (429 desde a 1ª chamada). A sonda da fase 1 foi contaminada por bloqueio (duas instâncias em
   paralelo) e não decide nada: repetir com o IP limpo, com o lock e a consulta de controle novos.
 - **Volume:** algumas centenas de buscas em ~30 min bastaram para o bloqueio. O eval em record (fase 6) precisa de
   `DDGS_RPS` baixo (≤ 0,3) ou proxy; com a cadeia toda limitada o caso sai com `busca_bloqueada`.

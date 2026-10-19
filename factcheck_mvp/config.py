@@ -110,9 +110,9 @@ BUSCA_WEB = _bool("BUSCA_WEB", True)
 BUSCA_DAILY_CAP = _int("BUSCA_DAILY_CAP", SERPAPI_DAILY_CAP)
 CACHE_BUSCA_TTL = _int("CACHE_BUSCA_TTL", CACHE_SERPAPI_TTL)
 # ddgs: backends em ORDEM, um por chamada (nunca `auto`: sorteia motores e quebra o replay). Passa ao próximo
-# quando o atual falha, vem vazio ou limita a taxa. Bing primeiro: nas buscas live de 19/10 foi o único que
-# respondeu (Google e Brave: HTTP 429 desde a 1ª chamada; DuckDuckGo: captcha 202).
-DDGS_TEXT_BACKENDS = _get("DDGS_TEXT_BACKENDS", "bing,duckduckgo,brave,google")
+# quando o atual falha, vem vazio ou limita a taxa. Só motores que o ddgs habilita (backend desligado é pulado):
+# no 9.16 o `bing` de TEXTO vem desligado (`disabled = True`); o de notícias funciona.
+DDGS_TEXT_BACKENDS = _get("DDGS_TEXT_BACKENDS", "duckduckgo,yahoo,brave,google")
 DDGS_NEWS_BACKENDS = _get("DDGS_NEWS_BACKENDS", "bing,duckduckgo,yahoo")
 DDGS_REGIAO = _get("DDGS_REGIAO", "br-pt")
 DDGS_SAFESEARCH = _get("DDGS_SAFESEARCH", "moderate")

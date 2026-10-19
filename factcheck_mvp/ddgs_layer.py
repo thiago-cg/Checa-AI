@@ -16,7 +16,7 @@ import re
 import threading
 import time
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlsplit
 
 from ddgs.exceptions import DDGSException, RatelimitException, TimeoutException
@@ -88,6 +88,38 @@ def _lista(texto: str) -> List[str]:
     return [b.strip().lower() for b in (texto or "").split(",") if b.strip()]
 
 
+_avisados: set = set()  # (funcao, backend) indisponíveis já avisados neste processo
+
+
+def _habilitados(funcao: str) -> Optional[set]:
+    """Motores que o ddgs instalado habilita para `funcao` (text|news), ou None se não der para saber.
+    Ex.: no 9.16 o `bing` de texto vem com `disabled = True` (só o de notícias funciona)."""
+    try:
+        from ddgs.engines import ENGINES
+        return set(ENGINES.get(funcao) or {})
+    except Exception as e:  # registro de motores mudou: segue sem filtrar (o ddgs avisa)
+        telemetria.fallback("ddgs.cadeia", f"lista de motores indisponível: {type(e).__name__}: {e}")
+        return None
+
+
+def backends_validos(funcao: str, configurados: List[str]) -> List[str]:
+    """Só os backends configurados que o ddgs habilita, na ordem. Backend inexistente/desligado NUNCA chega
+    à lib: com nenhum válido, o ddgs cai em `backend='auto'` (sorteia motores, quebra o replay e o
+    `search_metadata.backend` mentiria). Cada backend descartado é avisado uma vez por processo."""
+    hab = _habilitados(funcao)
+    if hab is None:
+        return list(configurados)
+    out = []
+    for b in configurados:
+        if b in hab:
+            out.append(b)
+        elif (funcao, b) not in _avisados:
+            _avisados.add((funcao, b))
+            telemetria.fallback("ddgs.cadeia", f"{b}: backend de {funcao} inexistente ou desligado no ddgs "
+                                               f"(habilitados: {', '.join(sorted(hab))}): pulado")
+    return out
+
+
 def _classificar(e: Exception) -> str:
     """ratelimit | timeout | vazio | erro. O ddgs embrulha o erro de um motor em DDGSException: a mensagem conta."""
     msg = str(e)
@@ -145,8 +177,8 @@ def _top_stories(noticias: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             for n in noticias[:TOP_STORIES_DDGS]]
 
 
-# `(site:a OR site:b …)` de `query_agencias`: com parênteses o Bing devolve zero; sem eles, só as agências pedidas
-# (sonda live de 19/10). O grupo vira `site:a OR site:b …` no fim da consulta, que é onde ele já fica.
+# `(site:a OR site:b …)` de `query_agencias`: com parênteses a busca devolvia zero; sem eles, só as agências pedidas
+# (teste live de 19/10, respondido pelo backend `auto` do ddgs: repetir por backend com o IP limpo). O grupo vira `site:a OR site:b …` no fim da consulta, que é onde ele já fica.
 _GRUPO_SITES = re.compile(r"\(\s*(site:\S+(?:\s+OR\s+site:\S+)*)\s*\)", re.I)
 
 
@@ -405,9 +437,11 @@ class DDGSClient(ClienteBusca):
         Vazio limpo em todos -> dados vazios, "". Se nenhum deu resultado e algum FALHOU: levanta
         BuscaLimitada quando TODOS limitaram a taxa ou não responderam (sob bloqueio um motor costuma só ficar
         lento); DDGSException nos demais casos. Desvios entre backends: `fallback(onde="ddgs.cadeia")`."""
-        backends = _lista(config.DDGS_TEXT_BACKENDS if funcao == "text" else config.DDGS_NEWS_BACKENDS)
+        configurados = _lista(config.DDGS_TEXT_BACKENDS if funcao == "text" else config.DDGS_NEWS_BACKENDS)
+        backends = backends_validos(funcao, configurados)
         if not backends:
-            raise DDGSException("nenhum backend configurado (DDGS_TEXT_BACKENDS / DDGS_NEWS_BACKENDS)")
+            raise DDGSException(f"nenhum backend de {funcao} disponível (configurados: {', '.join(configurados) or '-'}; "
+                                "DDGS_TEXT_BACKENDS / DDGS_NEWS_BACKENDS)")
         falhas: List[str] = []
         limitados = sem_resposta = 0
         ultimo: Dict[str, Any] = {}
