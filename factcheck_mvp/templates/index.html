@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Checa-AI — Isso pode ser fake news?</title>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%274 7 93 91%27 fill=%27none%27 aria-hidden=%27true%27%3E%3Cpath d=%27M27 8H73C85.15 8 95 17.85 95 30V63C95 75.15 85.15 85 73 85H40L17 96L21 82.8C11.7 80.2 5 71.7 5 62V30C5 17.85 14.85 8 27 8Z%27 fill=%27%23155563%27/%3E%3Cpath d=%27M47 61C56.9411 61 65 52.9411 65 43C65 33.0589 56.9411 25 47 25C37.0589 25 29 33.0589 29 43C29 52.9411 37.0589 61 47 61Z%27 stroke=%27white%27 stroke-width=%275.5%27/%3E%3Cpath d=%27M60 56L74 70%27 stroke=%27white%27 stroke-width=%275.5%27 stroke-linecap=%27round%27/%3E%3C/svg%3E'>
+<title>Checa AI — Recebeu uma mensagem e ficou na dúvida?</title>
 <meta content="Cole o que você recebeu. Estimamos a propensão de desinformação cruzando bases históricas e agências de checagem. Não damos veredito: você decide." name="description">
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -14,13 +15,9 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#ecfeff',
-              100: '#cffafe',
-              400: '#22d3ee',
-              500: '#06b6d4',
-              600: '#0891b2',
-              900: '#164e63',
+            petroleo: {
+              50: '#eef5f6', 100: '#d5e7ea', 200: '#aed0d6', 300: '#7fb3bd', 400: '#4f909c',
+              500: '#2a7280', 600: '#155563', 700: '#114756', 800: '#0e3a46', 900: '#0c303a', 950: '#071d24',
             },
             navy: {
               800: '#0f172a',
@@ -53,71 +50,35 @@
 <link crossorigin="" href='https://fonts.gstatic.com' rel="preconnect">
 <link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap' rel="stylesheet">
 <style data-purpose="custom-utilities">
-    /* Technical grid for light and dark modes */
-    .bg-tech-grid {
-      background-size: 36px 36px;
-      background-image: 
-        linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-    }
-    .dark .bg-tech-grid {
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    }
-    .glow-cyan {
-      box-shadow: 0 0 45px -10px rgba(6, 182, 212, 0.25);
-    }
-    .glow-telegram {
-      box-shadow: 0 10px 30px -5px rgba(34, 158, 217, 0.35);
-    }
     details summary::-webkit-details-marker {
       display: none;
     }
 </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-navy-950 dark:text-slate-100 font-sans antialiased selection:bg-brand-500/30 selection:text-brand-900 dark:selection:text-brand-100 min-h-screen relative overflow-x-hidden transition-colors duration-200">
-<!-- BEGIN: SiteBackgroundDecorations -->
-<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-  <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[850px] h-[550px] bg-gradient-to-tr from-blue-400/15 via-cyan-500/10 to-indigo-500/10 dark:from-cyan-600/15 dark:via-blue-600/10 dark:to-indigo-600/10 blur-[130px] rounded-full"></div>
-  <div class="absolute top-[800px] -right-32 w-[600px] h-[600px] bg-indigo-500/10 blur-[140px] rounded-full"></div>
-  <div class="absolute top-[1700px] -left-32 w-[650px] h-[650px] bg-blue-500/10 dark:bg-cyan-700/10 blur-[150px] rounded-full"></div>
-  <div class="absolute inset-0 bg-tech-grid opacity-75"></div>
-</div>
-<!-- END: SiteBackgroundDecorations -->
+<body class="bg-slate-50 text-slate-900 dark:bg-navy-950 dark:text-slate-100 font-sans antialiased selection:bg-petroleo-500/30 selection:text-petroleo-900 dark:selection:text-petroleo-100 min-h-screen relative overflow-x-hidden transition-colors duration-200">
+
 
 <!-- BEGIN: MainHeader -->
-<header class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-navy-950/80 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-navy-950/80 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
     <!-- Logo and Live Status Badge -->
     <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
       <a class="flex items-center gap-2.5 group" href='/'>
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
-          <svg class="w-5 h-5 text-white font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
-          </svg>
-        </div>
+        <svg class="w-10 h-10 text-petroleo-600 dark:text-petroleo-300 flex-shrink-0" viewBox="4 7 93 91" fill="none" aria-hidden="true"><path d="M27 8H73C85.15 8 95 17.85 95 30V63C95 75.15 85.15 85 73 85H40L17 96L21 82.8C11.7 80.2 5 71.7 5 62V30C5 17.85 14.85 8 27 8Z" fill="currentColor"/><path d="M47 61C56.9411 61 65 52.9411 65 43C65 33.0589 56.9411 25 47 25C37.0589 25 29 33.0589 29 43C29 52.9411 37.0589 61 47 61Z" stroke="white" stroke-width="5.5"/><path d="M60 56L74 70" stroke="white" stroke-width="5.5" stroke-linecap="round"/></svg>
         <div class="flex flex-col">
-          <span class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-500 flex items-center gap-1">Checa-AI</span>
-          <span class="text-[10px] font-mono tracking-widest uppercase text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">Auditoria de Dados Abertos</span>
+          <span class="text-xl font-bold tracking-tight text-petroleo-600 dark:text-petroleo-300 flex items-center gap-1">Checa AI</span>
+          <span class="text-[10px] tracking-wide uppercase text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">Checagem de fatos</span>
         </div>
       </a>
-      <!-- Live Status Pill -->
-      <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/60 shadow-inner flex-shrink-0">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
-        <span class="text-xs font-mono text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap">Rede Ativa: <span class="text-emerald-600 dark:text-emerald-400 font-semibold">20 Portais</span></span>
-      </div>
+      
     </div>
 
     <!-- Navigation Links: Clean and Proportional -->
     <nav class="hidden lg:flex items-center gap-5 xl:gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
-      <a class="hover:text-blue-600 dark:hover:text-cyan-400 transition-colors whitespace-nowrap" href='#metodologia'>Metodologia</a>
-      <a class="hover:text-blue-600 dark:hover:text-cyan-400 transition-colors whitespace-nowrap" href='#agencias'>Agências</a>
-      <a class="hover:text-blue-600 dark:hover:text-cyan-400 transition-colors whitespace-nowrap" href='#relatorio'>Relatório</a>
-      <a class="hover:text-blue-600 dark:hover:text-cyan-400 transition-colors whitespace-nowrap" href='#telegram-section'>Bot Telegram</a>
+      <a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition-colors whitespace-nowrap" href='#metodologia'>Metodologia</a>
+      <a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition-colors whitespace-nowrap" href='#agencias'>Agências</a>
+      <a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition-colors whitespace-nowrap" href='#relatorio'>Relatório</a>
+      <a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition-colors whitespace-nowrap" href='#telegram-section'>Bot Telegram</a>
     </nav>
 
     <!-- Header Actions: Theme Toggle, GitHub & Telegram -->
@@ -143,7 +104,7 @@
       </a>
 
       <!-- Telegram Button -->
-      <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-telegram hover:bg-telegram-hover transition-all duration-200 glow-telegram shadow-sm hover:shadow-cyan-500/20 active:scale-95 whitespace-nowrap" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
+      <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-telegram hover:bg-telegram-hover transition-all duration-200 shadow-sm active:scale-95 whitespace-nowrap" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
           <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.923z"></path>
         </svg>
@@ -158,43 +119,31 @@
 <main>
 <section class="relative pt-12 pb-20 md:pt-18 md:pb-28">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <!-- Live System Metric Pill -->
-    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 mb-8 backdrop-blur-md shadow-sm">
-      <span class="inline-block w-2 h-2 rounded-full bg-blue-500 dark:bg-cyan-400"></span>
-      <span class="text-xs font-mono tracking-wide text-slate-700 dark:text-slate-300">Índice Aberto • Algoritmo Verificável sem Censura</span>
-    </div>
+    
 
     <!-- Headline & Value Proposition (Nome TODO em azul) -->
     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
-      <span class="text-blue-600 dark:text-blue-500">Checa-AI</span> — <span class="bg-gradient-to-r from-blue-600 via-sky-500 to-indigo-600 dark:from-cyan-400 dark:via-sky-300 dark:to-indigo-300 bg-clip-text text-transparent">isso pode ser fake news?</span>
+      Recebeu uma mensagem e ficou na dúvida? <span class="text-petroleo-600 dark:text-petroleo-300">Checa AI.</span>
     </h1>
     <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
-      Cole o que você recebeu. Estimamos a propensão de desinformação cruzando bases históricas e agências de checagem certificadas. <span class="text-slate-900 dark:text-white font-medium underline decoration-blue-500/50 underline-offset-4">Não damos veredito: você decide.</span>
+      Cole o que você recebeu. Estimamos a propensão de desinformação cruzando bases históricas e agências de checagem certificadas. <span class="text-slate-900 dark:text-white font-medium underline decoration-petroleo-500/50 underline-offset-4">Não damos veredito: você decide.</span>
     </p>
 
     <!-- BEGIN: InteractiveAnalysisInputBox -->
-    <div class="mt-10 max-w-3xl mx-auto bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-4 sm:p-6 shadow-xl dark:shadow-2xl backdrop-blur-md glow-cyan text-left">
-      <div class="flex items-center justify-between mb-3 text-xs font-mono text-slate-500 dark:text-slate-400">
-        <span class="flex items-center gap-2">
-          <span class="h-2 w-2 rounded-full bg-blue-500 dark:bg-cyan-500"></span>
-          Console de Verificação Rápida
-        </span>
-        <span>UTF-8 • Auditoria em Escala</span>
-      </div>
+    <div class="mt-10 max-w-3xl mx-auto bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-4 sm:p-6 shadow-sm shadow-sm text-left">
+      <p class="mb-3 text-sm font-medium text-slate-600 dark:text-slate-300">Cole a mensagem que você recebeu</p>
       <form id="check-form" action="/checar-web" method="post" class="space-y-4">
         <label class="sr-only" for="claim-input">Conteúdo para checagem</label>
         <div class="relative">
-          <textarea class="w-full bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-800 rounded-xl p-4 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-base sm:text-base focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:border-blue-500 dark:focus:border-cyan-500 transition resize-none font-mono focus:outline-none" id="claim-input" name="conteudo" placeholder="Cole o texto, o título ou o link da notícia (pode ser um “ouvi dizer que...”)" rows="4">{{ CONTEUDO }}</textarea>
-          <div class="absolute right-3 bottom-3 hidden sm:flex items-center gap-2 text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-white/90 dark:bg-slate-900/80 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">
-            <span>Modo: Texto / Link / Título</span>
-          </div>
+          <textarea class="w-full bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-800 rounded-xl p-4 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-base sm:text-base focus:ring-2 focus:ring-petroleo-500 dark:focus:ring-petroleo-500 focus:border-petroleo-500 dark:focus:border-petroleo-500 transition resize-none focus:outline-none" id="claim-input" name="conteudo" placeholder="Cole o texto, o título ou o link da notícia (pode ser um “ouvi dizer que...”)" rows="4">{{ CONTEUDO }}</textarea>
+          
         </div>
 
         <!-- Progress Banner (Shown during async analysis) -->
-        <div id="loading-banner" class="hidden p-4 rounded-xl bg-blue-50 dark:bg-cyan-950/40 border border-blue-200 dark:border-cyan-800/50 space-y-2">
-          <div class="flex items-center justify-between text-xs font-mono text-blue-700 dark:text-cyan-300">
+        <div id="loading-banner" class="hidden p-4 rounded-xl bg-petroleo-50 dark:bg-petroleo-950/40 border border-petroleo-200 dark:border-petroleo-800/50 space-y-2">
+          <div class="flex items-center justify-between text-xs text-petroleo-700 dark:text-petroleo-300">
             <span class="flex items-center gap-2">
-              <svg class="animate-spin w-4 h-4 text-blue-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin w-4 h-4 text-petroleo-600 dark:text-petroleo-300" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
@@ -203,12 +152,12 @@
             <span id="loading-timer" class="text-slate-500 dark:text-slate-400">0s</span>
           </div>
           <div class="w-full bg-slate-200 dark:bg-slate-900 h-1.5 rounded-full overflow-hidden">
-            <div id="loading-progress-bar" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-full rounded-full transition-all duration-500 w-1/4"></div>
+            <div id="loading-progress-bar" class="bg-petroleo-600 h-full rounded-full transition-all duration-500 w-1/4"></div>
           </div>
         </div>
 
         <!-- Error Banner -->
-        <div id="error-banner" class="hidden p-3.5 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/70 text-red-700 dark:text-red-200 text-xs font-mono">
+        <div id="error-banner" class="hidden p-3.5 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/70 text-red-700 dark:text-red-200 text-xs">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -233,11 +182,11 @@
               Boato taxa PIX
             </button>
           </div>
-          <button id="btn-submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 whitespace-nowrap" type="submit">
+          <button id="btn-submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-petroleo-600 hover:bg-petroleo-500 text-white font-bold text-sm tracking-wide transition-all duration-200 hover:shadow-sm active:scale-95 whitespace-nowrap" type="submit">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
             </svg>
-            <span id="btn-text">Analisar Verificação</span>
+            <span id="btn-text">Checar</span>
           </button>
         </div>
       </form>
@@ -245,7 +194,7 @@
     <!-- END: InteractiveAnalysisInputBox -->
 
     <!-- Telegram Core Banner CTA -->
-    <div class="mt-8 max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-gradient-to-r from-sky-50 via-slate-100 to-sky-50 dark:from-sky-950/60 dark:via-slate-900/70 dark:to-slate-900/60 border border-sky-200 dark:border-sky-800/40 backdrop-blur-sm shadow-sm">
+    <div class="mt-8 max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-petroleo-200 dark:border-petroleo-800/40 shadow-sm">
       <div class="flex items-center gap-3 text-left">
         <div class="w-10 h-10 rounded-full bg-telegram/20 flex items-center justify-center text-telegram flex-shrink-0">
           <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -257,7 +206,7 @@
           <p class="text-xs text-slate-500 dark:text-slate-400">Encaminhe prints, áudios e links para o bot @fn_tic_bot</p>
         </div>
       </div>
-      <a class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-telegram hover:bg-telegram-hover text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap glow-telegram" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
+      <a class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-telegram hover:bg-telegram-hover text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
         Abrir no Telegram
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -268,19 +217,19 @@
     <!-- Trust Badges & Numerical Indicators -->
     <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-8 border-t border-slate-200 dark:border-slate-800/70">
       <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/60 text-center shadow-sm">
-        <span class="block text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono">+21.9k</span>
+        <span class="block text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">+21.9k</span>
         <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Checagens indexadas</span>
       </div>
       <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/60 text-center shadow-sm">
-        <span class="block text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-cyan-400 font-mono">20</span>
+        <span class="block text-2xl sm:text-3xl font-extrabold text-petroleo-600 dark:text-petroleo-300">20</span>
         <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Portais &amp; Agências</span>
       </div>
       <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/60 text-center shadow-sm">
-        <span class="block text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono">100%</span>
+        <span class="block text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">100%</span>
         <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Código &amp; Recibo Auditável</span>
       </div>
       <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/60 text-center shadow-sm">
-        <span class="block text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">0%</span>
+        <span class="block text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">0%</span>
         <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Censura prévia / Neutro</span>
       </div>
     </div>
@@ -294,14 +243,14 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
       <!-- Narrative Left Column -->
       <div class="lg:col-span-5 space-y-6">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-mono text-slate-700 dark:text-slate-300">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
           Auditoria Aberta
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Você no controle da decisão: nunca um oráculo, sempre um relatório aberto.
         </h2>
         <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
-          Mecanismos convencionais impõem etiquetas sem explicar o motivo. O Checa-AI gera um laudo probabilístico em escala (baixa/média/alta), confrontando alegações com matérias originais e recibos transparentes para você tirar suas próprias conclusões.
+          Mecanismos convencionais impõem etiquetas sem explicar o motivo. O Checa AI gera um laudo probabilístico em escala (baixa/média/alta), confrontando alegações com matérias originais e recibos transparentes para você tirar suas próprias conclusões.
         </p>
         <ul class="space-y-4 pt-2">
           <li class="flex items-start gap-3">
@@ -338,7 +287,7 @@
 <section class="py-24 bg-white/70 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative transition-colors" id="metodologia">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto text-center mb-16">
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 dark:bg-cyan-950/70 text-blue-700 dark:text-cyan-300 text-xs font-mono font-medium border border-blue-200 dark:border-cyan-800/60 mb-4">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-petroleo-100 dark:bg-petroleo-950/70 text-petroleo-700 dark:text-petroleo-300 text-xs font-medium border border-petroleo-200 dark:border-petroleo-800/60 mb-4">
         Metodologia &amp; Pipeline em 7 Etapas
       </div>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
@@ -352,13 +301,13 @@
     <!-- Four Pillars Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Pillar 1 -->
-      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 dark:hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-cyan-950/60 border border-blue-200 dark:border-cyan-800/50 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-5 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-cyan-500 dark:group-hover:text-navy-950 transition-colors">
+      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-petroleo-500/50 dark:hover:border-petroleo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
+        <div class="w-12 h-12 rounded-xl bg-petroleo-100 dark:bg-petroleo-950/60 border border-petroleo-200 dark:border-petroleo-800/50 flex items-center justify-center text-petroleo-600 dark:text-petroleo-300 mb-5 group-hover:bg-petroleo-600 group-hover:text-white dark:group-hover:bg-petroleo-500 dark:group-hover:text-navy-950 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
         </div>
-        <span class="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold tracking-wider uppercase block mb-1">01 / Índice de Checagens</span>
+        <span class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold tracking-wider uppercase block mb-1">01 / Índice de Checagens</span>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Consulta Histórica</h3>
         <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           Busca instantânea (BM25 calibrado) no índice com mais de 21 mil desmentidos das 13 agências de checagem do catálogo nacional.
@@ -366,13 +315,13 @@
       </div>
 
       <!-- Pillar 2 -->
-      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 dark:hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-cyan-950/60 border border-blue-200 dark:border-cyan-800/50 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-5 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-cyan-500 dark:group-hover:text-navy-950 transition-colors">
+      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-petroleo-500/50 dark:hover:border-petroleo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
+        <div class="w-12 h-12 rounded-xl bg-petroleo-100 dark:bg-petroleo-950/60 border border-petroleo-200 dark:border-petroleo-800/50 flex items-center justify-center text-petroleo-600 dark:text-petroleo-300 mb-5 group-hover:bg-petroleo-600 group-hover:text-white dark:group-hover:bg-petroleo-500 dark:group-hover:text-navy-950 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
         </div>
-        <span class="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold tracking-wider uppercase block mb-1">02 / Descoberta Fresca</span>
+        <span class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold tracking-wider uppercase block mb-1">02 / Descoberta Fresca</span>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Busca na Web</h3>
         <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           Consultas neutras e direcionadas na web para cobrir notícias de última hora, com leitura de matérias integrais e respeito à janela temporal.
@@ -380,13 +329,13 @@
       </div>
 
       <!-- Pillar 3 -->
-      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 dark:hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-cyan-950/60 border border-blue-200 dark:border-cyan-800/50 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-5 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-cyan-500 dark:group-hover:text-navy-950 transition-colors">
+      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-petroleo-500/50 dark:hover:border-petroleo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
+        <div class="w-12 h-12 rounded-xl bg-petroleo-100 dark:bg-petroleo-950/60 border border-petroleo-200 dark:border-petroleo-800/50 flex items-center justify-center text-petroleo-600 dark:text-petroleo-300 mb-5 group-hover:bg-petroleo-600 group-hover:text-white dark:group-hover:bg-petroleo-500 dark:group-hover:text-navy-950 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
         </div>
-        <span class="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold tracking-wider uppercase block mb-1">03 / Corroboração</span>
+        <span class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold tracking-wider uppercase block mb-1">03 / Corroboração</span>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Multi-Veículos</h3>
         <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           Identificação de convergência e divergência: veículos independentes confirmando ou contestando o fato, evitando republicações duplicadas.
@@ -394,13 +343,13 @@
       </div>
 
       <!-- Pillar 4 -->
-      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 dark:hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-cyan-950/60 border border-blue-200 dark:border-cyan-800/50 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-5 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-cyan-500 dark:group-hover:text-navy-950 transition-colors">
+      <div class="p-6 rounded-2xl bg-slate-50 dark:bg-navy-950/80 border border-slate-200 dark:border-slate-800 hover:border-petroleo-500/50 dark:hover:border-petroleo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-sm group">
+        <div class="w-12 h-12 rounded-xl bg-petroleo-100 dark:bg-petroleo-950/60 border border-petroleo-200 dark:border-petroleo-800/50 flex items-center justify-center text-petroleo-600 dark:text-petroleo-300 mb-5 group-hover:bg-petroleo-600 group-hover:text-white dark:group-hover:bg-petroleo-500 dark:group-hover:text-navy-950 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
         </div>
-        <span class="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold tracking-wider uppercase block mb-1">04 / Decisão em Escala</span>
+        <span class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold tracking-wider uppercase block mb-1">04 / Decisão em Escala</span>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Propensão Ponderada</h3>
         <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           Cálculo probabilístico com log-odds simétrico e faixas transparentes. Redação 100% neutra por templates: o LLM nunca dita o resultado.
@@ -412,10 +361,10 @@
 <!-- END: MethodologySection -->
 
 <!-- BEGIN: TelegramAppSection -->
-<section class="py-24 bg-gradient-to-b from-slate-100 via-white to-slate-100 dark:from-navy-950 dark:via-slate-900 dark:to-navy-950 border-t border-slate-200 dark:border-slate-800 relative transition-colors" id="telegram-section">
+<section class="py-24 bg-slate-100 dark:bg-navy-950 border-t border-slate-200 dark:border-slate-800 relative transition-colors" id="telegram-section">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto text-center mb-16">
-      <div class="w-16 h-16 rounded-2xl bg-telegram/20 border border-telegram/30 flex items-center justify-center mx-auto mb-6 text-telegram glow-telegram">
+      <div class="w-16 h-16 rounded-2xl bg-telegram/20 border border-telegram/30 flex items-center justify-center mx-auto mb-6 text-telegram">
         <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
           <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.923z"></path>
         </svg>
@@ -429,20 +378,20 @@
     </div>
 
     <!-- Telegram Mockup Display -->
-    <div class="max-w-xl mx-auto bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl dark:shadow-2xl">
+    <div class="max-w-xl mx-auto bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm shadow-sm">
       <!-- Chat Header -->
       <div class="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
-        <div class="w-10 h-10 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold">
+        <div class="w-10 h-10 rounded-full bg-petroleo-600 dark:bg-petroleo-500 flex items-center justify-center text-white font-bold">
           CA
         </div>
         <div>
           <div class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-            Checa-AI Bot (@fn_tic_bot)
-            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            Checa AI Bot (@fn_tic_bot)
+            <svg class="w-4 h-4 text-petroleo-600 dark:text-petroleo-300" fill="currentColor" viewBox="0 0 20 20">
               <path clip-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
             </svg>
           </div>
-          <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">bot • checagem rápida com recibo auditável</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">bot • checagem rápida com recibo auditável</span>
         </div>
       </div>
 
@@ -453,7 +402,7 @@
           <div class="max-w-[85%] bg-telegram/15 dark:bg-telegram/20 border border-telegram/30 text-slate-900 dark:text-white text-xs sm:text-sm p-3.5 rounded-2xl rounded-tr-none">
             <p class="font-medium text-slate-600 dark:text-slate-300 mb-1 text-[11px]">Mensagem Encaminhada</p>
             <p>“Governo vai confiscar a poupança a partir de segunda-feira pós eleições! Compartilhe antes que apaguem!”</p>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 block text-right mt-1 font-mono">10:42</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 block text-right mt-1">10:42</span>
           </div>
         </div>
 
@@ -461,25 +410,25 @@
         <div class="flex justify-start">
           <div class="max-w-[90%] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white text-xs sm:text-sm p-4 rounded-2xl rounded-tl-none space-y-3 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <span class="font-mono text-blue-600 dark:text-blue-400 text-xs font-semibold">Checa-AI Laudo</span>
-              <span class="px-2 py-0.5 rounded text-[10px] bg-red-500/10 text-red-500 dark:text-red-400 font-mono border border-red-500/20 font-semibold">🔴 Alta Propensão</span>
+              <span class="text-petroleo-600 dark:text-petroleo-300 text-xs font-semibold">Checa AI Laudo</span>
+              <span class="px-2 py-0.5 rounded text-[10px] bg-red-500/10 text-red-500 dark:text-red-400 border border-red-500/20 font-semibold">🔴 Alta Propensão</span>
             </div>
             <p class="text-slate-700 dark:text-slate-300">
               Alta propensão de ser fake news — 2 fontes independentes contestam o que o texto afirma. Compare as fontes abaixo e tire sua própria conclusão.
             </p>
-            <div class="p-2.5 rounded bg-white dark:bg-slate-950 font-mono text-[11px] space-y-1 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+            <div class="p-2.5 rounded bg-white dark:bg-slate-950 text-[11px] space-y-1 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
               <div>• Base de checagens: <span class="text-emerald-600 dark:text-emerald-400 font-bold">Encontrado no índice</span></div>
-              <div>• Fontes: <span class="text-blue-600 dark:text-cyan-400 font-bold">G1 Fato ou Fake &amp; Agência Lupa</span></div>
+              <div>• Fontes: <span class="text-petroleo-600 dark:text-petroleo-300 font-bold">G1 Fato ou Fake &amp; Agência Lupa</span></div>
               <div>• Auditoria: <span class="text-slate-900 dark:text-white font-semibold">7 etapas concluídas com sucesso</span></div>
             </div>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 block text-right font-mono">10:42 • Processado em segundos</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 block text-right">10:42 • Processado em segundos</span>
           </div>
         </div>
       </div>
 
       <!-- Input Footer Simulator -->
       <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center">
-        <a class="w-full py-3 rounded-xl bg-telegram hover:bg-telegram-hover text-white font-bold text-sm text-center transition-all flex items-center justify-center gap-2 glow-telegram" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
+        <a class="w-full py-3 rounded-xl bg-telegram hover:bg-telegram-hover text-white font-bold text-sm text-center transition-all flex items-center justify-center gap-2" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
           <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
             <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.923z"></path>
           </svg>
@@ -487,7 +436,7 @@
         </a>
       </div>
     </div>
-    <p class="text-center text-xs text-slate-500 font-mono mt-6">
+    <p class="text-center text-xs text-slate-500 mt-6">
       Compatível com Telegram para iOS, Android, macOS, Windows e Web • 100% Gratuito
     </p>
   </div>
@@ -497,18 +446,18 @@
 <!-- BEGIN: PartnersAndCommitmentSection -->
 <section class="py-16 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-navy-950 transition-colors" id="agencias">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <span class="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-6">
+    <span class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 block mb-6">
       Interoperabilidade com ecossistemas de checagem e portais jornalísticos
     </span>
     <div class="flex flex-wrap justify-center items-center gap-6 sm:gap-10 opacity-70 grayscale hover:grayscale-0 transition duration-300">
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">AGÊNCIA LUPA</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">AOS FATOS</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">PROJETO COMPROVA</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">FATO OU FAKE (G1)</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">ESTADÃO VERIFICA</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">UOL CONFERE</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">BOATOS.ORG</div>
-      <div class="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">E-FARSAS</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">AGÊNCIA LUPA</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">AOS FATOS</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">PROJETO COMPROVA</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">FATO OU FAKE (G1)</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">ESTADÃO VERIFICA</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">UOL CONFERE</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">BOATOS.ORG</div>
+      <div class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 tracking-wider">E-FARSAS</div>
     </div>
   </div>
 </section>
@@ -522,12 +471,12 @@
       <!-- Manifesto & Brand (Nome TODO em azul) -->
       <div class="md:col-span-2 space-y-4">
         <div class="flex items-center gap-2">
-          <span class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-500">Checa-AI</span>
+          <svg class="w-8 h-8 text-petroleo-600 dark:text-petroleo-300" viewBox="4 7 93 91" fill="none" aria-hidden="true"><path d="M27 8H73C85.15 8 95 17.85 95 30V63C95 75.15 85.15 85 73 85H40L17 96L21 82.8C11.7 80.2 5 71.7 5 62V30C5 17.85 14.85 8 27 8Z" fill="currentColor"/><path d="M47 61C56.9411 61 65 52.9411 65 43C65 33.0589 56.9411 25 47 25C37.0589 25 29 33.0589 29 43C29 52.9411 37.0589 61 47 61Z" stroke="white" stroke-width="5.5"/><path d="M60 56L74 70" stroke="white" stroke-width="5.5" stroke-linecap="round"/></svg><span class="text-xl font-extrabold tracking-tight text-petroleo-600 dark:text-petroleo-300">Checa AI</span>
         </div>
         <p class="text-slate-600 dark:text-slate-400 text-sm max-w-md leading-relaxed">
           Iniciativa de tecnologia cívica para fortalecimento do discernimento crítico e combate à desinformação em escala. Construído sob as diretrizes de transparência algorítmica, neutralidade informacional e conformidade com a LGPD.
         </p>
-        <div class="pt-2 flex items-center gap-4 text-xs font-mono text-slate-500 dark:text-slate-400">
+        <div class="pt-2 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
           <span>Servidores no Brasil</span>
           <span>•</span>
           <span>Zero Logs Pessoais</span>
@@ -537,24 +486,24 @@
       </div>
       <!-- Links Rápidos -->
       <div class="space-y-3">
-        <h5 class="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-slate-200 font-semibold">Plataforma</h5>
+        <h5 class="text-xs uppercase tracking-wider text-slate-900 dark:text-slate-200 font-semibold">Plataforma</h5>
         <ul class="space-y-2 text-xs">
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='#metodologia'>Metodologia Detalhada</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='#agencias'>Agências e Portais Integrados</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='#relatorio'>Exemplo de Laudo Técnico</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-cyan-400 transition" href='https://t.me/fn_tic_bot' target="_blank" rel="noopener">Canal &amp; Bot no Telegram</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='https://mariadenis.github.io/crosscheckbr-site/' target="_blank" rel="noopener">Site Institucional</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#metodologia'>Metodologia Detalhada</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#agencias'>Agências e Portais Integrados</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='#relatorio'>Exemplo de Laudo Técnico</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition" href='https://t.me/fn_tic_bot' target="_blank" rel="noopener">Canal &amp; Bot no Telegram</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='https://mariadenis.github.io/crosscheckbr-site/' target="_blank" rel="noopener">Site Institucional</a></li>
         </ul>
       </div>
       <!-- Compliance e Governança -->
       <div class="space-y-3">
-        <h5 class="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-slate-200 font-semibold">Governança &amp; Código</h5>
+        <h5 class="text-xs uppercase tracking-wider text-slate-900 dark:text-slate-200 font-semibold">Governança &amp; Código</h5>
         <ul class="space-y-2 text-xs">
-          <li><a class="hover:text-blue-600 dark:hover:text-cyan-400 transition flex items-center gap-1.5 font-medium" href='https://github.com/thiago-cg/Checa-AI' target="_blank" rel="noopener">Repositório GitHub (Open Source) <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='https://mariadenis.github.io/crosscheckbr-site/' target="_blank" rel="noopener">Manifesto de Neutralidade</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='/portais'>Catálogo de Portais (JSON)</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='/progresso.json'>Progresso do Sistema</a></li>
-          <li><a class="hover:text-blue-600 dark:hover:text-white transition" href='/saude'>Status do Sistema (/saude)</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition flex items-center gap-1.5 font-medium" href='https://github.com/thiago-cg/Checa-AI' target="_blank" rel="noopener">Repositório GitHub (Open Source) <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='https://mariadenis.github.io/crosscheckbr-site/' target="_blank" rel="noopener">Manifesto de Neutralidade</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='/portais'>Catálogo de Portais (JSON)</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='/progresso.json'>Progresso do Sistema</a></li>
+          <li><a class="hover:text-petroleo-600 dark:hover:text-white transition" href='/saude'>Status do Sistema (/saude)</a></li>
         </ul>
       </div>
     </div>
@@ -564,7 +513,7 @@
       <div class="flex items-center gap-6">
         <a class="hover:text-slate-900 dark:hover:text-slate-300 transition" href='#metodologia'>Metodologia</a>
         <a class="hover:text-slate-900 dark:hover:text-slate-300 transition" href='#relatorio'>Transparência</a>
-        <a class="hover:text-blue-600 dark:hover:text-cyan-400 transition font-medium" href='https://github.com/thiago-cg/Checa-AI' target="_blank" rel="noopener">GitHub</a>
+        <a class="hover:text-petroleo-600 dark:hover:text-petroleo-300 transition font-medium" href='https://github.com/thiago-cg/Checa-AI' target="_blank" rel="noopener">GitHub</a>
         <a class="hover:text-slate-900 dark:hover:text-slate-300 transition" href='https://t.me/fn_tic_bot' target="_blank" rel="noopener">Telegram</a>
       </div>
     </div>
@@ -714,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (errorBanner) errorBanner.classList.remove('hidden');
         if (loadingBanner) loadingBanner.classList.add('hidden');
         if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Analisar Verificação';
+        if (btnText) btnText.textContent = 'Checar';
         return;
       }
 
@@ -723,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (loadingBanner) loadingBanner.classList.add('hidden');
       if (btn) btn.disabled = false;
-      if (btnText) btnText.textContent = 'Analisar Verificação';
+      if (btnText) btnText.textContent = 'Checar';
 
       // Scroll suave até o relatório
       const relSec = document.getElementById('relatorio');
@@ -738,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (errorBanner) errorBanner.classList.remove('hidden');
       if (loadingBanner) loadingBanner.classList.add('hidden');
       if (btn) btn.disabled = false;
-      if (btnText) btnText.textContent = 'Analisar Verificação';
+      if (btnText) btnText.textContent = 'Checar';
     }
   });
 
@@ -769,17 +718,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const tit = escapeHtml(f.titulo || '');
         const quote = escapeHtml(f.quote || '');
         const leitura = (f.corpo_lido ? '📄 texto lido' : ('📰 só manchete — ' + 'não analisada ' + 'integralmente'));
-        const veredito = f.veredito ? ` · <span class="text-blue-600 dark:text-cyan-400 font-semibold">${escapeHtml(f.veredito)}</span>` : '';
+        const veredito = f.veredito ? ` · <span class="text-petroleo-600 dark:text-petroleo-300 font-semibold">${escapeHtml(f.veredito)}</span>` : '';
         const quoteHtml = quote ? `<p class="text-xs text-slate-600 dark:text-slate-300 italic my-1.5 pl-2 border-l-2 border-slate-300 dark:border-slate-700">“${quote}”</p>` : '';
         const urlSafe = (f.url && (f.url.startsWith('http://') || f.url.startsWith('https://')))
-          ? `<a href='${escapeHtml(f.url)}' target="_blank" rel="noopener" class="text-xs font-mono text-blue-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 mt-2">Acessar fonte original →</a>`
-          : `<span class="text-xs font-mono text-slate-500">${escapeHtml(f.url || '')}</span>`;
+          ? `<a href='${escapeHtml(f.url)}' target="_blank" rel="noopener" class="text-xs text-petroleo-600 dark:text-petroleo-300 hover:underline inline-flex items-center gap-1 mt-2">Acessar fonte original →</a>`
+          : `<span class="text-xs text-slate-500">${escapeHtml(f.url || '')}</span>`;
 
         return `
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-sm">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
               <span class="font-bold text-slate-900 dark:text-white">${portal}</span>
-              <span class="text-xs font-mono text-slate-500 dark:text-slate-400">${leitura}${veredito}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">${leitura}${veredito}</span>
             </div>
             <p class="text-xs text-slate-700 dark:text-slate-300 font-medium">${tit}</p>
             ${quoteHtml}
@@ -791,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const etapasHtml = (rel.etapas || []).map(e => `
       <li class="flex items-start gap-2 text-xs">
-        <span class="text-emerald-600 dark:text-emerald-400 font-mono">✓</span>
+        <span class="text-emerald-600 dark:text-emerald-400">✓</span>
         <span class="text-slate-700 dark:text-slate-300"><strong>${escapeHtml(e.nome || '')}</strong>: ${escapeHtml(e.detalhe || '')}</span>
       </li>
     `).join('');
@@ -802,43 +751,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const guiaHtml = (rel.perguntas_guia || []).map(g => `
       <li class="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
-        <span class="text-blue-600 dark:text-cyan-400 font-bold">?</span>
+        <span class="text-petroleo-600 dark:text-petroleo-300 font-bold">?</span>
         <span>${escapeHtml(g)}</span>
       </li>
     `).join('');
 
     const avisoWeb = (rel.onde_encontrado === 'web')
-      ? '<p class="text-xs font-mono text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-3">Não encontrado na base de checagens históricas; resultado derivado de apuração jornalística aberta.</p>'
+      ? '<p class="text-xs text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-3">Não encontrado na base de checagens históricas; resultado derivado de apuração jornalística aberta.</p>'
       : '';
 
     relatorioArea.innerHTML = `
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-xl dark:shadow-2xl relative transition-colors">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors">
         <div class="flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
           <div>
-            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block">ID: #CAI-${Math.floor(10000 + Math.random() * 90000)} · ${escapeHtml(rel.versao || 'mvp-0.2.0')}</span>
+            
             <h4 class="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Laudo de Propensão de Desinformação</h4>
           </div>
           <div>
-            <span class="px-3 py-1 rounded-full font-mono text-xs font-semibold border ${badgeClass}">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}">
               ${propTxt}
             </span>
           </div>
         </div>
 
         <div class="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800">
-          <span class="text-xs font-mono text-slate-500 block mb-1">Conteúdo submetido para análise:</span>
-          <p class="text-sm text-slate-700 dark:text-slate-300 italic font-mono">“${escapeHtml(entradaTexto)}”</p>
+          <span class="text-xs text-slate-500 block mb-1">Conteúdo submetido para análise:</span>
+          <p class="text-sm text-slate-700 dark:text-slate-300 italic">“${escapeHtml(entradaTexto)}”</p>
         </div>
 
         <div class="mt-6 space-y-3">
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">${escapeHtml(rel.header || rel.propensao || '')}</h2>
-          <p class="text-sm font-semibold text-blue-600 dark:text-cyan-300">${escapeHtml(rel.why_1linha || '')}</p>
+          <p class="text-sm font-semibold text-petroleo-600 dark:text-petroleo-300">${escapeHtml(rel.why_1linha || '')}</p>
           ${avisoWeb}
           <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${escapeHtml(rel.justificativa || '')}</p>
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-          <span class="text-xs font-mono text-slate-500 dark:text-slate-400 block mb-3 uppercase tracking-wider font-semibold">
+          <span class="text-xs text-slate-500 dark:text-slate-400 block mb-3 uppercase tracking-wider font-semibold">
             O que as fontes dizem:
           </span>
           <div class="space-y-3">
@@ -848,13 +797,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ${guiaHtml ? `
         <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
-          <span class="text-xs font-mono text-slate-500 dark:text-slate-400 block mb-2 uppercase tracking-wider font-semibold">Para avaliar você mesmo:</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400 block mb-2 uppercase tracking-wider font-semibold">Para avaliar você mesmo:</span>
           <ul class="space-y-1.5">${guiaHtml}</ul>
         </div>` : ''}
 
         <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
           <details class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-            <summary class="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold cursor-pointer select-none">
+            <summary class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold cursor-pointer select-none">
               ▸ Como chegamos aqui (Recibo por etapas auditável)
             </summary>
             <ul class="mt-3 space-y-1.5 pl-2">${etapasHtml}</ul>
@@ -862,14 +811,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
           ${limsHtml ? `
           <details class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-            <summary class="text-xs font-mono text-slate-500 dark:text-slate-400 font-semibold cursor-pointer select-none">
+            <summary class="text-xs text-slate-500 dark:text-slate-400 font-semibold cursor-pointer select-none">
               ▸ Limitações desta análise
             </summary>
             <ul class="mt-3 list-disc pl-5 space-y-1">${limsHtml}</ul>
           </details>` : ''}
         </div>
 
-        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
           <span>Relatório gerado em ${escapeHtml(rel.gerado_em || '')}</span>
           <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Auditoria IFCN Ativa</span>
         </div>
