@@ -300,6 +300,18 @@ def limitacoes_para_pessoa(limitacoes: List[str]) -> List[str]:
     return saida
 
 
+def preparar_para_pessoa(rel: Any) -> Any:
+    """Preenche no relatório os campos para a pessoa (a página em JavaScript usa só o JSON)."""
+    direcoes = direcoes_por_url(getattr(rel, "decisao", None))
+    rel.resumo_pessoa = resumo_para_pessoa(rel.decisao, rel.why_1linha or rel.justificativa)
+    rel.limitacoes_pessoa = limitacoes_para_pessoa(rel.limitacoes)
+    rel.etapas_pessoa = [f"{STATUS_ETAPA.get(e.status, '')} {NOMES_ETAPAS.get(e.nome, e.nome)}".strip()
+                         for e in (rel.etapas or []) if e.nome in ETAPAS_PARA_PESSOA]
+    for f in rel.fontes or []:
+        f.selo_visivel = mostra_selo(f, direcoes)
+    return rel
+
+
 def resumo_para_pessoa(decisao: Any, reserva: str = "") -> str:
     """Uma explicação em português comum: o motivo da decisão (já escrito para pessoas), com a lembrança
     de que não é veredito (RF14). Sem `decisao` (relatório antigo), usa o texto de reserva."""
