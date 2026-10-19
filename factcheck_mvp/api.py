@@ -46,7 +46,7 @@ except Exception:  # telegram opcional p/ API/web (bot não quebra API)
     LINK_SEM_TEXTO_MSG = "Não consegui ler esse link. Cole aqui o título e o texto da notícia."
 
 log = logging.getLogger("factcheck.api")
-app = FastAPI(title="Checa-AI", version="0.2.0")
+app = FastAPI(title="Checa AI", version="0.2.0")
 
 _pipe: Pipeline | None = None
 _lock = threading.Lock()
@@ -236,64 +236,64 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_ms
                          f"{esc(e.detalhe)}</li>" for e in rel.etapas)
         lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes[:5])
         guia = "".join(f"<li>{esc(p)}</li>" for p in rel.perguntas_guia)
-        aviso = ("<p class='text-xs font-mono text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-2'>"
+        aviso = ("<p class='text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-2'>"
                  "<i>Não encontrado na base de checagens; resultado de outras fontes</i></p>"
                  if rel.onde_encontrado == "web" else "")
 
         rel_bloco = (
-            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-xl dark:shadow-2xl relative transition-colors'>"
+            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors'>"
             f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
-            f"<div><span class='text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block'>ID de Análise: #CAI-RELATORIO</span>"
-            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Laudo de Propensão de Desinformação</h4></div>"
-            f"<div><span class='px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-cyan-300 font-mono text-xs font-semibold'>{esc(rel.header or rel.propensao)}</span></div>"
+            f"<div>"
+            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Resultado da checagem</h4></div>"
+            f"<div><span class='px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-petroleo-600 dark:text-petroleo-300 text-xs font-semibold'>{esc(rel.header or rel.propensao)}</span></div>"
             f"</div>"
             f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
-            f"<span class='text-xs font-mono text-slate-500 block mb-1'>Conteúdo submetido para análise:</span>"
-            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic font-mono'>“{esc(entrada_txt)}”</p></div>"
+            f"<span class='text-xs text-slate-500 block mb-1'>Conteúdo submetido para análise:</span>"
+            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic '>“{esc(entrada_txt)}”</p></div>"
             f"<h2 class='text-xl font-bold text-slate-900 dark:text-white mt-6'>{esc(rel.header or rel.propensao)}</h2>"
-            f"<p class='text-blue-600 dark:text-cyan-300 font-semibold my-1'><b>{esc(rel.why_1linha or '')}</b></p>"
+            f"<p class='text-petroleo-600 dark:text-petroleo-300 font-semibold my-1'><b>{esc(rel.why_1linha or '')}</b></p>"
             f"{aviso}"
             f"<p class='text-slate-700 dark:text-slate-300 leading-relaxed my-3'>{esc(rel.justificativa)}</p>"
             f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>O que as fontes dizem</h3>"
             f"{fontes or '<p class=\"text-sm text-slate-500 dark:text-slate-400 italic\">Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
             f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Para avaliar você mesmo</h3><ul class='list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1'>{guia}</ul>"
-            f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-blue-600 dark:text-cyan-400'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
+            f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-petroleo-600 dark:text-petroleo-300'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
             f"{_descontos_html(rel.decisao)}</details>"
             f"<details class='mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-slate-500 dark:text-slate-400'>Limitações desta análise</summary><ul class='mt-2 list-disc pl-5 space-y-1 text-slate-500 dark:text-slate-400'>{lims}</ul></details>"
             f"</div>"
         )
     else:
         rel_bloco = (
-            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-xl dark:shadow-2xl relative transition-colors'>"
+            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors'>"
             f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
-            f"<div><span class='text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block'>ID de Análise: #CAI-EXEMPLO</span>"
-            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Laudo de Propensão de Desinformação</h4></div>"
-            f"<div><span class='px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold'>Exemplo Demonstrativo</span></div>"
+            f"<div>"
+            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Resultado da checagem</h4></div>"
+            f"<div><span class='px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold'>Exemplo Demonstrativo</span></div>"
             f"</div>"
             f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
-            f"<span class='text-xs font-mono text-slate-500 block mb-1'>Conteúdo de demonstração:</span>"
-            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic font-mono'>“ATENÇÃO: Banco Central vai bloquear chaves PIX que não pagarem taxa de recadastramento até hoje às 23:59. Acesse o link oficial para regularizar...”</p></div>"
+            f"<span class='text-xs text-slate-500 block mb-1'>Conteúdo de demonstração:</span>"
+            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic '>“ATENÇÃO: Banco Central vai bloquear chaves PIX que não pagarem taxa de recadastramento até hoje às 23:59. Acesse o link oficial para regularizar...”</p></div>"
             f"<div class='mt-6 space-y-3'>"
             f"<h2 class='text-xl font-bold text-slate-900 dark:text-white'>🟡 Propensão média de ser fake news</h2>"
-            f"<p class='text-blue-600 dark:text-cyan-300 font-semibold'><b>Fontes independentes esclarecem a questão cadastral.</b></p>"
+            f"<p class='text-petroleo-600 dark:text-petroleo-300 font-semibold'><b>Fontes independentes esclarecem a questão cadastral.</b></p>"
             f"<p class='text-slate-700 dark:text-slate-300 leading-relaxed'>O Banco Central e agências de checagem catalogadas confirmam que não há qualquer taxa associada à manutenção ou regularização de chaves PIX.</p>"
             f"</div>"
             f"<div class='mt-8 pt-6 border-t border-slate-200 dark:border-slate-800'>"
-            f"<h3 class='text-xs font-mono text-slate-500 dark:text-slate-400 block mb-3 uppercase tracking-wider font-semibold'>Checagens Correspondentes Encontradas:</h3>"
+            f"<h3 class='text-xs text-slate-500 dark:text-slate-400 block mb-3 uppercase tracking-wider font-semibold'>Checagens Correspondentes Encontradas:</h3>"
             f"<div class='space-y-3'>"
             f"<div class='p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4'>"
-            f"<div><div class='flex items-center gap-2 mb-1'><span class='text-xs font-bold text-slate-900 dark:text-white'>Agência Lupa</span><span class='text-[10px] text-slate-500 font-mono'>Desmentido catalogado</span></div>"
+            f"<div><div class='flex items-center gap-2 mb-1'><span class='text-xs font-bold text-slate-900 dark:text-white'>Agência Lupa</span><span class='text-[10px] text-slate-500 '>Desmentido catalogado</span></div>"
             f"<p class='text-xs text-slate-700 dark:text-slate-300'>Selo da Lupa: FALSO — O Banco Central esclarece que não cobra taxas para o PIX.</p></div>"
-            f"<span class='text-xs font-mono text-blue-600 dark:text-cyan-400 font-medium'>Auditado</span></div>"
+            f"<span class='text-xs text-petroleo-600 dark:text-petroleo-300 font-medium'>Auditado</span></div>"
             f"<div class='p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4'>"
-            f"<div><div class='flex items-center gap-2 mb-1'><span class='text-xs font-bold text-slate-900 dark:text-white'>Aos Fatos</span><span class='text-[10px] text-slate-500 font-mono'>Desmentido catalogado</span></div>"
+            f"<div><div class='flex items-center gap-2 mb-1'><span class='text-xs font-bold text-slate-900 dark:text-white'>Aos Fatos</span><span class='text-[10px] text-slate-500 '>Desmentido catalogado</span></div>"
             f"<p class='text-xs text-slate-700 dark:text-slate-300'>Site clone simula página governamental para capturar credenciais bancárias.</p></div>"
-            f"<span class='text-xs font-mono text-blue-600 dark:text-cyan-400 font-medium'>Auditado</span></div>"
+            f"<span class='text-xs text-petroleo-600 dark:text-petroleo-300 font-medium'>Auditado</span></div>"
             f"</div></div>"
             f"</div>"
         )
 
-    msg_erro = f"<div class='p-3.5 rounded-xl bg-red-950/60 border border-red-800/70 text-red-200 text-xs font-mono my-2'><b>{esc(erro_msg)}</b></div>" if erro_msg else ""
+    msg_erro = f"<div class='p-3.5 rounded-xl bg-red-950/60 border border-red-800/70 text-red-200 text-xs my-2'><b>{esc(erro_msg)}</b></div>" if erro_msg else ""
 
     if template:
         html_out = template
@@ -303,8 +303,8 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_ms
         return html_out
 
     # Fallback caso o arquivo de template não seja encontrado
-    return (f"<html><head><meta charset='utf-8'><title>Checa-AI</title></head><body>"
-            f"<h1>Checa-AI</h1>{msg_erro}{rel_bloco}</body></html>")
+    return (f"<html><head><meta charset='utf-8'><title>Checa AI</title></head><body>"
+            f"<h1>Checa AI</h1>{msg_erro}{rel_bloco}</body></html>")
 
 
 @app.get("/", response_class=HTMLResponse)
