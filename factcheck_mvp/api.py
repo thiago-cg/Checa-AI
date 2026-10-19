@@ -46,7 +46,7 @@ except Exception:  # telegram opcional p/ API/web (bot não quebra API)
     LINK_SEM_TEXTO_MSG = "Não consegui ler esse link. Cole aqui o título e o texto da notícia."
 
 log = logging.getLogger("factcheck.api")
-app = FastAPI(title="Checagem cruzada de fatos (MVP)", version="0.2.0")
+app = FastAPI(title="Checa-AI", version="0.2.0")
 
 _pipe: Pipeline | None = None
 _lock = threading.Lock()
@@ -184,21 +184,20 @@ def _link_html(url: str) -> str:
     return html.escape(u[:80])
 
 
-def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None) -> str:
+def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_msg: str = "") -> str:
+    from pathlib import Path
     from .agregador import (NOMES_ETAPAS, STATUS_ETAPA, data_publicacao_exibida, direcoes_por_url,
                             linha_raciocinio, postura_legivel, rotulo_selo, texto_de_linha)
     from .confiabilidade import ROTULO
     esc = html.escape
-    corpo = f"<form method='post' action='/checar-web'>" \
-        f"<textarea name='conteudo' rows='4' style='width:100%' placeholder='Cole o texto, o título ou o link da notícia (pode ser um “ouvi dizer que…”)'>{esc(entrada_txt)}</textarea><br/>" \
-        f"<button type='submit'>Analisar</button></form><hr/>"
+    tmpl_path = Path(__file__).resolve().parent / "templates" / "index.html"
+    template = tmpl_path.read_text(encoding="utf-8") if tmpl_path.exists() else ""
+
     if rel:
-        # Mesma regra do bot: julgadas como fora do tema não aparecem como evidência.
         direcoes = direcoes_por_url(rel.decisao)
         nao_lidas = _urls_nao_analisadas(rel)
         uteis = [f for f in rel.fontes if f.relevante is not False][:5]
-        cor = {"contesta o que o texto afirma": "#b42318", "confirma o que o texto afirma": "#067647"}
-        # E4: mesma regra do bot (ver telegram_bot.formatar): `decisao` validado pelo schema, sem try.
+        cor = {"contesta o que o texto afirma": "#f87171", "confirma o que o texto afirma": "#4ade80"}
         _dec = rel.decisao or {}
         _descontadas = {x.get("url") for x in _dec.get("descontos_temporais", []) or [] if x.get("url")}
 
@@ -207,27 +206,22 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None) -> str:
             if bool(getattr(f, "corpo_lido", False)) and f.url not in nao_lidas:
                 leitura = "📄 texto lido"
             else:
-                # E3: só título/snippet não foi analisada integralmente (não vota).
                 leitura = "📰 só manchete — não analisada integralmente"
-            # E4 Task 6: aviso neutro de data por fonte (sobre DATAS, nunca veracidade; sem bits).
             _r = getattr(f, "relevancia_temporal", None)
             _linha_data = ""
             if (_r is not None and _r < 1.0) or (f.url in _descontadas):
-                # M5: data relativa da página ("há 3 dias") sai aproximada, não como data exata.
                 _dtxt = data_publicacao_exibida(getattr(f, "data_pub", None), getattr(f, "data_pub_precisao", None),
                                                 getattr(f, "data_pub_bruta", None))
                 if _dtxt:
                     _linha_data = f"<br/>📅 {esc(_dtxt)} · anterior ao período do texto"
                 else:
                     _linha_data = "<br/>📅 anterior ao período do texto"
-            # B1a: porquê do avaliador, atribuído e escapado; só quando há raciocínio.
             _rac = linha_raciocinio(getattr(f, "raciocinio", None))
-            _html_rac = f"<span style='color:#444'>{esc(_rac)}</span><br/>" if _rac else ""
-            # I1: título e citação de página entram achatados (uma linha), antes do escape.
+            _html_rac = f"<span class='text-slate-500 dark:text-slate-400 block mt-1'>{esc(_rac)}</span><br/>" if _rac else ""
             _cit = texto_de_linha(f.quote)[:300]
-            return (f"<div style='border:1px solid #ccc;border-radius:6px;padding:8px;margin:6px 0'>"
+            return (f"<div class='p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 my-3 text-sm'>"
                     f"<b>{esc(texto_de_linha(f.portal_nome) or 'web')}</b> "
-                    f"<span style='color:{cor.get(post, '#555')}'>{esc(post)}</span>"
+                    f"<span style='color:{cor.get(post, '#94a3b8')}'>{esc(post)}</span>"
                     f"{' · ' + esc(texto_de_linha(rotulo_selo(f))) if f.veredito else ''}"
                     f" · {leitura}"
                     f"{' · ' + esc(ROTULO[f.confiabilidade]) if f.confiabilidade in ROTULO else ''}<br/>"
@@ -235,31 +229,82 @@ def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None) -> str:
                     f"{'<i>“' + esc(_cit) + '”</i><br/>' if _cit else ''}"
                     f"{_html_rac}"
                     f"{_linha_data}"
-                    f"{_link_html(f.url)}</div>")
+                    f"<br/>{_link_html(f.url)}</div>")
+
         fontes = "".join(_cartao(f) for f in uteis)
         etapas = "".join(f"<li>{STATUS_ETAPA.get(e.status, '')} <b>{esc(NOMES_ETAPAS.get(e.nome, e.nome))}</b>: "
                          f"{esc(e.detalhe)}</li>" for e in rel.etapas)
         lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes[:5])
         guia = "".join(f"<li>{esc(p)}</li>" for p in rel.perguntas_guia)
-        aviso = ("<p><i>Não encontrado na base de checagens; resultado de outras fontes</i></p>"
+        aviso = ("<p class='text-xs font-mono text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-2'>"
+                 "<i>Não encontrado na base de checagens; resultado de outras fontes</i></p>"
                  if rel.onde_encontrado == "web" else "")
-        corpo += (f"<h2>{esc(rel.header or rel.propensao)}</h2>"
-                  f"<p><b>{esc(rel.why_1linha or '')}</b></p>"
-                  f"{aviso}"
-                  f"<p>{esc(rel.justificativa)}</p>"
-                  f"<h3>O que as fontes dizem</h3>"
-                  f"{fontes or '<p>Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
-                  f"<h3>Para avaliar você mesmo</h3><ul>{guia}</ul>"
-                  f"<details><summary>Como chegamos aqui</summary><ul>{etapas}</ul>"
-                  f"{_descontos_html(rel.decisao)}</details>"
-                  f"<details><summary>Limitações desta análise</summary><ul>{lims}</ul></details>")
-    return ("<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
-            "<title>CrossCheckBR</title></head>"
-            f"<body style='font-family:sans-serif;max-width:800px;margin:20px auto;padding:0 16px'>"
-            f"<h1>CrossCheckBR — isso pode ser fake news?</h1>"
-            f"<p>Cole o que você recebeu. Estimamos a propensão de ser fake news e mostramos o que "
-            f"os veículos e agências de checagem dizem. Não damos veredito: você decide.</p>"
-            f"{corpo}</body></html>")
+
+        rel_bloco = (
+            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-xl dark:shadow-2xl relative transition-colors'>"
+            f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
+            f"<div><span class='text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block'>ID de Análise: #CAI-RELATORIO</span>"
+            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Laudo de Propensão de Desinformação</h4></div>"
+            f"<div><span class='px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-cyan-300 font-mono text-xs font-semibold'>{esc(rel.header or rel.propensao)}</span></div>"
+            f"</div>"
+            f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
+            f"<span class='text-xs font-mono text-slate-500 block mb-1'>Conteúdo submetido para análise:</span>"
+            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic font-mono'>“{esc(entrada_txt)}”</p></div>"
+            f"<h2 class='text-xl font-bold text-slate-900 dark:text-white mt-6'>{esc(rel.header or rel.propensao)}</h2>"
+            f"<p class='text-blue-600 dark:text-cyan-300 font-semibold my-1'><b>{esc(rel.why_1linha or '')}</b></p>"
+            f"{aviso}"
+            f"<p class='text-slate-700 dark:text-slate-300 leading-relaxed my-3'>{esc(rel.justificativa)}</p>"
+            f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>O que as fontes dizem</h3>"
+            f"{fontes or '<p class=\"text-sm text-slate-500 dark:text-slate-400 italic\">Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
+            f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Para avaliar você mesmo</h3><ul class='list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1'>{guia}</ul>"
+            f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-blue-600 dark:text-cyan-400'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
+            f"{_descontos_html(rel.decisao)}</details>"
+            f"<details class='mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-slate-500 dark:text-slate-400'>Limitações desta análise</summary><ul class='mt-2 list-disc pl-5 space-y-1 text-slate-500 dark:text-slate-400'>{lims}</ul></details>"
+            f"</div>"
+        )
+    else:
+        rel_bloco = (
+            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-xl dark:shadow-2xl relative transition-colors'>"
+            f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
+            f"<div><span class='text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block'>ID de Análise: #CAI-EXEMPLO</span>"
+            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Laudo de Propensão de Desinformação</h4></div>"
+            f"<div><span class='px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-mono text-xs font-semibold'>Exemplo Demonstrativo</span></div>"
+            f"</div>"
+            f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
+            f"<span class='text-xs font-mono text-slate-500 block mb-1'>Conteúdo de demonstração:</span>"
+            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic font-mono'>“ATENÇÃO: Banco Central vai bloquear chaves PIX que não pagarem taxa de recadastramento até hoje às 23:59. Acesse o link oficial para regularizar...”</p></div>"
+            f"<div class='mt-6 space-y-3'>"
+            f"<h2 class='text-xl font-bold text-slate-900 dark:text-white'>🟡 Propensão média de ser fake news</h2>"
+            f"<p class='text-blue-600 dark:text-cyan-300 font-semibold'><b>Fontes independentes esclarecem a questão cadastral.</b></p>"
+            f"<p class='text-slate-700 dark:text-slate-300 leading-relaxed'>O Banco Central e agências de checagem catalogadas confirmam que não há qualquer taxa associada à manutenção ou regularização de chaves PIX.</p>"
+            f"</div>"
+            f"<div class='mt-8 pt-6 border-t border-slate-200 dark:border-slate-800'>"
+            f"<h3 class='text-xs font-mono text-slate-500 dark:text-slate-400 block mb-3 uppercase tracking-wider font-semibold'>Checagens Correspondentes Encontradas:</h3>"
+            f"<div class='space-y-3'>"
+            f"<div class='p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4'>"
+            f"<div><div class='flex items-center gap-2 mb-1'><span class='text-xs font-bold text-slate-900 dark:text-white'>Agência Lupa</span><span class='text-[10px] text-slate-500 font-mono'>Desmentido catalogado</span></div>"
+            f"<p class='text-xs text-slate-700 dark:text-slate-300'>Selo da Lupa: FALSO — O Banco Central esclarece que não cobra taxas para o PIX.</p></div>"
+            f"<span class='text-xs font-mono text-blue-600 dark:text-cyan-400 font-medium'>Auditado</span></div>"
+            f"<div class='p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4'>"
+            f"<div><div class='flex items-center gap-2 mb-1'><span class='text-xs font-bold text-slate-900 dark:text-white'>Aos Fatos</span><span class='text-[10px] text-slate-500 font-mono'>Desmentido catalogado</span></div>"
+            f"<p class='text-xs text-slate-700 dark:text-slate-300'>Site clone simula página governamental para capturar credenciais bancárias.</p></div>"
+            f"<span class='text-xs font-mono text-blue-600 dark:text-cyan-400 font-medium'>Auditado</span></div>"
+            f"</div></div>"
+            f"</div>"
+        )
+
+    msg_erro = f"<div class='p-3.5 rounded-xl bg-red-950/60 border border-red-800/70 text-red-200 text-xs font-mono my-2'><b>{esc(erro_msg)}</b></div>" if erro_msg else ""
+
+    if template:
+        html_out = template
+        html_out = html_out.replace("{{ CONTEUDO }}", esc(entrada_txt))
+        html_out = html_out.replace("{{ MENSAGEM_ERRO_HTML }}", msg_erro)
+        html_out = html_out.replace("{{ RELATORIO_HTML }}", rel_bloco)
+        return html_out
+
+    # Fallback caso o arquivo de template não seja encontrado
+    return (f"<html><head><meta charset='utf-8'><title>Checa-AI</title></head><body>"
+            f"<h1>Checa-AI</h1>{msg_erro}{rel_bloco}</body></html>")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -270,24 +315,21 @@ def home():
 @app.post("/checar-web", response_class=HTMLResponse)
 async def checar_web(request: Request, conteudo: str = Form(...)):
     if not _rate_ok(request):
-        return HTMLResponse(_render_html(conteudo)
-                            + "<p style='color:#a00'><b>Muitas checagens; "
-                              "tente de novo em instantes.</b></p>", status_code=429)
+        return HTMLResponse(_render_html(conteudo, erro_msg="Muitas checagens; tente de novo em instantes."), status_code=429)
     try:
         entrada = classificar_entrada(conteudo)
     except Exception:
-        return HTMLResponse(_render_html(conteudo), status_code=400)
+        return HTMLResponse(_render_html(conteudo, erro_msg="Entrada inválida."), status_code=400)
     try:
         async with asyncio.timeout(180):
             pronta = await _ler_link(entrada)
             if pronta is None:
-                return HTMLResponse(_render_html(conteudo) + "<p style='color:#a00'><b>"
-                                    + html.escape(LINK_SEM_TEXTO_MSG) + "</b></p>", status_code=422)
+                return HTMLResponse(_render_html(conteudo, erro_msg=LINK_SEM_TEXTO_MSG), status_code=422)
             rel = await pipeline().executar(pronta)
         return HTMLResponse(_render_html(conteudo, rel))
     except Exception:
         log.exception("falha no pipeline web")
-        return HTMLResponse(_render_html(conteudo), status_code=502)
+        return HTMLResponse(_render_html(conteudo, erro_msg="Falha no pipeline web"), status_code=502)
 
 
 @app.get("/progresso.json")
