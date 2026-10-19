@@ -37,9 +37,11 @@ def test_r1_nao_vale_para_agencia_nao_curada():
     assert d.log_odds < 1.0  # peso de site pouco acessado
 
 
-def test_sustenta_de_agencia_nao_ganha_peso_extra():
+def test_r1_simetrico_sustenta_de_agencia_pesa_como_selo():
+    """R1 simétrico (19/10): a confirmação em voz própria de agência curada crava sozinha, como a contestação."""
     d = decidir(_ev([_it("https://ag.test/a", "SUSTENTA", agencia=True)]))
-    assert d.log_odds == -1.0
+    assert d.log_odds == -1.5 and d.nivel == "baixa"
+    assert d.votos[0].motivo == "postura SUSTENTA (agência)"
 
 
 def test_r11_sustenta_de_nao_agencia_nao_vota_quando_agencia_refuta():
@@ -64,7 +66,7 @@ def test_r11_sustenta_de_outra_agencia_continua_votando():
     itens = [_it("https://ag1.test/a", "REFUTA", agencia=True),
              _it("https://ag2.test/a", "SUSTENTA", agencia=True)]
     d = decidir(_ev(itens))
-    assert not d.posturas_suprimidas and d.log_odds == 0.5  # +1,5 -1,0
+    assert not d.posturas_suprimidas and d.log_odds == 0.0  # +1,5 -1,5 (R1 simétrico, 19/10)
 
 
 def test_r11_vale_por_afirmacao():

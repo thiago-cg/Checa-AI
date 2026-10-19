@@ -541,3 +541,41 @@ agentes Sonnet em paralelo (worktrees), integrados por merge; **tudo que muda de
   chaves não chegou a trocar de chave ao vivo (a chave 1 não se esgotou); coberto só por testes. Gasto: ~190 buscas.
 - **Verificação:** pytest 1.226 passed; `eval.decisao` a3-dev inalterado (acerto 0,1884, erro grave 0). Nenhum caso,
   rótulo, gabarito ou baseline alterado. Holdout não rodado.
+
+## 2026-10-19 — Agregador: monotonicidade, R1 simétrico, R11 com data, superação temporal e adjudicador
+
+- **Hipótese.** Nos 869 runs de `runs/`, os 22 `verdadeiro → média` da simulação têm **zero REFUTA**: 1–2 votos
+  SUSTENTA de 0,6–1,0, abaixo de τ. O lado falso é simétrico (os 24 `falso → média` são 1 voto só), mas o mundo não:
+  boato tem agência dizendo "é falso" (R1: 1,5, crava sozinha) e notícia verdadeira quase nunca tem agência confirmando.
+  Dois defeitos de lógica: (a) conjunção não monotônica — com todas as partes confirmadas valia `max(L_a)`, então achar
+  UMA fonte confirmando uma parte de detalhe levava baixa → média (run 20261014-151128, Lula/Flávio/6x1: 8 clusters
+  confirmam, 1 contesta, saía média); (b) a R11 anulava confirmações POSTERIORES à checagem da agência (Lupa 20/09 ×
+  g1/Folha 14/10 sobre "o Senado aprovou o fim da 6x1" dava **alta**, erro grave quando a situação mudou).
+- **Mudanças** (`decisao.py`, função pura):
+  - M1: sem parte contestada, vale a mais fraca entre as decisivas (L_a ≤ −τ) e as fracas MISTAS (com voto que
+    contesta); a parte fraca só confirmada conta como parte sem voto. Propriedade testada (40 sementes): acrescentar
+    SUSTENTA nunca sobe o nível; acrescentar REFUTA nunca desce. A justificativa diz qual parte tem confirmação fraca.
+  - R1 simétrico: postura SUSTENTA de agência curada também pesa 1,5 (`trava_indice` trata as duas como do índice).
+  - R11t: a R11 só anula SUSTENTA do mesmo período (até `R11_FOLGA_DIAS` = 3 dias depois da checagem); a posterior
+    vota (`posturas_posteriores`) e o conflito vai a média. Afirmação de "evento"/"atemporal" ou data ausente: como antes.
+  - S1 (superação, decisão da usuária de 19/10: a propensão vale para a data do conteúdo, senão a da consulta; mostrar
+    a linha do tempo): em afirmação de "estado", voto superado por fonte confiável posterior que relata a mudança com
+    citação conferida não vota; mudança posterior à data do conteúdo também não. `superacoes`, `linha_do_tempo` e frase
+    neutra na justificativa. Sem relato de mudança não há superação (boato reciclado continua conflito).
+  - M3: motivo da média separa cobertura ("falta uma segunda fonte independente confiável") de conflito ("fontes
+    divergem") e de datas ("a situação pode ter mudado").
+  - Adjudicador (`adjudicador.py`, flag `ADJUDICADOR`, **padrão 0**): 1 chamada LLM por afirmação antes da
+    autoconsistência; devolve tipo temporal, `vale_em`, `relata_mudanca` e revisão de classe. Validador: RELATA→posição
+    só com citação conferida; posição→RELATA livre; SUSTENTA↔REFUTA vira RELATA; K>1 exige unanimidade para criar
+    posição ou mudança. Nunca muda o nível. `pipeline` passa `data_consulta` só com ele ligado.
+  - Sintetizador: SUSTENTA × RELATA deixou de ser "conflito" por si (prompt mudou: cassetes do sintetizador precisam
+    ser regravados; em replay ele cai em `manter`).
+- **Medição (nível 0, sem rede).** Replay de `decidir` sobre o evento `evidencias` dos 829 runs rotulados pela
+  simulação: antes = depois (acerto 478/829 = 57,7%, erro grave 1, 22 `verdadeiro → média`). Os 22 são de afirmação
+  única com fonte não-agência e a fonte do caso deixada de fora, onde M1/R1/R11t não atuam; a cobertura de evidência
+  continua o gargalo. Sobre todos os ~850 runs com evidência, só 1 muda de nível: 20261014-151128 média → baixa.
+  `eval.decisao` a3-dev inalterado (acerto 0,1884, erro grave 0). pytest 1.226 → 1.302 passed (16 testes editados
+  por mudança deliberada de regra: R1 simétrico e M1; 76 novos em `test_decisao_temporal.py` e `test_adjudicador.py`).
+- **Não medido:** o adjudicador e a superação com LLM real (precisa `record`: prompt novo); não há caso de "fato que
+  mudou" no gold — falta criar a categoria com rótulo valendo na data de referência. Holdout não rodado. Baseline não
+  atualizado. Nenhum caso, rótulo ou gabarito alterado.

@@ -28,6 +28,7 @@ from . import (afirmacoes, aplicabilidade, avaliador, confiabilidade, config, co
 from . import agente as _agente
 from . import observabilidade
 from . import sintetizador  # Missão F / A2
+from . import adjudicador  # 19/10: corrige a evidência (classe, tempo) antes da decisão
 from .agregador import perguntas_guia, texto_de_linha
 from .aprofundar import aprofundar
 from .catalogo import Catalogo
@@ -696,7 +697,16 @@ class Pipeline:
                         for a, (janela, marco) in zip(afs, marcas_af)],
             itens=itens, vago=eh_vago, opiniao=eh_opiniao, rumor=eh_rumor, juiz_disponivel=juiz_ok,
             n_lidas=_contar_lidas(pecas), n_consultadas=len(pecas), texto_usuario=texto_base,
-            data_referencia=ref)
+            data_referencia=ref,
+            # S1 (decisão da usuária, 19/10): sem data do conteúdo, a superação vale para a data da consulta. Só
+            # o adjudicador produz o que a superação lê; sem ele não se consulta o relógio (nem o cassete dele).
+            data_consulta=(None if ref or not (usar_llm and adjudicador.habilitado())
+                           else replay.hoje(contexto=texto_base)))
+        # 19/10: o adjudicador relê o conjunto e corrige a evidência (classe com citação, tipo temporal, mudança)
+        # ANTES da autoconsistência: um item que ele promova a decisivo ainda passa pelo rejulgamento.
+        if usar_llm and juiz_ok and adjudicador.habilitado():
+            await avisar("Comparando as fontes e as datas entre si…")
+            await asyncio.to_thread(adjudicador.rodar, ev, afs, pecas, julg)
         # Missão F / A3: se UM julgamento SUSTENTA/REFUTA decide o nível, rejulga-o (sem cache) e vota.
         from . import autoconsistencia
         if usar_llm and autoconsistencia.habilitada():

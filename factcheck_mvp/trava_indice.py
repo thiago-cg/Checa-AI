@@ -42,8 +42,9 @@ from . import config, indice
 MIN_TERMOS = 3          # termos de conteúdo mínimos para uma candidata identificar uma alegação
 _MAX_FRASE = 300        # a 1ª frase do trecho é cortada aqui (trecho sem pontuação não vira "uma frase" gigante)
 # Prefixos da descrição (`decisao._contribuicoes`) dos votos que o índice sozinho sustenta: o selo e, desde B4/R1,
-# a postura REFUTA de agência curada (pesa como selo, 1,5): a mesma página do índice, com o mesmo poder de cravar.
-_DESCRICOES_DO_INDICE = ("selo", "postura REFUTA (agência)")
+# a postura de agência curada (pesa como selo, 1,5; nos dois sentidos desde 19/10): a mesma página do índice,
+# com o mesmo poder de cravar.
+_DESCRICOES_DO_INDICE = ("selo", "postura REFUTA (agência)", "postura SUSTENTA (agência)")
 
 
 def habilitada() -> bool:

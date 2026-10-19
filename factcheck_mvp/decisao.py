@@ -28,10 +28,15 @@ Fórmula (log-odds, prior neutro L0 = 0), por afirmação a:
                 curada 1,0 · institucional / muito acessada (Tranco) 0,6 (selo 0,8) ·
                 rede social / plataforma 0,45 (selo 0,55) · site pouco acessado 0,3 (selo 0,4)
       B4 (decisão da usuária, 13/10): agência de checagem CURADA (catálogo tipo=checagem) é confiável por
-                natureza. R1: a postura REFUTA dela pesa como um selo (W_VEREDITO·f = 1,5), não 1,0.
+                natureza. R1: a postura dela pesa como um selo (W_VEREDITO·f = 1,5), não 1,0 — nos dois
+                sentidos desde 19/10 (antes só a REFUTA; a confirmação de agência nunca cravava sozinha).
                 R11: havendo REFUTA de agência (dentro da janela, corpo lido), a postura SUSTENTA de quem NÃO é
-                agência não vota naquela afirmação (`posturas_suprimidas` no trace). SUSTENTA de agência e
-                selos seguem como antes.
+                agência não vota naquela afirmação (`posturas_suprimidas` no trace). R11t (19/10): só a
+                SUSTENTA do mesmo período (até R11_FOLGA_DIAS depois da checagem); a posterior vota
+                (`posturas_posteriores`), salvo afirmação de "evento"/"atemporal".
+      S1 (superação, 19/10): em afirmação de "estado" (situação que muda), o voto superado por uma
+                fonte confiável posterior que relata a mudança (citação conferida pelo adjudicador) não
+                vota; a mudança posterior à data do conteúdo também não. `superacoes` e `linha_do_tempo`.
       página com postura e veredito: vale a contribuição de maior |.| se concordam;
       se discordam, 0 (conflito registrado).
       E3: peça lida só pelo título/snippet não vota (nem postura nem selo).
@@ -45,14 +50,17 @@ Fórmula (log-odds, prior neutro L0 = 0), por afirmação a:
     L_a       = Σ_clusters voto  (um cluster = um voto: republicação não soma)
     p_texto   = 1 − Π_{a: L_a ≥ 0} (1 − σ(L_a))   (conjunção, D2: o texto é desinformação se alguma
                 parte contestada for; só partes contestadas ou divididas somam, decisão de 09/10)
-    L         = logit(p_texto)  (max(L_a) se nenhuma parte tem L_a ≥ 0; 0 se nenhuma tem voto)
+    L         = logit(p_texto)  (se nenhuma parte tem L_a ≥ 0: a mais fraca entre as decisivas,
+                L_a ≤ −τ, ou max(L_a) sem decisiva — M1; 0 se nenhuma tem voto)
     p         = σ(L)  (probabilidade de desinformação, só informativa)
 
 Conjunção (D2, decisão da usuária 09/10: só partes contestadas somam). Entram no produto só as
 afirmações COM voto (n_votos > 0) com L_a ≥ 0 (contestadas, ou divididas com L_a = 0). Uma
 afirmação confirmada (L_a < 0) não soma: confirmações nunca dão alta. Se nenhuma parte tem
-L_a ≥ 0, L = max(L_a), a confirmação mais fraca. Afirmação sem voto fica fora (ausência de
-evidência não é evidência). Com uma afirmação, L = L_a. O contrafactual (sem desconto temporal)
+L_a ≥ 0, vale a confirmação mais fraca entre as decisivas (L_a ≤ −τ); sem nenhuma decisiva, max(L_a).
+Afirmação sem voto fica fora (ausência de evidência não é evidência), e a confirmada abaixo de τ é
+tratada igual (M1, 19/10: antes, achar UMA fonte confirmando uma parte levava baixa → média;
+`por_afirmacao[i]["confirmacao_fraca"]` e a justificativa dizem qual parte é). Com uma afirmação, L = L_a. O contrafactual (sem desconto temporal)
 usa o mesmo critério sobre os votos brutos. Ver `_combinar_afirmacoes`.
 T7 (E4 × D2): com 2+ afirmações com voto, sai do produto a afirmação cujos votos vêm SÓ de
 fontes fora da janela (descontadas) e cujo |L_a| < τ ("só evidência de outro período" em
@@ -92,6 +100,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import asdict, dataclass, field
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from . import aplicabilidade, confiabilidade, observabilidade, selos, trava_indice
@@ -113,6 +122,11 @@ CLASSES_TRATA = ("SUSTENTA", "REFUTA", "RELATA_SEM_ENDOSSO")
 # RELATA_SEM_ENDOSSO ("parecida, não a mesma") indica que a alegação checada pode ser outra: aplicar o
 # selo dela à afirmação do usuário foi a causa do único erro grave da simulação de 13/10 (falso → baixa).
 CLASSES_SELO = ("SUSTENTA", "REFUTA")
+# R11t (19/10): a R11 só anula a SUSTENTA do mesmo período da checagem da agência. Uma SUSTENTA publicada mais
+# de R11_FOLGA_DIAS depois da checagem mais recente pode descrever uma situação nova: ela vota, e o conflito
+# leva à média (só a superação S1, com mudança relatada e citada, deixa a fonte nova vencer).
+R11_FOLGA_DIAS = 3
+TIPOS_TEMPORAIS = ("estado", "evento", "atemporal")
 
 
 @dataclass
@@ -144,6 +158,11 @@ class ItemEvidencia:
     # Missão F / A6: textos que dizem o que a checagem do índice checou (afirmação checada, título, 1ª frase
     # do trecho). None = não informado (snapshot antigo / peça que não é do índice): a trava não age.
     alegacoes_checadas: Optional[List[str]] = None
+    # S1 (superação, 19/10; vêm do adjudicador, já validados): `vale_em` = data a que o que a página afirma se
+    # refere (YYYY-MM-DD; None = a data de publicação); `relata_mudanca` = a página relata, com citação
+    # conferida, que a situação MUDOU ("aprovou nesta terça", "foi solto"). None = não informado.
+    vale_em: Optional[str] = None
+    relata_mudanca: Optional[bool] = None
 
     def nivel_confiabilidade(self) -> str:
         return self.confiabilidade or confiabilidade.classificar(self.url, self.curada)
@@ -160,6 +179,10 @@ class AfirmacaoDecisao:
     # None então significa "sem marcador de fato", e a decisão NÃO recalcula pelo texto. False = snapshot
     # antigo ou construção sem o campo (testes/snapshots pré-campo): caminho legado.
     calculada: bool = False
+    # S1 (19/10): "estado" (situação que muda: aprovado/vigente, preso/solto, cargo, posição de alguém),
+    # "evento" (fato pontual que não muda) ou "atemporal" (ciência, definição). None = incerto (sem
+    # adjudicador). Só "estado" admite superação por fonte mais nova que relata mudança.
+    tipo_temporal: Optional[str] = None
 
 
 @dataclass
@@ -174,6 +197,10 @@ class Evidencias:
     n_consultadas: int = 0     # peças únicas após dedupe
     texto_usuario: str = ""    # E4: marcadores "hoje/ontem/nesta semana" do texto
     data_referencia: Optional[str] = None  # E4: "hoje" do texto (YYYY-MM-DD); None = data atual
+    # S1 (decisão da usuária, 19/10): a propensão vale para a data do conteúdo quando ela é conhecida
+    # (`data_referencia`); senão, para a data da consulta. Link sem data desliga o E4 (data_referencia None),
+    # mas a superação usa esta data.
+    data_consulta: Optional[str] = None
 
 
 @dataclass
@@ -206,6 +233,9 @@ class Decisao:
     posturas_fracas: List[Dict[str, Any]] = field(default_factory=list)      # D-c: postura abaixo de 5% do peso
     posturas_suprimidas: List[Dict[str, Any]] = field(default_factory=list)  # B4/R11: SUSTENTA de não-agência anulada
     tetos_similaridade: List[Dict[str, Any]] = field(default_factory=list)   # Missão F / A6: selo do índice cortado
+    posturas_posteriores: List[Dict[str, Any]] = field(default_factory=list)  # R11t: SUSTENTA posterior à agência, vota
+    superacoes: List[Dict[str, Any]] = field(default_factory=list)  # S1: voto superado por mudança relatada depois
+    linha_do_tempo: List[Dict[str, Any]] = field(default_factory=list)  # S1: votos datados das afirmações com superação
     contagem: Dict[str, int] = field(default_factory=dict)
     travas: Dict[str, bool] = field(default_factory=dict)
     parametros: Dict[str, Any] = field(default_factory=dict)
@@ -277,6 +307,39 @@ class Decisao:
         return (f"Fontes independentes contestam {_citar_afirmacao(self.por_afirmacao[i_c], i_c)}; "
                 f"já {_citar_afirmacao(self.por_afirmacao[i_f], i_f)} é confirmada por fontes.")
 
+    def _motivo_media(self) -> str:
+        """M3 (19/10): a média por CONFLITO (fontes nos dois sentidos) e a média por COBERTURA (fontes numa só
+        direção, sem força para cravar) são coisas diferentes para o usuário; antes as duas eram
+        "evidência fraca ou dividida"."""
+        if self.posturas_posteriores:
+            return ("fontes de datas diferentes divergem: há confirmações publicadas depois da checagem de uma "
+                    "agência, e a situação pode ter mudado")
+        if self.n_clusters(+1) and self.n_clusters(-1):
+            return "fontes divergem: umas contestam e outras confirmam o que o texto afirma"
+        return ("evidência numa só direção, mas insuficiente para cravar: falta uma segunda fonte "
+                "independente confiável")
+
+    def linha_do_tempo_texto(self) -> List[str]:
+        """S1: uma frase por afirmação com superação: os votos datados em ordem e o que foi superado (neutro)."""
+        frases = []
+        for a_idx in sorted({x["afirmacao"] for x in self.linha_do_tempo}):
+            if self._afirmacao_fora(a_idx) or a_idx >= len(self.por_afirmacao):
+                continue
+            passos = []
+            for x in [x for x in self.linha_do_tempo if x["afirmacao"] == a_idx][:6]:
+                d = _dia(x["data"])
+                quando = d.strftime("%d/%m/%Y") if d else x["data"]
+                verbo = "contesta" if x["direcao"] > 0 else "confirma"
+                extra = (" e relata mudança da situação" if x["mudanca"] else "")
+                if x["superada"]:
+                    extra += " (posição superada pela mudança relatada depois)"
+                elif x["posterior_ao_conteudo"]:
+                    extra += " (mudança posterior à data do conteúdo, não pesou)"
+                passos.append(f"{quando}, {_nome_fonte(x)} {verbo}{extra}")
+            frases.append(f"Linha do tempo de {_citar_afirmacao(self.por_afirmacao[a_idx], a_idx)}: "
+                          + "; ".join(passos) + ".")
+        return frases
+
     def justificativa(self) -> str:
         from .agregador import titulo_propensao
         c = self.contagem
@@ -301,6 +364,15 @@ class Decisao:
             if self.posturas_suprimidas:  # B4/R11: neutro, diz o que não pesou e por quê
                 partes.append(f"{len(self.posturas_suprimidas)} página(s) que confirmam o que o texto afirma não "
                               "pesaram porque uma agência de checagem da base contesta a mesma afirmação.")
+            if self.posturas_posteriores:  # R11t: neutro, diz o que continuou pesando e por quê
+                partes.append(f"{len(self.posturas_posteriores)} página(s) que confirmam o que o texto afirma são "
+                              "posteriores à checagem de uma agência e continuaram pesando: a situação pode ter "
+                              "mudado depois da checagem.")
+            partes += self.linha_do_tempo_texto()  # S1 (decisão da usuária, 19/10: mostrar a linha do tempo)
+            if self.nivel == "baixa" and self.travas.get("parte_com_confirmacao_fraca"):  # M1
+                partes += [f"{_citar_afirmacao(e, i)[:1].upper()}{_citar_afirmacao(e, i)[1:]} tem confirmação "
+                           "mais fraca que as demais partes do texto."
+                           for i, e in enumerate(self.por_afirmacao) if e.get("confirmacao_fraca")]
             if self.nivel == "media" and self._sem_fonte_confiavel_no_texto():  # I2: o "média" só vale em média
                 if self._confiavel_de_outro_periodo():
                     partes.append("As fontes que tomam posição são redes sociais, sites pouco acessados "
@@ -359,6 +431,8 @@ class Decisao:
                 and (self.nivel != self.nivel_sem_desconto or self.travas.get("so_fontes_de_outro_periodo"))
                 and self._elegivel() and not self.motivo_avisa_data):
             base += " Datas anteriores ao período do texto tiveram o peso reduzido."
+        if self.travas.get("superacao") and self.nivel != "indeterminada":  # S1
+            base += " Uma posição anterior foi superada por mudança relatada depois (ver linha do tempo)."
         return base
 
     def header(self) -> str:
@@ -383,7 +457,11 @@ class Decisao:
                                 for x in self.posturas_fracas][:6],
             "posturas_suprimidas": [f"af{x['afirmacao']} {x['classe']}@{x['url'][:60]}"
                                     for x in self.posturas_suprimidas][:6],
-            "conflitos": [c["url"][:70] for c in self.conflitos],
+            "posturas_posteriores": [f"af{x['afirmacao']} {x['classe']}@{x['url'][:60]} {x['data']}>{x['checagem']}"
+                                     for x in self.posturas_posteriores][:6],
+            "superacoes": [f"af{x['afirmacao']} {x['tipo']} {x['classe']}@{x['url'][:60]} {x['data']}"
+                           for x in self.superacoes][:6],
+            "conflitos":[c["url"][:70] for c in self.conflitos],
             "contagem": self.contagem, **self.travas,
         }
 
@@ -435,6 +513,16 @@ def _selo_atribuido(v: Dict[str, Any]) -> str:
     return formatar_selo(agencia, v.get("veredito") or "", artigo=_artigo_da_agencia(agencia))
 
 
+def _nome_fonte(x: Dict[str, Any]) -> str:
+    """S1: nome da fonte na linha do tempo: o veículo, ou o host da URL sem "www."."""
+    from urllib.parse import urlsplit
+    nome = " ".join((x.get("veiculo") or "").split())
+    if nome:
+        return nome
+    host = urlsplit(x.get("url") or "").hostname or "fonte"
+    return host[4:] if host.startswith("www.") else host
+
+
 def nivel_de(L: float) -> str:
     if L >= TAU:
         return "alta"
@@ -473,11 +561,12 @@ def _fator_credibilidade(it: ItemEvidencia) -> float:
     return 1.0 - min(1.0, max(0.0, float(it.prob_fake_pagina)))
 
 
-def _contribuicoes(it: ItemEvidencia, s: float, dec: Decisao, agencia_refuta: bool = False) -> List[tuple]:
+def _contribuicoes(it: ItemEvidencia, s: float, dec: Decisao, r11_suprime: bool = False) -> List[tuple]:
     """(valor, descrição) de um item; registra vereditos aplicados/ignorados, conflitos, não analisadas
     (E3) e posturas fracas (D-c: postura com menos de 5% do peso, não vota).
-    B4: `agencia_refuta` = uma agência curada REFUTA esta afirmação (dentro da janela): a SUSTENTA de quem
-    não é agência não vota (R11). A REFUTA de agência curada pesa como selo (R1)."""
+    B4: `r11_suprime` = uma agência curada REFUTA esta afirmação no mesmo período deste item (`decidir`
+    decide, ver `_r11_suprime`): a SUSTENTA de quem não é agência não vota (R11). A postura de agência
+    curada pesa como selo nos dois sentidos (R1; simétrico desde 19/10)."""
     if (it.motor or "").startswith("fallback") or it.classe is None:
         if it.veredito:
             dec.vereditos_ignorados.append({"url": it.url, "veredito": it.veredito,
@@ -495,18 +584,20 @@ def _contribuicoes(it: ItemEvidencia, s: float, dec: Decisao, agencia_refuta: bo
     post = None
     if it.classe in CLASSES_VOTO:
         d = 1.0 if it.classe == "REFUTA" else -1.0
-        ag_refuta = it.classe == "REFUTA" and it.eh_agencia()  # R1
-        if ag_refuta:
+        # R1 (simétrico, 19/10): a agência curada que confirma em voz própria checou a afirmação tanto quanto
+        # a que contesta; antes só a REFUTA pesava como selo e a verdade nunca cravava com uma checagem só.
+        ag = it.eh_agencia()
+        if ag:
             base = W_VEREDITO * confiabilidade.FATOR_VEREDITO[confiabilidade.CURADA]
         else:
             base = W_POSTURA * confiabilidade.FATOR_POSTURA[it.nivel_confiabilidade()]  # peso sem o BERT
         w = base * _fator_credibilidade(it)
-        if it.classe == "SUSTENTA" and agencia_refuta and not it.eh_agencia():
+        if it.classe == "SUSTENTA" and r11_suprime and not ag:
             # R11: uma agência curada contesta esta afirmação; quem confirma sem ser agência não vota.
             dec.posturas_suprimidas.append({"url": it.url, "afirmacao": it.afirmacao, "classe": it.classe,
                                             "confiabilidade": it.nivel_confiabilidade()})
         elif base > 0 and w >= FRACAO_MIN_VOTO * base:
-            post = (s * d * w, "postura REFUTA (agência)" if ag_refuta else f"postura {it.classe}")
+            post = (s * d * w, f"postura {it.classe} (agência)" if ag else f"postura {it.classe}")
         else:
             # D-c (09/10): com o BERT quase certo de que a página é fake (menos de 5% do peso), a postura
             # não vota, como se não existisse. O trace guarda o caso em `posturas_fracas`.
@@ -618,18 +709,24 @@ def _clusters_com_voto(clusters: Dict[str, List[tuple]]) -> int:
     return sum(1 for contribs in clusters.values() if sum(v for v, _, _ in contribs) != 0)
 
 
-def _combinar_afirmacoes(valores: List[float]) -> float:
+def _combinar_afirmacoes(valores: List[float], mistas: Optional[List[bool]] = None) -> float:
     """Conjunção entre afirmações (D2, com a decisão da usuária de 09/10: só partes contestadas somam).
 
     `valores` são os L_a das afirmações COM voto (quem chama tira as que não contam: sem voto e a
     só-descontada de T7, ver `decidir`). Só entram no produto as partes com L_a ≥ 0 (contestadas e
     divididas, com L_a = 0): p_texto = 1 − Π(1 − σ(L_a)) e L = logit(p_texto). Uma confirmação
-    (L_a < 0) não soma, então confirmações nunca dão alta. Se nenhuma parte tem L_a ≥ 0,
-    L = max(L_a): a confirmação mais fraca. Lista vazia → 0; uma parte só → o próprio L_a, porque σ
+    (L_a < 0) não soma, então confirmações nunca dão alta. Se nenhuma parte tem L_a ≥ 0, vale a
+    mais fraca entre as decisivas (L_a ≤ −τ) e as fracas MISTAS; sem nenhuma delas, max(L_a).
+    Monotonicidade (M1, 19/10): uma parte confirmada abaixo de τ cujos votos só confirmam conta como a
+    parte sem voto (que já fica fora): sem isso, achar UMA fonte confirmando uma parte de detalhe levava
+    baixa → média, isto é, confirmar aumentava a propensão. Acrescentar SUSTENTA nunca sobe o nível.
+    `mistas[i]` = a parte i tem algum voto que contesta: ela segue contando mesmo abaixo de τ (a fonte
+    atual que contesta não some só porque fontes antigas confirmam; caso C1). None = nenhuma mista.
+    Lista vazia → 0; uma parte só → o próprio L_a, porque σ
     e logit se cancelam (atalho exato, sem o clamp de p). No ramo geral, 1 − σ(L) = σ(−L) (sem
     cancelamento) e p é limitado em [1e-12, 1 − 1e-12] antes do logit.
-    Propriedades: L ≥ max(valores) (a parte falsa não some por causa de parte verdadeira); com só
-    confirmações, L ≤ max < 0. Caso (b) do T7: p≈0,70 (falsa) + p≈0,10 (verdadeira) dão L = logit(0,70)
+    Propriedades: com alguma parte contestada, L ≥ max(valores) (a parte falsa não some por causa de
+    parte verdadeira); com só confirmações, L < 0. Caso (b) do T7: p≈0,70 (falsa) + p≈0,10 (verdadeira) dão L = logit(0,70)
     ≈ 0,85, isto é, média. Duas partes contestadas com p≈0,70 cada dão p_texto≈0,91.
     Comportamento conhecido: duas partes divididas (L_a = 0) dão p_texto = 0,75, então L = τ e o
     nível é alta. Pela decisão de 09/10, L = 0 conta como contestada; o teste documenta isso e não
@@ -641,7 +738,9 @@ def _combinar_afirmacoes(valores: List[float]) -> float:
         return valores[0]
     contestadas = [v for v in valores if v >= 0]
     if not contestadas:
-        return max(valores)
+        mistas = mistas or [False] * len(valores)
+        contam = [v for v, m in zip(valores, mistas) if v <= -TAU or m]
+        return max(contam) if contam else max(valores)
     if len(contestadas) == 1:
         return contestadas[0]  # σ e logit se cancelam: o L da única parte contestada
     descrenca = 1.0  # Π(1 − σ(L_a)) sobre as contestadas
@@ -684,12 +783,114 @@ def _de_outro_periodo(af: AfirmacaoDecisao, ev: Evidencias, it: ItemEvidencia) -
     return bool(medida and medida[1] > 0)
 
 
+def _dia(s: Optional[str]) -> Optional[date]:
+    try:
+        return datetime.strptime(str(s or "")[:10], "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def _data_item(it: ItemEvidencia) -> Optional[date]:
+    """S1: data a que o que a página afirma se refere (`vale_em`, do adjudicador) ou, sem ela, a de publicação."""
+    return _dia(it.vale_em) or _dia(it.data_pub)
+
+
+def _pode_votar(it: ItemEvidencia) -> bool:
+    return it.classe in CLASSES_VOTO and it.corpo_lido and not (it.motor or "").startswith("fallback")
+
+
+def _referencia_superacao(af: AfirmacaoDecisao, ev: Evidencias) -> Optional[date]:
+    """S1: o momento a que a afirmação se refere. A data explícita do fato (marco, com a folga) tem precedência;
+    senão a data do conteúdo (`data_referencia`); senão a da consulta (decisão da usuária, 19/10)."""
+    if af.marco is not None:
+        d = _dia(af.marco[0])
+        if d is not None:
+            try:
+                return d + timedelta(days=max(0, int(af.marco[1] or 0)))
+            except (TypeError, ValueError):
+                return d
+    return _dia(ev.data_referencia) or _dia(ev.data_consulta)
+
+
+def _superacao(af: AfirmacaoDecisao, a_idx: int, ev: Evidencias, dec: Decisao) -> set:
+    """S1 (19/10): ids dos itens que NÃO votam porque a situação mudou. Só para afirmação de "estado".
+
+    Um voto A é SUPERADO quando há um voto B na direção oposta que (i) relata a mudança com citação conferida
+    (`relata_mudanca`, validado pelo adjudicador), (ii) vem de fonte confiável (curada, institucional ou muito
+    acessada), (iii) se refere a data posterior à de A e não posterior ao momento de referência da afirmação.
+    Sem relato de mudança não há superação: fonte nova que só repete o contrário é conflito (boato reciclado
+    depois de desmentido é comum). B posterior ao momento de referência (a mudança aconteceu depois do
+    conteúdo) não vota: na data do conteúdo, o que ele relata ainda não valia.
+    Registra `superacoes` e a `linha_do_tempo` da afirmação (votos datados, em ordem)."""
+    if af.tipo_temporal != "estado":
+        return set()
+    itens = [it for it in ev.itens if it.afirmacao == a_idx and _pode_votar(it)]
+    ref = _referencia_superacao(af, ev)
+    posteriores: set = set()
+    mudancas = []
+    for b in itens:
+        db = _data_item(b)
+        if not b.relata_mudanca or db is None or b.nivel_confiabilidade() not in confiabilidade.CONFIAVEIS:
+            continue
+        if ref is not None and db > ref:
+            posteriores.add(id(b))
+            dec.superacoes.append({"tipo": "mudanca_posterior_ao_conteudo", "afirmacao": a_idx, "url": b.url,
+                                   "classe": b.classe, "data": db.isoformat(),
+                                   "referencia": ref.isoformat()})
+            continue
+        mudancas.append((b, db))
+    superadas: set = set()
+    for a in itens:
+        da = _data_item(a)
+        if id(a) in posteriores or da is None:
+            continue
+        por = [(b, db) for b, db in mudancas if b.classe != a.classe and db > da]
+        if por:
+            superadas.add(id(a))
+            dec.superacoes.append({"tipo": "superada", "afirmacao": a_idx, "url": a.url, "classe": a.classe,
+                                   "data": da.isoformat(), "superada_por": sorted({b.url for b, _ in por}),
+                                   "data_mudanca": max(db for _, db in por).isoformat()})
+    fora = superadas | posteriores
+    if fora:
+        s = -1.0 if af.polaridade == "nega" else 1.0
+        for it in sorted((it for it in itens if _data_item(it)), key=lambda x: (_data_item(x), x.url)):
+            dec.linha_do_tempo.append({
+                "afirmacao": a_idx, "data": _data_item(it).isoformat(), "url": it.url,
+                "veiculo": it.veiculo or "", "classe": it.classe,
+                "direcao": s * (1.0 if it.classe == "REFUTA" else -1.0),
+                "mudanca": bool(it.relata_mudanca), "superada": id(it) in superadas,
+                "posterior_ao_conteudo": id(it) in posteriores})
+    return fora
+
+
+def _r11_suprime(it: ItemEvidencia, af: AfirmacaoDecisao, ag_refutas: List[ItemEvidencia], dec: Decisao) -> bool:
+    """R11 com data (R11t, 19/10): a REFUTA de agência curada anula a SUSTENTA de não-agência do MESMO período.
+    SUSTENTA publicada mais de R11_FOLGA_DIAS depois da checagem mais recente vota (registrada em
+    `posturas_posteriores`): pode descrever uma situação nova, e o conflito leva à média. Afirmação de
+    "evento" ou "atemporal" não muda com o tempo: a R11 vale como antes. Data ausente: vale como antes."""
+    if not ag_refutas or it.classe != "SUSTENTA" or it.eh_agencia():
+        return False
+    if af.tipo_temporal in ("evento", "atemporal"):
+        return True
+    d = _data_item(it)
+    datas = [_data_item(x) for x in ag_refutas]
+    if d is None or any(x is None for x in datas):
+        return True
+    if d > max(datas) + timedelta(days=R11_FOLGA_DIAS):
+        dec.posturas_posteriores.append({"url": it.url, "afirmacao": it.afirmacao, "classe": it.classe,
+                                         "data": d.isoformat(), "checagem": max(datas).isoformat(),
+                                         "confiabilidade": it.nivel_confiabilidade()})
+        return False
+    return True
+
+
 def decidir(ev: Evidencias) -> Decisao:
     """Função pura: mesma entrada, mesma Decisao. Não faz I/O nem telemetria."""
     dec = Decisao(nivel="indeterminada", log_odds=0.0, prob=0.5, motivo="",
                   travas={"vago": ev.vago, "opiniao": ev.opiniao, "rumor": ev.rumor, "sem_fonte_confiavel": False,
                           "so_fontes_de_outro_periodo": False, "parte_sem_checagem_atual": False,
-                          "indice_similaridade_baixa": False,
+                          "indice_similaridade_baixa": False, "parte_com_confirmacao_fraca": False,
+                          "superacao": False, "confirmacao_posterior_a_checagem": False,
                           "juiz_disponivel": ev.juiz_disponivel,
                           # Missão F / 8: "nada para julgar" (sem itens) não é "juiz indisponível"
                           "juiz_estado": observabilidade.estado_juiz(len(ev.itens), ev.juiz_disponivel)},
@@ -701,7 +902,9 @@ def decidir(ev: Evidencias) -> Decisao:
                               "fracao_min_voto": FRACAO_MIN_VOTO,
                               "combinacao": ("conjuncao: 1−Π(1−σ(L_a)) sobre as partes com L_a≥0 (com voto); "
                                              "sem as só-descontadas (E4) com |L_a|<τ, se 2+ com voto; "
-                                             "se nenhuma parte é ≥0, max(L_a)")})
+                                             "se nenhuma parte é ≥0, a mais fraca das decisivas (≤−τ), "
+                                             "ou max(L_a) sem decisiva"),
+                              "r11_folga_dias": R11_FOLGA_DIAS})
     julgados = [i for i in ev.itens if i.classe is not None and not (i.motor or "").startswith("fallback")]
     dec.contagem = {
         "consultadas": ev.n_consultadas, "lidas": ev.n_lidas, "julgadas": len(julgados),
@@ -718,6 +921,8 @@ def decidir(ev: Evidencias) -> Decisao:
     n_votos: Dict[int, int] = {}
     n_brutos: Dict[int, int] = {}
     so_descontada: Dict[int, bool] = {}  # T7/E4: todo voto da afirmação vem de fonte fora da janela
+    mista: Dict[int, bool] = {}          # M1: a afirmação tem voto que contesta (não é "só confirmação")
+    mista_bruta: Dict[int, bool] = {}
     for a_idx, af in enumerate(ev.afirmacoes):
         s = -1.0 if af.polaridade == "nega" else 1.0
         clusters: Dict[str, List[tuple]] = {}
@@ -725,16 +930,18 @@ def decidir(ev: Evidencias) -> Decisao:
         atuais: Dict[str, List[float]] = {}  # E4 (trava so_fontes): contribuições NÃO descontadas, por cluster
         ids_descontados: set = set()  # ids dos itens descontados por data (I1: só a fonte atual conta como confiável)
         contribuiu_atual = contribuiu_descontado = False  # T7: itens com voto dentro / fora da janela
+        # S1: votos superados por mudança relatada depois (só afirmação de "estado") não votam nem anulam ninguém.
+        superados = _superacao(af, a_idx, ev, dec)
         # B4/R11: agência curada que REFUTA esta afirmação, lida e dentro da janela (fonte de outro
-        # período não anula a evidência atual).
-        agencia_refuta = any(
-            i.afirmacao == a_idx and i.classe == "REFUTA" and i.corpo_lido and i.eh_agencia()
-            and not (i.motor or "").startswith("fallback") and not _de_outro_periodo(af, ev, i)
-            for i in ev.itens)
+        # período não anula a evidência atual); R11t: só anula a SUSTENTA do mesmo período (`_r11_suprime`).
+        ag_refutas = [i for i in ev.itens
+                      if i.afirmacao == a_idx and i.classe == "REFUTA" and i.corpo_lido and i.eh_agencia()
+                      and not (i.motor or "").startswith("fallback") and not _de_outro_periodo(af, ev, i)
+                      and id(i) not in superados]
         for it in ev.itens:
-            if it.afirmacao != a_idx:
+            if it.afirmacao != a_idx or id(it) in superados:
                 continue
-            contribs = _contribuicoes(it, s, dec, agencia_refuta)
+            contribs = _contribuicoes(it, s, dec, _pode_votar(it) and _r11_suprime(it, af, ag_refutas, dec))
             brutos = list(contribs)
             medida = (_medida_temporal(af, ev, it.data_pub) if contribs else None)
             descontado = bool(medida and medida[1] > 0)  # E4: fonte de outro período (excedente > 0)
@@ -778,6 +985,9 @@ def decidir(ev: Evidencias) -> Decisao:
         # T7/E4 (C1): só-descontada = todo voto vem de fora da janela. Uma afirmação com voto de fonte atual
         # continua no produto, mesmo que a trava so_fontes tenha cortado o L dela.
         so_descontada[a_idx] = contribuiu_descontado and not contribuiu_atual
+        # M1: a parte tem algum voto (cluster) que contesta o que o texto afirma (valor > 0, já com polaridade)
+        mista[a_idx] = any(v.valor > 0 for v in dec.votos if v.afirmacao == a_idx)
+        mista_bruta[a_idx] = any(sum(v for v, _, _ in c) > 0 for c in clusters_brutos.values())
         dec.por_afirmacao.append({"afirmacao": af.texto, "nucleo": af.nucleo, "polaridade": af.polaridade,
                                   "L": round(L_a, 4), "n_votos": n_votos[a_idx]})
     # combinação entre afirmações (D2, conjunção; decisão 09/10: só partes contestadas somam, ver
@@ -795,13 +1005,24 @@ def decidir(ev: Evidencias) -> Decisao:
         fora = {a for a in com_voto + zerada if so_descontada[a] and abs(por_af[a]) < TAU}
     for a in fora:
         dec.por_afirmacao[a]["fora_da_conjuncao"] = "só evidência de outro período"
-    L = _combinar_afirmacoes([por_af[a] for a in com_voto if a not in fora])
+    entram = [a for a in com_voto if a not in fora]
+    L = _combinar_afirmacoes([por_af[a] for a in entram], [mista[a] for a in entram])
     # D-b (09/10): a parte só com fonte de outro período não deixa o texto cravar baixa. Se alguma
     # afirmação saiu por isso e o nível sairia baixa, o texto fica em média.
     if fora and L <= -TAU:
         L = math.copysign(TAU * 0.99, L)
         dec.travas["parte_sem_checagem_atual"] = True
-    L_sem = _combinar_afirmacoes([por_af_brutos[a] for a in por_af_brutos if n_brutos[a] > 0])
+    # M1 (19/10): em baixa, a parte confirmada abaixo de τ não segurou o nível (conta como parte sem voto);
+    # a justificativa diz qual é, para o usuário saber que ela tem confirmação mais fraca.
+    if L <= -TAU:
+        for a in entram:
+            if -TAU < por_af[a] < 0 and not mista[a]:
+                dec.por_afirmacao[a]["confirmacao_fraca"] = True
+                dec.travas["parte_com_confirmacao_fraca"] = True
+    dec.travas["superacao"] = any(x["tipo"] == "superada" for x in dec.superacoes)
+    dec.travas["confirmacao_posterior_a_checagem"] = bool(dec.posturas_posteriores)
+    entram_brutas = [a for a in por_af_brutos if n_brutos[a] > 0]
+    L_sem = _combinar_afirmacoes([por_af_brutos[a] for a in entram_brutas], [mista_bruta[a] for a in entram_brutas])
     dec.log_odds = round(L, 4)
     dec.log_odds_sem_desconto = round(L_sem, 4)
     dec.nivel_sem_desconto = nivel_de(L_sem)
@@ -845,7 +1066,7 @@ def decidir(ev: Evidencias) -> Decisao:
         dec.nivel = nivel_de(L)
         dec.motivo = {"alta": "fontes independentes contestam o que o texto afirma",
                       "baixa": "fontes independentes confirmam o que o texto afirma",
-                      "media": "evidência fraca ou dividida"}[dec.nivel]
+                      "media": dec._motivo_media()}[dec.nivel]
         if dec.nivel == "media" and dec._sem_fonte_confiavel_no_texto():
             dec.motivo = ("as fontes com posição são redes sociais ou sites pouco acessados"
                           + (", ou de outro período" if dec._confiavel_de_outro_periodo() else "")

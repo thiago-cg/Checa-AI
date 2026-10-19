@@ -109,7 +109,7 @@ DECISÃO ATUAL: {decisao}
 Classes do juiz: SUSTENTA (a página afirma o mesmo que a afirmação), REFUTA (a página diz que a afirmação é falsa, enganosa ou sem comprovação), RELATA_SEM_ENDOSSO (trata do assunto ou de algo parecido sem tomar posição), NAO_TRATA (outro assunto).
 
 Procure, de forma geral:
-1. Páginas EQUIVALENTES (mesmo fato, mesma informação, mesma conclusão) que receberam classes diferentes. Exemplo genérico: os itens 1 e 3 dizem a mesma coisa sobre o mesmo fato, mas um é SUSTENTA e o outro RELATA_SEM_ENDOSSO.
+1. Páginas EQUIVALENTES (mesmo fato, mesma informação, mesma conclusão) que receberam classes OPOSTAS: uma SUSTENTA e outra REFUTA. Páginas que só relatam (RELATA_SEM_ENDOSSO) ao lado de outras que confirmam ou contestam NÃO são conflito por si: relatar sem tomar posição não desmente quem toma; só conta se o relato mostra que a afirmação foi lida de outro jeito (ver item 3).
 2. REFUTA ou SUSTENTA por inferência ou por silêncio: a página não contesta (ou não confirma) a afirmação, apenas diz algo relacionado, ou não a menciona, e o juiz deduziu a posição. Exemplo genérico: "o remédio X tem efeitos colaterais" não é prova de que "X não cura Y".
 3. Alegação checada DIFERENTE da afirmação: o selo, o título ou o que a página diz ("pagina_diz") trata de uma variante (outro sujeito, número, data, lugar ou efeito).
 4. Decisão apoiada numa única fonte, sobretudo se ela não for agência de checagem, tiver citação genérica ou raciocínio hipotético, ou se as demais páginas não a confirmam.

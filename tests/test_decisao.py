@@ -720,7 +720,7 @@ def test_t6_selo_de_pagina_contra_postura_nao_gera_conflito():
     it = _it("https://aosfatos.org/x", "SUSTENTA", veredito="FALSO", origem="pagina")
     d = decidir(_ev([it]))
     assert not d.conflitos and not d.vereditos_aplicados
-    assert d.log_odds == -1.0
+    assert d.log_odds == -1.5  # aosfatos.org é agência curada: a postura pesa como selo (R1 simétrico, 19/10)
 
 
 def test_t6_selo_de_indice_continua_votando():
@@ -825,7 +825,8 @@ def test_t7_contestada_e_confirmada_dao_alta_e_justificativa_cita_as_duas():
     itens += [_it(f"https://{d}/b", "SUSTENTA", cluster=d, af=1)
               for d in ("bbc.com", "folha.uol.com.br", "agenciabrasil.ebc.com.br", "aosfatos.org", "lupa.uol.com.br")]
     d = decidir(_ev_afs(itens, ["A ponte caiu em 2024", "A obra custou 2 bilhões"]))
-    assert d.por_afirmacao[0]["L"] == pytest.approx(2.0) and d.por_afirmacao[1]["L"] == pytest.approx(-5.0)
+    # B: 3 veículos curados (−1,0) + Aos Fatos e Lupa, agências curadas (−1,5 cada, R1 simétrico de 19/10)
+    assert d.por_afirmacao[0]["L"] == pytest.approx(2.0) and d.por_afirmacao[1]["L"] == pytest.approx(-6.0)
     assert d.nivel == "alta" and d.parametros["combinacao"].startswith("conjuncao")
     j = d.justificativa()
     assert '"A ponte caiu em 2024"' in j and '"A obra custou 2 bilhões"' in j
@@ -887,9 +888,10 @@ def test_t7_ramo_geral_so_entre_contestadas(valores):
     assert decisao._combinar_afirmacoes(valores + [-40.0]) == pytest.approx(_conj_ref(valores), abs=1e-6)
 
 
-@pytest.mark.parametrize("valores", [[2.0, -5.0], [0.9, -2.3], [1.0, 1.0], [-3.0, -0.2], [0.5, 0.0, -4.0]])
+@pytest.mark.parametrize("valores", [[2.0, -5.0], [0.9, -2.3], [1.0, 1.0], [0.5, 0.0, -4.0]])
 def test_t7_combinacao_nunca_fica_abaixo_da_parte_mais_falsa(valores):
-    """Parte falsa não some por causa de parte verdadeira: L >= max(L_a)."""
+    """Parte falsa não some por causa de parte verdadeira: com alguma parte contestada, L >= max(L_a).
+    (Só confirmações: ver M1, a parte confirmada abaixo de τ conta como parte sem voto.)"""
     assert decisao._combinar_afirmacoes(valores) >= max(valores) - 1e-9
 
 
@@ -1038,7 +1040,8 @@ def test_t7_cinco_confirmadas_com_duas_fontes_cada_dao_baixa():
 def test_t7_so_confirmacoes_nunca_dao_alta(n):
     """Propriedade (decisão de 09/10): só confirmações nunca dão alta, com qualquer número de partes e qualquer
     mistura de pesos. Cada afirmação recebe 1 a 3 fontes confirmando (curada −1,0; institucional −0,6;
-    baixo tráfego −0,3). O texto é baixa ou média, e o L é o da confirmação mais fraca."""
+    baixo tráfego −0,3). O texto é baixa ou média, e o L é o da confirmação mais fraca entre as decisivas
+    (L_a ≤ −τ; M1, 19/10), ou o máximo quando nenhuma é decisiva."""
     def fontes(k):
         return [_it(f"https://c{k}.com.br/a", "SUSTENTA", cluster=f"c{k}", af=k),
                 _it_nivel(f"https://i{k}.gov.br/a", "SUSTENTA", confiabilidade.INSTITUCIONAL, af=k, cluster=f"i{k}"),
@@ -1047,13 +1050,17 @@ def test_t7_so_confirmacoes_nunca_dao_alta(n):
     d = decidir(_ev_afs(itens, [f"Afirmacao {k}" for k in range(n)]))
     assert all(p["L"] < 0 for p in d.por_afirmacao)
     assert d.log_odds < 0 and d.nivel in ("media", "baixa")
-    assert d.log_odds == pytest.approx(max(p["L"] for p in d.por_afirmacao), abs=1e-4)
+    Ls = [p["L"] for p in d.por_afirmacao]
+    decisivas = [x for x in Ls if x <= -decisao.TAU]
+    assert d.log_odds == pytest.approx(max(decisivas) if decisivas else max(Ls), abs=1e-4)
 
 
 @pytest.mark.parametrize("valores", [[-0.3, -1.0], [-2.5, -0.1, -4.0], [-1.0] * 12])
 def test_t7_so_confirmacoes_nao_dao_alta_na_funcao(valores):
-    """Mesma propriedade na função: com L_a < 0 em todas as partes, o resultado é max(L_a), sempre < τ."""
-    assert decisao._combinar_afirmacoes(valores) == pytest.approx(max(valores))
+    """Mesma propriedade na função: com L_a < 0 em todas as partes, o resultado é a mais fraca das decisivas
+    (M1), ou max(L_a) sem decisiva; sempre < τ."""
+    decisivas = [v for v in valores if v <= -decisao.TAU]
+    assert decisao._combinar_afirmacoes(valores) == pytest.approx(max(decisivas) if decisivas else max(valores))
     assert decisao.nivel_de(decisao._combinar_afirmacoes(valores)) != "alta"
 
 
