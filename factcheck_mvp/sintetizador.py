@@ -119,6 +119,7 @@ Regras:
 - Use só os itens abaixo; não use conhecimento próprio nem invente fatos novos.
 - Você NÃO muda a direção da decisão: só indica se ela pode ser mantida ou se a confiança deve ser reduzida.
 - "manter": o conjunto é coerente para a decisão atual. Divergência entre páginas que tratam de aspectos diferentes não é conflito. Não invente conflitos.
+- Datas diferentes podem ser momentos sucessivos do mesmo fato: se uma página mais antiga descreve um estado anterior (ex.: "ainda não foi votado", "está em tramitação") e páginas mais recentes descrevem o estado seguinte (ex.: "foi aprovado"), isso NÃO é conflito; vale a informação mais recente. Só é conflito quando páginas da MESMA época se contradizem.
 - "rebaixar": há conflito real (itens 1 a 5) que tira a base da decisão atual; a confiança deve cair.
 - "buscar_mais": o conjunto é insuficiente ou ambíguo e uma nova busca provavelmente esclareceria.
 - "conflitos": lista curta (até 5) de frases, cada uma citando os índices "i" dos itens envolvidos. Vazia se não houver.
@@ -141,15 +142,18 @@ def _eh_agencia(p: Dict[str, Any]) -> bool:
 
 
 def montar_itens(ai: int, pecas: List[Dict[str, Any]], julg: Dict[Tuple[int, int], Dict[str, Any]],
-                 limite: int = 0) -> List[Dict[str, Any]]:
+                 limite: int = 0, urls_votantes: Optional[set] = None) -> List[Dict[str, Any]]:
     """Itens julgados da afirmação `ai` (classe não None), na ordem: os que tomam posição ou tratam do
-    assunto primeiro, depois NAO_TRATA (que entram para o sintetizador achar equivalentes), até `limite`.
-    O índice `i` é o do item na lista enviada ao LLM."""
+    assunto primeiro, depois NAO_TRATA, até `limite`. O índice `i` é o do item na lista enviada ao LLM.
+    `urls_votantes` (19/10): só as páginas que votaram na decisão; página que não votou (fora do tema,
+    outra alegação, só relata) não pesa no nível, então não é base para rebaixá-lo. None = todas."""
     brutos = []
     for (pi, a), r in julg.items():
         if a != ai or r.get("classe") is None or pi >= len(pecas):
             continue
         p = pecas[pi]
+        if urls_votantes is not None and p.get("url") not in urls_votantes:
+            continue
         brutos.append({
             "classe": r["classe"], "veiculo": p.get("veiculo") or p.get("dominio") or "",
             "dominio": p.get("dominio") or "", "agencia_de_checagem": "sim" if _eh_agencia(p) else "nao",
@@ -252,7 +256,8 @@ def aplicar(dec: Any, afs: List[Any], pecas: List[Dict[str, Any]],
             info = dec.por_afirmacao[ai] if ai < len(dec.por_afirmacao) else {}
             if not info.get("n_votos") or "fora_da_conjuncao" in info:
                 continue
-            itens = montar_itens(ai, pecas, julg)
+            votantes = {u for v in dec.votos if v.afirmacao == ai and v.valor != 0 for u in v.urls}
+            itens = montar_itens(ai, pecas, julg, urls_votantes=votantes)
             s = sintetizar(ai, af.alvo(), _decisao_texto(dec, ai), itens)
             entrada = {"afirmacao": ai, "n_itens": len(itens),
                        "classes": {c: sum(1 for d in itens if d["classe"] == c)

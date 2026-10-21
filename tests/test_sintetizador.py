@@ -78,9 +78,16 @@ def _pecas_julg(n=3, classes=("REFUTA", "REFUTA", "RELATA_SEM_ENDOSSO")):
     return pecas, julg
 
 
+def _votam(dec, pecas, af=0):
+    """As peças do teste contam como votantes da afirmação `af` (o sintetizador só recebe quem votou)."""
+    v = next(v for v in dec.votos if v.afirmacao == af)
+    v.urls = v.urls + [p["url"] for p in pecas]
+
+
 def _aplicar(nivel, resposta, n_favor=2, n_contra=0):
     dec = _dec(nivel, n_favor, n_contra)
     pecas, julg = _pecas_julg()
+    _votam(dec, pecas)
     lims = []
     resumo = sintetizador.aplicar(dec, [Afirmacao(texto="a0")], pecas, julg, lims)
     return dec, resumo, lims
@@ -246,6 +253,8 @@ def test_varias_afirmacoes_a_mais_baixa_vence_e_ignora_fora_da_conjuncao(ambient
     dec.por_afirmacao[2]["fora_da_conjuncao"] = "só evidência de outro período"
     pecas, julg = _pecas_julg()
     julg.update({(k, 1): dict(julg[(k, 0)]) for k in range(3)})
+    _votam(dec, pecas, 0)
+    _votam(dec, pecas, 1)
     resumo = sintetizador.aplicar(dec, [Afirmacao(texto=f"a{i}") for i in range(3)], pecas, julg, [])
     assert len(vistos) == 2 and [a["afirmacao"] for a in resumo["afirmacoes"]] == [0, 1]
     assert dec.nivel == "media"   # af1: 1 cluster a favor, 0 contra
@@ -285,6 +294,7 @@ def test_evento_sintetizador_e_gravado_por_rodar(ambiente, monkeypatch):
     monkeypatch.setattr(llm, "_local", _llm([_resp("rebaixar")]))
     dec = _dec("alta", 1, 0)
     pecas, julg = _pecas_julg()
+    _votam(dec, pecas)
     sintetizador.rodar(dec, [Afirmacao(texto="a0")], pecas, julg, [])
     tipo, d = next(e for e in ambiente["eventos"] if e[0] == "sintetizador")
     assert d["nivel_antes"] == "alta" and d["nivel_depois"] == "media"
@@ -427,3 +437,13 @@ def test_pipeline_sem_llm_nao_chama_o_sintetizador(pipe_amb, monkeypatch):
     rel = asyncio.run(pipe.executar(EntradaConsulta(tipo="titulo", conteudo="Ibuprofeno cura dengue"),
                                     usar_llm=False))
     assert "sintetizador" not in chamadas and rel.propensao == "indeterminada"
+
+
+def test_montar_itens_so_com_paginas_que_votaram():
+    """19/10: com `urls_votantes`, páginas que não votaram (fora do tema, só relata) não vão ao sintetizador."""
+    pecas = [{"url": f"https://s{k}.com/a", "veiculo": f"V{k}"} for k in range(4)]
+    classes = ["REFUTA", "RELATA_SEM_ENDOSSO", "NAO_TRATA", "REFUTA"]
+    julg = {(k, 0): {"classe": c} for k, c in enumerate(classes)}
+    itens = sintetizador.montar_itens(0, pecas, julg, urls_votantes={"https://s0.com/a", "https://s3.com/a"})
+    assert [d["url"] for d in itens] == ["https://s0.com/a", "https://s3.com/a"]
+    assert [d["i"] for d in itens] == [0, 1]

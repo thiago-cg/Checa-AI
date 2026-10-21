@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parent.parent
 
 try:
     from dotenv import load_dotenv
@@ -26,6 +29,15 @@ def _int(name: str, default: int) -> int:
         return int(os.getenv(name, "") or default)
     except (TypeError, ValueError):
         return default
+
+
+def _caminho(name: str) -> str:
+    """Caminho relativo é resolvido a partir da raiz do repositório (não do diretório atual)."""
+    bruto = _get(name).strip()
+    if not bruto:
+        return ""
+    p = Path(bruto).expanduser()
+    return str(p if p.is_absolute() else RAIZ / p)
 
 
 def _bool(name: str, default: bool = False) -> bool:
@@ -90,7 +102,7 @@ INDICE_SCORE_MIN = _float("INDICE_SCORE_MIN", 1.0)
 MAX_AFIRMACOES = _int("MAX_AFIRMACOES", 3)
 MAX_EVIDENCIAS = _int("MAX_EVIDENCIAS", 5)
 CACHE_SERPAPI_TTL = _int("CACHE_SERPAPI_TTL", 3600)
-FAKE_MODEL_PATH = _get("FAKE_MODEL_PATH")  # vazio = mock explícito (RF08 até o modelo real)
+FAKE_MODEL_PATH = _caminho("FAKE_MODEL_PATH")  # vazio = mock explícito; relativo = à raiz do repo
 # Modelo real só opina em texto longo: em manchete solta o BERTimbau v6 erra
 # por formato (curto → fake). Confiança baixa: é um sinal a mais, não o principal.
 FAKE_MODEL_MIN_PALAVRAS = _int("FAKE_MODEL_MIN_PALAVRAS", 80)
@@ -213,7 +225,7 @@ BUSCA_EXTRAS_MAX = _int("BUSCA_EXTRAS_MAX", 3)
 # Missão F / A6: trava de similaridade no atalho do índice (trava_indice.py). Com 1 só cluster decidindo
 # por selo do índice, exige similaridade mínima (Dice, 0..1) entre a alegação checada e o núcleo da
 # afirmação; abaixo do limiar o nível tem teto "media". 0,6 = o `cobertura_min` do próprio índice.
-INDICE_TRAVA_SIMILARIDADE = _get("INDICE_TRAVA_SIMILARIDADE", "1").strip().lower() in ("1", "true", "sim", "on")
+INDICE_TRAVA_SIMILARIDADE = _get("INDICE_TRAVA_SIMILARIDADE", "0").strip().lower() in ("1", "true", "sim", "on")
 INDICE_TRAVA_SIM_MIN = _float("INDICE_TRAVA_SIM_MIN", 0.6)
 # Missão F / item 7 (Extrator): limpeza determinística pós-LLM do núcleo e da consulta (tira marcadores
 # temporais, moldura de entrega e palavras-ruído que zeram o AND do Google News). Muda consultas. Padrão ligado desde a Missão G (não piorou na medição de 14/10; 0 para desligar).

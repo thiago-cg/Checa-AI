@@ -30,8 +30,10 @@ Fórmula (log-odds, prior neutro L0 = 0), por afirmação a:
       B4 (decisão da usuária, 13/10): agência de checagem CURADA (catálogo tipo=checagem) é confiável por
                 natureza. R1: a postura REFUTA dela pesa como um selo (W_VEREDITO·f = 1,5), não 1,0.
                 R11: havendo REFUTA de agência (dentro da janela, corpo lido), a postura SUSTENTA de quem NÃO é
-                agência não vota naquela afirmação (`posturas_suprimidas` no trace). SUSTENTA de agência e
-                selos seguem como antes.
+                agência pesa w·(1 − S), S = max_i 2^(−Δ_i/h) = chance de a checagem i ainda valer na data da
+                fonte (Δ_i = data da fonte − data da checagem, h = R11_MEIA_VIDA_DIAS). Δ ≤ 0 ou sem data:
+                S = 1, não vota (`posturas_suprimidas`); 0 < 1 − S < 1: `posturas_atenuadas`. SUSTENTA de
+                agência e selos seguem como antes.
       página com postura e veredito: vale a contribuição de maior |.| se concordam;
       se discordam, 0 (conflito registrado).
       E3: peça lida só pelo título/snippet não vota (nem postura nem selo).
@@ -92,6 +94,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import asdict, dataclass, field
+from datetime import date
 from typing import Any, Dict, List, Optional
 
 from . import aplicabilidade, confiabilidade, observabilidade, selos, trava_indice
@@ -103,6 +106,9 @@ W_VEREDITO = 1.5             # selo de checagem tipado, aplicável à afirmaçã
 # D-c (09/10): postura cujo peso ficou abaixo desta fração do peso sem o BERT (1 − prob_fake < 5%) não vota,
 # como se não existisse. Sem isso, um voto de valor ≈0 entrava na conjunção com σ(0) = 0,5.
 FRACAO_MIN_VOTO = 0.05
+# R11: meia-vida (dias) da validade de uma checagem de agência frente a uma fonte mais nova que a confirma.
+# Decaimento exponencial (HALO 2025, Chronofy 2026); valor inicial, a estimar no split dev.
+R11_MEIA_VIDA_DIAS = 7.0
 # Fonte fora do catálogo: o fator vem do nível de confiabilidade (confiabilidade.py).
 F_NAO_CURADA = confiabilidade.FATOR_POSTURA[confiabilidade.ALTO_TRAFEGO]            # 0,6 (como antes)
 F_VEREDITO_NAO_CURADA = confiabilidade.FATOR_VEREDITO[confiabilidade.ALTO_TRAFEGO]  # 0,8 (como antes)
@@ -205,6 +211,7 @@ class Decisao:
     descontos_temporais: List[Dict[str, Any]] = field(default_factory=list)  # E4: evidência de outro episódio
     posturas_fracas: List[Dict[str, Any]] = field(default_factory=list)      # D-c: postura abaixo de 5% do peso
     posturas_suprimidas: List[Dict[str, Any]] = field(default_factory=list)  # B4/R11: SUSTENTA de não-agência anulada
+    posturas_atenuadas: List[Dict[str, Any]] = field(default_factory=list)   # R11: SUSTENTA com peso × (1 − S)
     tetos_similaridade: List[Dict[str, Any]] = field(default_factory=list)   # Missão F / A6: selo do índice cortado
     contagem: Dict[str, int] = field(default_factory=dict)
     travas: Dict[str, bool] = field(default_factory=dict)
@@ -383,6 +390,8 @@ class Decisao:
                                 for x in self.posturas_fracas][:6],
             "posturas_suprimidas": [f"af{x['afirmacao']} {x['classe']}@{x['url'][:60]}"
                                     for x in self.posturas_suprimidas][:6],
+            "posturas_atenuadas": [f"af{x['afirmacao']} {x['classe']}@{x['url'][:60]} 1-S={x['fracao']}"
+                                   for x in self.posturas_atenuadas][:6],
             "conflitos": [c["url"][:70] for c in self.conflitos],
             "contagem": self.contagem, **self.travas,
         }
@@ -473,11 +482,32 @@ def _fator_credibilidade(it: ItemEvidencia) -> float:
     return 1.0 - min(1.0, max(0.0, float(it.prob_fake_pagina)))
 
 
-def _contribuicoes(it: ItemEvidencia, s: float, dec: Decisao, agencia_refuta: bool = False) -> List[tuple]:
+def _validade_checagem(data_fonte: Optional[str], datas_checagem: List[Optional[str]]) -> float:
+    """R11: S = max_i 2^(−Δ_i/h), a chance de a checagem i ainda valer na data da fonte que confirma
+    (Δ_i = data_fonte − data_checagem_i, em dias; Δ ≤ 0 → 1). Sem data em qualquer lado: 1 (como antes)."""
+    def _dia(d: Optional[str]) -> Optional[date]:
+        try:
+            return date.fromisoformat(str(d or "")[:10])
+        except ValueError:
+            return None
+    fonte = _dia(data_fonte)
+    if fonte is None or not datas_checagem:
+        return 1.0
+    s = 0.0
+    for dc in datas_checagem:
+        chec = _dia(dc)
+        if chec is None:
+            return 1.0
+        s = max(s, 2.0 ** (-max(0, (fonte - chec).days) / R11_MEIA_VIDA_DIAS))
+    return s
+
+
+def _contribuicoes(it: ItemEvidencia, s: float, dec: Decisao,
+                   agencia_refuta: Optional[List[Optional[str]]] = None) -> List[tuple]:
     """(valor, descrição) de um item; registra vereditos aplicados/ignorados, conflitos, não analisadas
     (E3) e posturas fracas (D-c: postura com menos de 5% do peso, não vota).
-    B4: `agencia_refuta` = uma agência curada REFUTA esta afirmação (dentro da janela): a SUSTENTA de quem
-    não é agência não vota (R11). A REFUTA de agência curada pesa como selo (R1)."""
+    B4: `agencia_refuta` = datas das agências curadas que REFUTAM esta afirmação (dentro da janela; vazia =
+    nenhuma): a SUSTENTA de quem não é agência pesa × (1 − S) (R11). A REFUTA de agência curada pesa como selo (R1)."""
     if (it.motor or "").startswith("fallback") or it.classe is None:
         if it.veredito:
             dec.vereditos_ignorados.append({"url": it.url, "veredito": it.veredito,
@@ -501,11 +531,19 @@ def _contribuicoes(it: ItemEvidencia, s: float, dec: Decisao, agencia_refuta: bo
         else:
             base = W_POSTURA * confiabilidade.FATOR_POSTURA[it.nivel_confiabilidade()]  # peso sem o BERT
         w = base * _fator_credibilidade(it)
+        validade = 0.0
         if it.classe == "SUSTENTA" and agencia_refuta and not it.eh_agencia():
-            # R11: uma agência curada contesta esta afirmação; quem confirma sem ser agência não vota.
+            # R11: uma agência curada contesta esta afirmação; quem confirma sem ser agência pesa × (1 − S).
+            validade = _validade_checagem(it.data_pub, agencia_refuta)
+        if 1.0 - validade < FRACAO_MIN_VOTO:
             dec.posturas_suprimidas.append({"url": it.url, "afirmacao": it.afirmacao, "classe": it.classe,
-                                            "confiabilidade": it.nivel_confiabilidade()})
+                                            "confiabilidade": it.nivel_confiabilidade(),
+                                            "validade_checagem": round(validade, 4)})
         elif base > 0 and w >= FRACAO_MIN_VOTO * base:
+            if validade > 0.0:
+                w *= 1.0 - validade
+                dec.posturas_atenuadas.append({"url": it.url, "afirmacao": it.afirmacao, "classe": it.classe,
+                                               "data_pub": it.data_pub, "fracao": round(1.0 - validade, 4)})
             post = (s * d * w, "postura REFUTA (agência)" if ag_refuta else f"postura {it.classe}")
         else:
             # D-c (09/10): com o BERT quase certo de que a página é fake (menos de 5% do peso), a postura
@@ -699,6 +737,8 @@ def decidir(ev: Evidencias) -> Decisao:
                               "f_veredito_por_nivel": dict(confiabilidade.FATOR_VEREDITO),
                               "postura": "W_POSTURA·f_fonte·(1−prob_fake_pagina)",
                               "fracao_min_voto": FRACAO_MIN_VOTO,
+                              "r11_meia_vida_dias": R11_MEIA_VIDA_DIAS,
+                              "r11": "SUSTENTA de não-agência × (1 − max_i 2^(−Δ_i/h)), Δ_i = fonte − checagem i",
                               "combinacao": ("conjuncao: 1−Π(1−σ(L_a)) sobre as partes com L_a≥0 (com voto); "
                                              "sem as só-descontadas (E4) com |L_a|<τ, se 2+ com voto; "
                                              "se nenhuma parte é ≥0, max(L_a)")})
@@ -727,10 +767,10 @@ def decidir(ev: Evidencias) -> Decisao:
         contribuiu_atual = contribuiu_descontado = False  # T7: itens com voto dentro / fora da janela
         # B4/R11: agência curada que REFUTA esta afirmação, lida e dentro da janela (fonte de outro
         # período não anula a evidência atual).
-        agencia_refuta = any(
-            i.afirmacao == a_idx and i.classe == "REFUTA" and i.corpo_lido and i.eh_agencia()
-            and not (i.motor or "").startswith("fallback") and not _de_outro_periodo(af, ev, i)
-            for i in ev.itens)
+        agencia_refuta = [
+            i.data_pub for i in ev.itens
+            if i.afirmacao == a_idx and i.classe == "REFUTA" and i.corpo_lido and i.eh_agencia()
+            and not (i.motor or "").startswith("fallback") and not _de_outro_periodo(af, ev, i)]
         for it in ev.itens:
             if it.afirmacao != a_idx:
                 continue

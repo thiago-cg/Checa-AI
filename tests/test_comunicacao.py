@@ -54,12 +54,22 @@ def test_bot_mostra_postura_leitura_e_etapas_legiveis():
     assert verificar_neutralidade(t) == []
 
 
-def test_web_mostra_postura_e_esconde_fora_do_tema():
+def test_web_mostra_postura_e_separa_fora_do_tema():
     from factcheck_mvp.api import _render_html
     h = _render_html("x", _rel())
     assert "contesta o que o texto afirma" in h and "📄 texto lido" in h and "site muito acessado" in h
-    assert "a.test/fora" not in h
+    evid, outras = h.split("Outras fontes acessadas (1)")
+    assert "a.test/fora" not in evid  # fora do tema não vira evidência
+    assert "a.test/fora" in outras and "não trata do assunto" in outras
     assert "Análise das fontes" in h
+
+
+def test_web_mostra_todas_as_fontes_sem_teto():
+    from factcheck_mvp.api import _render_html
+    rel = _rel()
+    rel.fontes = [_fonte(f"https://a.test/{i}", "RELATA_SEM_ENDOSSO") for i in range(8)]
+    h = _render_html("x", rel)
+    assert all(f"https://a.test/{i}" in h for i in range(8))
 
 
 def _rel_e3():
@@ -522,3 +532,22 @@ def test_pipeline_fontes_acha_titulo_e_citacao_em_uma_linha():
     f = Pipeline._fontes(None, [Afirmacao(texto="Governo vai confiscar a poupança")], [peca], julg, dec)[0]
     assert f.titulo == "Notícia longa quebrada"
     assert f.quote == "Trecho com quebra"
+
+
+def test_checar_html_devolve_o_mesmo_bloco_da_pagina_com_raciocinio(monkeypatch):
+    # O JS da página só insere este HTML: raciocínio da LLM e fontes fora do tema vêm do servidor.
+    from fastapi.testclient import TestClient
+    from factcheck_mvp import api
+    rel = _rel()
+    rel.fontes[0].raciocinio = "A página nega que o governo vá confiscar a poupança."
+
+    class _Pipe:
+        async def executar(self, entrada, **_):
+            return rel
+
+    monkeypatch.setattr(api, "pipeline", lambda: _Pipe())
+    monkeypatch.setattr(api, "_rate_ok", lambda request: True)
+    r = TestClient(api.app).post("/checar-html", json={"tipo": "texto", "conteudo": "Governo vai confiscar a poupança"})
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/html")
+    assert "🧠" in r.text and "nega que o governo vá confiscar" in r.text
+    assert "Outras fontes acessadas (1)" in r.text and "<html" not in r.text  # só o bloco, sem a página

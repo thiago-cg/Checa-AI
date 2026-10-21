@@ -121,7 +121,7 @@ def test_json_da_api_traz_os_campos_para_a_pessoa():
 def test_pagina_em_javascript_usa_os_campos_para_a_pessoa():
     from pathlib import Path
     t = (Path(__file__).resolve().parents[1] / "factcheck_mvp" / "templates" / "index.html").read_text(encoding="utf-8")
-    assert "rel.resumo_pessoa" in t and "rel.etapas_pessoa" in t and "rel.limitacoes_pessoa" in t
-    assert "f.selo_visivel !== false" in t
-    assert "rel.justificativa" not in t                # o parágrafo longo que repetia o resultado saiu
+    # O JS não desenha o relatório: insere o bloco do servidor (_relatorio_html, coberto acima).
+    assert "fetch('/checar-html'" in t and "renderClientRelatorio" not in t
+    assert "rel.justificativa" not in t               # o parágrafo longo que repetia o resultado saiu
     assert "IFCN" not in t and "Laudo" not in t

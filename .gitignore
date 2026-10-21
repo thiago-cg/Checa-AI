@@ -22,3 +22,5 @@ eval/serpapi_uso.json
 # Resultados da avaliação golden do PR2 (gerados localmente)
 avaliacao/resultados/
 reports/
+.env.producao
+.env33

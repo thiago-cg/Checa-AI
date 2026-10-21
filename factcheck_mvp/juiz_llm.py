@@ -136,8 +136,8 @@ INSTRUCAO = """AFIRMAÇÃO A VERIFICAR: "{afirmacao}"
 Abaixo há {n} itens (páginas encontradas numa busca). Para CADA item, leia o título e o trecho e diga o que a PÁGINA afirma sobre a AFIRMAÇÃO, escolhendo exatamente uma classe:
 - SUSTENTA: a página afirma, com a própria voz, a MESMA coisa que a AFIRMAÇÃO (mesmo sujeito, mesma ação, mesmo efeito), ou traz fato que a confirma diretamente.
 - REFUTA: a página afirma, com a própria voz, que a AFIRMAÇÃO é falsa, enganosa ou sem comprovação (desmente, contesta, classifica como falsa). Uma checagem que diz "é falso que ..." sobre esta afirmação REFUTA.
-- RELATA_SEM_ENDOSSO: a página trata desta afirmação, ou de uma afirmação parecida mas diferente, ou relata que alguém a fez, sem dizer se ela é verdadeira ou falsa.
-- NAO_TRATA: a página não trata desta afirmação (outro assunto, ou só palavras parecidas).
+- RELATA_SEM_ENDOSSO: a página trata desta afirmação,, ou relata que alguém a fez, sem dizer se ela é verdadeira ou falsa.
+- NAO_TRATA: a página não trata desta afirmação, ou de uma afirmação parecida mas diferente (outro assunto, ou só palavras parecidas).
 
 Regras:
 1. Julgue só pelo título e pelo trecho do item; não use conhecimento próprio.

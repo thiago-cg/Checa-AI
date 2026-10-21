@@ -438,36 +438,6 @@
    "coletado_em": "2026-10-14T12:38:03.643624+00:00"
   },
   {
-   "id": "valor-globo-com",
-   "nome": "Valor Econômico",
-   "tipo": "geral",
-   "homepage": "https://valor.globo.com/",
-   "dominio": "valor.globo.com",
-   "rss": [
-    "https://valor.globo.com/rss/valor"
-   ],
-   "sitemap": null,
-   "editorias": [],
-   "article_url_patterns": [
-    "/mundo/",
-    "/mundo/noticia/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, [itemprop='articleBody'], main, .mc-article-body"
-   },
-   "titulo_exemplo": "Data center é desativado temporariamente na Rússia após ataques de drones da Ucrânia",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://valor.globo.com/mundo/noticia/2026/10/12/data-center-desativado-temporariamente-na-rssia-aps-ataques-de-drones-da-ucrnia.ghtml"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T17:29:50.097084+00:00"
-  },
-  {
    "id": "catracalivre-com-br",
    "nome": "Catraca Livre",
    "tipo": "geral",
@@ -609,43 +579,6 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-10-14T18:41:53.440350+00:00"
-  },
-  {
-   "id": "institutodelongevidade-org",
-   "nome": "Instituto de Longevidade MAG",
-   "tipo": "geral",
-   "homepage": "https://institutodelongevidade.org/",
-   "dominio": "institutodelongevidade.org",
-   "rss": [],
-   "sitemap": "https://institutodelongevidade.org/sitemap.xml",
-   "editorias": [
-    "longevidade-e-comportamento",
-    "longevidade-e-saude",
-    "longevidade-financeira",
-    "longevidade-e-cidades",
-    "longevidade-e-trabalho",
-    "nossas-iniciativas",
-    "o-instituto",
-    "beneficios"
-   ],
-   "article_url_patterns": [
-    "/longevidade-e-saude/",
-    "/longevidade-e-saude/alimentacao/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article"
-   },
-   "titulo_exemplo": "Relação entre álcool e envelhecimento é revelada em estudo japonês",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://institutodelongevidade.org/longevidade-e-saude/alimentacao/relacao-entre-alcool-e-envelhecimento"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T19:16:04.896258+00:00"
   },
   {
    "id": "revistagalileu-globo-com",
@@ -1371,43 +1304,6 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-10-14T20:07:13.747132+00:00"
-  },
-  {
-   "id": "gauchazh-clicrbs-com-br",
-   "nome": "GZH",
-   "tipo": "geral",
-   "homepage": "https://gauchazh.clicrbs.com.br/",
-   "dominio": "gauchazh.clicrbs.com.br",
-   "rss": [],
-   "sitemap": null,
-   "editorias": [
-    "esportes",
-    "colunistas",
-    "politica",
-    "viral",
-    "saude",
-    "seguranca",
-    "cultura-e-lazer",
-    "gaucha"
-   ],
-   "article_url_patterns": [
-    "/politica/",
-    "/politica/noticia/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, [itemprop='articleBody']"
-   },
-   "titulo_exemplo": "Placa de Marielle quebrada e &quot;inspeção&quot; em colégios: quem é Daniel Silveira, deputado preso por ordem de ministro do STF",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://gauchazh.clicrbs.com.br/politica/noticia/2021/02/placa-de-marielle-quebrada-e-inspecao-em-colegios-quem-e-daniel-silveira-deputado-preso-por-ordem-de-ministro-do-stf-ckl9iftdh046101i1iylderc5.html"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T20:07:44.028214+00:00"
   },
   {
    "id": "jovempan-com-br",
@@ -2654,34 +2550,6 @@
    "coletado_em": "2026-10-14T20:09:48.630107+00:00"
   },
   {
-   "id": "cafefazenda-com-br",
-   "nome": "Café Fazenda Floresta",
-   "tipo": "geral",
-   "homepage": "https://cafefazenda.com.br/",
-   "dominio": "cafefazenda.com.br",
-   "rss": [],
-   "sitemap": "https://cafefazenda.com.br/sitemap.xml",
-   "editorias": [],
-   "article_url_patterns": [
-    "/blogs/",
-    "/blogs/news/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, main"
-   },
-   "titulo_exemplo": "Como o Café Ajuda na Prevenção do Câncer",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://cafefazenda.com.br/blogs/news/como-o-cafe-ajuda-na-prevencao-do-cancer?srsltid=AU7gw4WscMxcPZuKNPDMJfcJIDzTpVCaWf0Q_LLP2el7auAifRYJbf9n"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T20:19:15.857535+00:00"
-  },
-  {
    "id": "mistobrasil-com",
    "nome": "Misto Brasil",
    "tipo": "geral",
@@ -2757,46 +2625,6 @@
    "coletado_em": "2026-10-15T15:36:32.867288+00:00"
   },
   {
-   "id": "jornal-usp-br",
-   "nome": "Jornal da USP",
-   "tipo": "geral",
-   "homepage": "https://jornal.usp.br/",
-   "dominio": "jornal.usp.br",
-   "rss": [
-    "https://jornal.usp.br/feed/",
-    "https://jornal.usp.br/feed/podcast"
-   ],
-   "sitemap": "https://jornal.usp.br/sitemap.xml",
-   "editorias": [
-    "editorias",
-    "campus-ribeirao-preto",
-    "radio-usp",
-    "universidade",
-    "podcast",
-    "radio",
-    "podcasts",
-    "ciencias"
-   ],
-   "article_url_patterns": [
-    "/articulistas/",
-    "/articulistas/hamilton-roschel/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, [itemprop='articleBody'], main"
-   },
-   "titulo_exemplo": "Blog",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://jornal.usp.br/articulistas/hamilton-roschel/cafe-e-cancer-de-vilao-a-mocinho-a-historia-que-a-ciencia-reescreveu/"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-15T15:36:33.525630+00:00"
-  },
-  {
    "id": "observador-pt",
    "nome": "Observador",
    "tipo": "geral",
@@ -2834,43 +2662,6 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-10-15T21:12:21.827499+00:00"
-  },
-  {
-   "id": "agenciabrasil-ebc-com-br",
-   "nome": "Agência Brasil",
-   "tipo": "geral",
-   "homepage": "https://agenciabrasil.ebc.com.br/",
-   "dominio": "agenciabrasil.ebc.com.br",
-   "rss": [],
-   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
-   "editorias": [
-    "politica",
-    "educacao",
-    "esportes",
-    "economia",
-    "justica",
-    "geral",
-    "internacional",
-    "meio-ambiente"
-   ],
-   "article_url_patterns": [
-    "/politica/",
-    "/politica/noticia/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "[itemprop='articleBody'], main"
-   },
-   "titulo_exemplo": "Senado aprova fim da escala 6x1 e redução da jornada de trabalho",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-de-trabalho"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-15T21:22:45.914567+00:00"
   },
   {
    "id": "aseguirniteroi-com-br",
@@ -2988,6 +2779,692 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-10-15T21:44:54.061195+00:00"
+  },
+  {
+   "id": "cafefazenda-com-br",
+   "nome": "Café Fazenda Floresta",
+   "tipo": "geral",
+   "homepage": "https://cafefazenda.com.br/",
+   "dominio": "cafefazenda.com.br",
+   "rss": [],
+   "sitemap": "https://cafefazenda.com.br/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/blogs/",
+    "/blogs/news/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Como o Café Ajuda na Prevenção do Câncer",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://cafefazenda.com.br/blogs/news/como-o-cafe-ajuda-na-prevencao-do-cancer?srsltid=AU7gw4VIyg2L9wzC26JGRwxrnU5TfZ-IeYEcLO36vdKuu3oUwgIMBTdJ"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T14:29:22.267948+00:00"
+  },
+  {
+   "id": "essentia-com-br",
+   "nome": "Blog da Essentia Pharma",
+   "tipo": "geral",
+   "homepage": "https://essentia.com.br/",
+   "dominio": "essentia.com.br",
+   "rss": [
+    "https://essentia.com.br/feed/",
+    "https://essentia.com.br/comments/feed/",
+    "https://essentia.com.br/home/feed/"
+   ],
+   "sitemap": "https://essentia.com.br/sitemap.xml",
+   "editorias": [],
+   "article_url_patterns": [
+    "/conteudos/",
+    "/conteudos/o-consumo-de-cafe-associado-ao-menor-risco-de-cancer-colorretal/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], .entry-content"
+   },
+   "titulo_exemplo": "O consumo de café associado ao menor risco de câncer colorretal",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://essentia.com.br/conteudos/o-consumo-de-cafe-associado-ao-menor-risco-de-cancer-colorretal/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T14:39:49.131764+00:00"
+  },
+  {
+   "id": "jornal-usp-br",
+   "nome": "Jornal da USP",
+   "tipo": "geral",
+   "homepage": "https://jornal.usp.br/",
+   "dominio": "jornal.usp.br",
+   "rss": [
+    "https://jornal.usp.br/feed/",
+    "https://jornal.usp.br/feed/podcast"
+   ],
+   "sitemap": "https://jornal.usp.br/sitemap.xml",
+   "editorias": [
+    "editorias",
+    "campus-ribeirao-preto",
+    "radio-usp",
+    "universidade",
+    "podcast",
+    "radio",
+    "podcasts",
+    "ciencias"
+   ],
+   "article_url_patterns": [
+    "/articulistas/",
+    "/articulistas/hamilton-roschel/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Blog",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://jornal.usp.br/articulistas/hamilton-roschel/cafe-e-cancer-de-vilao-a-mocinho-a-historia-que-a-ciencia-reescreveu/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T14:39:50.900752+00:00"
+  },
+  {
+   "id": "congressoemfoco-com-br",
+   "nome": "Congresso em Foco",
+   "tipo": "geral",
+   "homepage": "https://www.congressoemfoco.com.br/",
+   "dominio": "congressoemfoco.com.br",
+   "rss": [],
+   "sitemap": "https://www.congressoemfoco.com.br/sitemap.xml",
+   "editorias": [
+    "noticia",
+    "coluna",
+    "colunista",
+    "artigo",
+    "apoiadores",
+    "eleicoes",
+    "informativo",
+    "estado"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/122832/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "TSE mantém vídeo que liga Flávio a Vorcaro, CV e Adriano da Nóbrega",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.congressoemfoco.com.br/noticia/122832/tse-mantem-video-que-liga-flavio-a-vorcaro-cv-e-adriano-da-nobrega"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T17:20:49.255134+00:00"
+  },
+  {
+   "id": "cut-org-br",
+   "nome": "CUT - Central Única dos Trabalhadores",
+   "tipo": "geral",
+   "homepage": "https://www.cut.org.br/",
+   "dominio": "cut.org.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "secretarias",
+    "noticias",
+    "indicadores",
+    "conteudo",
+    "entidade",
+    "editoria",
+    "multimidias",
+    "politica-de-privacidade-da-cut"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/flavio-bolsonaro-pediu-e-recebeu-r-61-milhoes-de-vorcaro-dono-do-banco-master-3dae/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "Flávio Bolsonaro pediu e recebeu R$ 61 milhões de Vorcaro, dono do banco Master",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.cut.org.br/noticias/flavio-bolsonaro-pediu-e-recebeu-r-61-milhoes-de-vorcaro-dono-do-banco-master-3dae"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T17:20:57.106723+00:00"
+  },
+  {
+   "id": "valor-globo-com",
+   "nome": "Valor Econômico",
+   "tipo": "geral",
+   "homepage": "https://valor.globo.com/",
+   "dominio": "valor.globo.com",
+   "rss": [
+    "https://valor.globo.com/rss/valor"
+   ],
+   "sitemap": null,
+   "editorias": [],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main, .mc-article-body"
+   },
+   "titulo_exemplo": "Entenda o que muda com aprovação da PEC do fim da escala 6x1",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://valor.globo.com/politica/noticia/2026/10/14/entenda-o-que-muda-se-a-pec-do-fim-da-escala-6x1-for-aprovada.ghtml"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T19:18:29.991741+00:00"
+  },
+  {
+   "id": "cspconlutas-org-br",
+   "nome": "CSP-Conlutas",
+   "tipo": "geral",
+   "homepage": "https://cspconlutas.org.br/",
+   "dominio": "cspconlutas.org.br",
+   "rss": [
+    "https://cspconlutas.org.br/rss/noticias.php"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "index.php",
+    "noticias",
+    "quem-somos",
+    "historia",
+    "estatuto",
+    "estaduais-regionais",
+    "estrutura",
+    "secretaria-executiva-nacional"
+   ],
+   "article_url_patterns": [
+    "/n/",
+    "/n/20489/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "EUA realizam novos ataques contra o Ir. Entenda os motivos do fim do cessar-fogo",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://cspconlutas.org.br/n/20489/eua-realizam-novos-ataques-contra-o-ira-entenda-os-motivos-do-fim-do-cessar-fogo"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T19:40:00.515959+00:00"
+  },
+  {
+   "id": "gauchazh-clicrbs-com-br",
+   "nome": "GZH",
+   "tipo": "geral",
+   "homepage": "https://gauchazh.clicrbs.com.br/",
+   "dominio": "gauchazh.clicrbs.com.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "esportes",
+    "politica",
+    "pioneiro",
+    "colunistas",
+    "zona-sul",
+    "geral",
+    "gaucha",
+    "cultura-e-lazer"
+   ],
+   "article_url_patterns": [
+    "/colunistas/",
+    "/colunistas/giane-guerra/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Giane Guerra",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://gauchazh.clicrbs.com.br/colunistas/giane-guerra/noticia/2026/07/vendas-do-rs-ao-oriente-medio-caem-ao-menor-nivel-desde-2020-com-guerra-cmrtpso9g009y01637xrd9su2.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T19:42:19.692426+00:00"
+  },
+  {
+   "id": "viva-com-br",
+   "nome": "Viva",
+   "tipo": "geral",
+   "homepage": "https://viva.com.br/",
+   "dominio": "viva.com.br",
+   "rss": [],
+   "sitemap": "https://viva.com.br/sitemap.xml",
+   "editorias": [
+    "canal",
+    "cultura-e-lazer",
+    "colunista",
+    "dinheiro",
+    "politica",
+    "cidadania-e-direitos",
+    "carreira-e-educacao",
+    "noticias"
+   ],
+   "article_url_patterns": [
+    "/saude-e-bem-estar/",
+    "/saude-e-bem-estar/micro-ondas-pode-causa-cancer-veja.html/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Micro-ondas pode causa câncer? Veja o que a ciência já comprovou",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://viva.com.br/saude-e-bem-estar/micro-ondas-pode-causa-cancer-veja.html"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T20:15:32.613321+00:00"
+  },
+  {
+   "id": "mundologistica-com-br",
+   "nome": "Fim da escala 6x1: Como as entidades avaliam a aprovação",
+   "tipo": "geral",
+   "homepage": "https://mundologistica.com.br/",
+   "dominio": "mundologistica.com.br",
+   "rss": [
+    "https://mundologistica.com.br/rss.xml"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "noticias",
+    "glossario",
+    "artigos",
+    "blog",
+    "podcast",
+    "revista",
+    "cliques",
+    "entrevistas"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/fim-escala-6x1-entidades-logistica-transporte/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Fim da escala 6x1: Como as entidades do setor de logística avaliam a aprovação",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://mundologistica.com.br/noticias/fim-escala-6x1-entidades-logistica-transporte"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T20:31:53.741799+00:00"
+  },
+  {
+   "id": "obemdito-com-br",
+   "nome": "OBemdito - Portal de notícias de Umuarama",
+   "tipo": "geral",
+   "homepage": "https://obemdito.com.br/",
+   "dominio": "obemdito.com.br",
+   "rss": [
+    "https://obemdito.com.br/web-stories/feed/"
+   ],
+   "sitemap": "https://obemdito.com.br/sitemap.xml",
+   "editorias": [
+    "noticia",
+    "editoria",
+    "videos",
+    "politica-de-privacidade",
+    "ultimas-noticias",
+    "target=",
+    "fale-com-o-bemdito"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/468356/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, [itemprop='articleBody'], main, .post-content"
+   },
+   "titulo_exemplo": "Padre morre após cruz cair sobre ele durante missa; vídeo impressiona e registra acidente",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://obemdito.com.br/noticia/468356/padre-morre-apos-cruz-cair-sobre-ele-durante-missa-video-impressiona-e-registra-acidente"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T20:43:44.724070+00:00"
+  },
+  {
+   "id": "sampi-net-br",
+   "nome": "sampi",
+   "tipo": "geral",
+   "homepage": "https://sampi.net.br/",
+   "dominio": "sampi.net.br",
+   "rss": [],
+   "sitemap": "https://sampi.net.br/sitemap.xml",
+   "editorias": [
+    "nacional",
+    "campinas",
+    "jundiai",
+    "franca",
+    "ovale",
+    "aracatuba",
+    "bauru",
+    "botucatu"
+   ],
+   "article_url_patterns": [
+    "/ovale/",
+    "/ovale/noticias/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Padre morre após cruz se desprender e cair durante missa",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://sampi.net.br/ovale/noticias/3012295/vale-do-paraiba/2026/10/padre-morre-apos-cruz-se-desprender-e-cair-durante-missa"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-19T20:43:50.896258+00:00"
+  },
+  {
+   "id": "band-com-br",
+   "nome": "Pode tomar café durante o tratamento oncológico? Descubra",
+   "tipo": "geral",
+   "homepage": "https://www.band.com.br/",
+   "dominio": "band.com.br",
+   "rss": [],
+   "sitemap": null,
+   "editorias": [
+    "entretenimento",
+    "esportes",
+    "nacional",
+    "politica",
+    "colunistas",
+    "ao-vivo",
+    "minha-band",
+    "tudo-sobre"
+   ],
+   "article_url_patterns": [
+    "/saude/",
+    "/saude/cafe-tratamento-oncologico/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Pode tomar café durante o tratamento oncológico? Descubra",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.band.com.br/saude/cafe-tratamento-oncologico"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T13:57:19.436322+00:00"
+  },
+  {
+   "id": "agenciabrasil-ebc-com-br",
+   "nome": "Agência Brasil",
+   "tipo": "geral",
+   "homepage": "https://agenciabrasil.ebc.com.br/",
+   "dominio": "agenciabrasil.ebc.com.br",
+   "rss": [],
+   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
+   "editorias": [
+    "politica",
+    "internacional",
+    "meio-ambiente",
+    "esportes",
+    "economia",
+    "geral",
+    "saude",
+    "radioagencia-nacional"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Senado aprova fim da escala 6x1 e redução da jornada de trabalho",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-de-trabalho"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T14:27:53.352171+00:00"
+  },
+  {
+   "id": "mtpolitica-com-br",
+   "nome": "Senado aprova fim da escala 6x1",
+   "tipo": "geral",
+   "homepage": "https://mtpolitica.com.br/",
+   "dominio": "mtpolitica.com.br",
+   "rss": [],
+   "sitemap": "https://mtpolitica.com.br/sitemap.xml",
+   "editorias": [
+    "noticia",
+    "video",
+    "editorias",
+    "videos",
+    "ultimas-noticias",
+    "paginas",
+    "municipios",
+    "blogs-e-colunas"
+   ],
+   "article_url_patterns": [
+    "/noticia/",
+    "/noticia/16068/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Senado aprova fim da escala 6x1",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://mtpolitica.com.br/noticia/16068/senado-aprova-fim-da-escala-6x1"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T14:27:54.131210+00:00"
+  },
+  {
+   "id": "revistacafeicultura-com-br",
+   "nome": "Revista Cafeicultura",
+   "tipo": "geral",
+   "homepage": "https://revistacafeicultura.com.br/",
+   "dominio": "revistacafeicultura.com.br",
+   "rss": [],
+   "sitemap": "https://revistacafeicultura.com.br/sitemap.xml",
+   "editorias": [
+    "category",
+    "videos",
+    "noticias",
+    "cafe-arabica-salta-mais-de-3-em-nova-york-nesta-segunda-feira-e-robusta-tambem-avanca-em-londres",
+    "cafe-inicia-semana-em-alta-nas-bolsas-de-nova-york-e-londres-com-clima-no-radar",
+    "cafe-brasileiro-bate-recorde-em-leilao-das-lendas-mundiais-da-ace-2",
+    "cafe-dispara-quase-4-em-nova-york-com-riscos-climaticos-e-fisico-sobe-ate-47-no-brasil",
+    "cafe-brasileiro-bate-recorde-em-leilao-das-lendas-mundiais-da-ace"
+   ],
+   "article_url_patterns": [
+    "/cafe-nao-causa-cancer-diz-oms/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody']"
+   },
+   "titulo_exemplo": "Café não causa câncer, diz OMS",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://revistacafeicultura.com.br/cafe-nao-causa-cancer-diz-oms/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T14:29:13.898008+00:00"
+  },
+  {
+   "id": "cafetinacafe-com",
+   "nome": "cafetinaland",
+   "tipo": "geral",
+   "homepage": "https://www.cafetinacafe.com/",
+   "dominio": "cafetinacafe.com",
+   "rss": [
+    "https://www.cafetinacafe.com/blog-feed.xml"
+   ],
+   "sitemap": "https://www.cafetinacafe.com/sitemap.xml",
+   "editorias": [
+    "maquinas-e-utenslios",
+    "sobre-2",
+    "loja",
+    "dicas-chzn",
+    "blog1"
+   ],
+   "article_url_patterns": [
+    "/single-post/",
+    "/single-post/2019/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Café é forte aliado na prevenção de vários tipos de câncer",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www.cafetinacafe.com/single-post/2019/02/04/caf%C3%A9-%C3%A9-forte-aliado-na-preven%C3%A7%C3%A3o-de-v%C3%A1rios-tipos-de-c%C3%A2ncer"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T14:29:18.546180+00:00"
+  },
+  {
+   "id": "cuidadospelavida-com-br",
+   "nome": "Quais são os efeitos de dormir poucas horas todas as noites? | Cuidados Pela Vid",
+   "tipo": "geral",
+   "homepage": "https://cuidadospelavida.com.br/",
+   "dominio": "cuidadospelavida.com.br",
+   "rss": [],
+   "sitemap": "https://cuidadospelavida.com.br/sitemap.xml",
+   "editorias": [
+    "produtos",
+    "especiais",
+    "medicamentos-participantes",
+    "sobre-o-ache",
+    "sobre-a-biosintetica",
+    "sobre-a-profuse"
+   ],
+   "article_url_patterns": [
+    "/blog/",
+    "/blog/post/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Quais são os efeitos de dormir poucas horas todas as noites?",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://cuidadospelavida.com.br/blog/post/quais-sao-os-efeitos-de-dormir-poucas-horas-todas-as-noites"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T14:43:47.095097+00:00"
+  },
+  {
+   "id": "institutodelongevidade-org",
+   "nome": "Instituto de Longevidade MAG",
+   "tipo": "geral",
+   "homepage": "https://institutodelongevidade.org/",
+   "dominio": "institutodelongevidade.org",
+   "rss": [],
+   "sitemap": "https://institutodelongevidade.org/sitemap.xml",
+   "editorias": [
+    "longevidade-e-comportamento",
+    "longevidade-e-saude",
+    "longevidade-financeira",
+    "longevidade-e-trabalho",
+    "longevidade-e-cidades",
+    "nossas-iniciativas",
+    "o-instituto",
+    "beneficios"
+   ],
+   "article_url_patterns": [
+    "/longevidade-e-saude/",
+    "/longevidade-e-saude/saude-fisica/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Consequências de dormir pouco: privação de sono aumenta risco de demência",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://institutodelongevidade.org/longevidade-e-saude/saude-fisica/consequencias-de-dormir-pouco"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-21T14:43:48.956187+00:00"
   }
  ]
 }

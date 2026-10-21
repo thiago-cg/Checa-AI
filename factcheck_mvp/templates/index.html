@@ -641,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const tipo = classificarTipo(texto);
-      const res = await fetch('/checar', {
+      const res = await fetch('/checar-html', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tipo: tipo, conteudo: texto })
@@ -667,8 +667,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const rel = await res.json();
-      renderClientRelatorio(texto, rel);
+      // O servidor devolve o relatório já montado (mesmo desenho do /checar-web).
+      if (relatorioArea) relatorioArea.innerHTML = await res.text();
 
       if (loadingBanner) loadingBanner.classList.add('hidden');
       if (btn) btn.disabled = false;
@@ -690,123 +690,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnText) btnText.textContent = 'Checar';
     }
   });
-
-  function renderClientRelatorio(entradaTexto, rel) {
-    if (!relatorioArea) return;
-
-    const uteis = (rel.fontes || []).filter(f => f.relevante !== false).slice(0, 5);
-    let fontesHtml = '';
-    if (uteis.length === 0) {
-      fontesHtml = '<p class="text-sm text-slate-500 dark:text-slate-400 italic">Não encontramos fontes que tratem diretamente do assunto. Na dúvida, não compartilhe.</p>';
-    } else {
-      fontesHtml = uteis.map(f => {
-        const portal = escapeHtml(f.portal_nome || 'web');
-        const tit = escapeHtml(f.titulo || '');
-        const quote = escapeHtml(f.quote || '');
-        const leitura = (f.corpo_lido ? '📄 texto lido' : ('📰 só manchete — ' + 'não analisada ' + 'integralmente'));
-        const veredito = (f.veredito && f.selo_visivel !== false) ? ` · <span class="text-petroleo-600 dark:text-petroleo-300 font-semibold">${escapeHtml(f.veredito)}</span>` : '';
-        const mesmo = (a, b) => a.toLowerCase().replace(/\s+/g, ' ').trim() === b.toLowerCase().replace(/\s+/g, ' ').trim();
-        const quoteHtml = (quote && !mesmo(quote, tit)) ? `<p class="text-xs text-slate-600 dark:text-slate-300 italic my-1.5 pl-2 border-l-2 border-slate-300 dark:border-slate-700">“${quote}”</p>` : '';
-        const urlSafe = (f.url && (f.url.startsWith('http://') || f.url.startsWith('https://')))
-          ? `<a href='${escapeHtml(f.url)}' target="_blank" rel="noopener" class="text-xs text-petroleo-600 dark:text-petroleo-300 hover:underline inline-flex items-center gap-1 mt-2">Acessar fonte original →</a>`
-          : `<span class="text-xs text-slate-500">${escapeHtml(f.url || '')}</span>`;
-
-        return `
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-sm">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
-              <span class="font-bold text-slate-900 dark:text-white">${portal}</span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">${leitura}${veredito}</span>
-            </div>
-            <p class="text-xs text-slate-700 dark:text-slate-300 font-medium">${tit}</p>
-            ${quoteHtml}
-            <div>${urlSafe}</div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    const etapasHtml = (rel.etapas_pessoa || []).map(t => `
-      <li class="text-xs text-slate-700 dark:text-slate-300">${escapeHtml(t)}</li>
-    `).join('');
-    const etapasTecnicasHtml = (rel.etapas || []).map(e => `
-      <li class="text-[11px] text-slate-500 dark:text-slate-400"><strong>${escapeHtml(e.nome || '')}</strong>: ${escapeHtml(e.detalhe || '')}</li>
-    `).join('');
-
-    const limsHtml = (rel.limitacoes_pessoa || rel.limitacoes || []).map(l => `
-      <li class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(l)}</li>
-    `).join('');
-
-    const guiaHtml = (rel.perguntas_guia || []).map(g => `
-      <li class="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
-        <span class="text-petroleo-600 dark:text-petroleo-300 font-bold">?</span>
-        <span>${escapeHtml(g)}</span>
-      </li>
-    `).join('');
-
-    const avisoWeb = (rel.onde_encontrado === 'web')
-      ? '<p class="text-xs text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-3">Não encontrado na base de checagens históricas; resultado derivado de apuração jornalística aberta.</p>'
-      : '';
-
-    relatorioArea.innerHTML = `
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors">
-        <div class="flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
-          <div>
-            
-            <h4 class="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Resultado da checagem</h4>
-          </div>
-        </div>
-
-        <div class="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800">
-          <span class="text-xs text-slate-500 block mb-1">Conteúdo submetido para análise:</span>
-          <p class="text-sm text-slate-700 dark:text-slate-300 italic">“${escapeHtml(entradaTexto)}”</p>
-        </div>
-
-        <div class="mt-6 space-y-3">
-          <h2 class="text-xl font-bold text-slate-900 dark:text-white">${escapeHtml(rel.header || rel.propensao || '')}</h2>
-          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${escapeHtml(rel.resumo_pessoa || rel.why_1linha || '')}</p>
-          ${avisoWeb}
-        </div>
-
-        <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-          <span class="text-xs text-slate-500 dark:text-slate-400 block mb-3 uppercase tracking-wider font-semibold">
-            O que as fontes dizem:
-          </span>
-          <div class="space-y-3">
-            ${fontesHtml}
-          </div>
-        </div>
-
-        ${guiaHtml ? `
-        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
-          <span class="text-xs text-slate-500 dark:text-slate-400 block mb-2 uppercase tracking-wider font-semibold">Para avaliar você mesmo:</span>
-          <ul class="space-y-1.5">${guiaHtml}</ul>
-        </div>` : ''}
-
-        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-          <details class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-            <summary class="text-xs text-petroleo-600 dark:text-petroleo-300 font-semibold cursor-pointer select-none">
-              ▸ Como chegamos aqui
-            </summary>
-            <ul class="mt-3 space-y-1.5 pl-2">${etapasHtml}</ul>
-            <details class="mt-3 pl-2">
-              <summary class="text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer select-none">Detalhes técnicos</summary>
-              <ul class="mt-2 space-y-1">${etapasTecnicasHtml}</ul>
-            </details>
-          </details>
-
-          ${limsHtml ? `
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Limitações desta análise</span>
-            <ul class="mt-2 list-disc pl-5 space-y-1">${limsHtml}</ul>
-          </div>` : ''}
-        </div>
-
-        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Relatório gerado em ${escapeHtml(rel.gerado_em || '')}</span>
-        </div>
-      </div>
-    `;
-  }
 });
 </script>
 </body>

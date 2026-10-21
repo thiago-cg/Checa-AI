@@ -100,3 +100,42 @@ def test_item_sem_marca_confere_pela_url_no_catalogo():
     assert ItemEvidencia(url="https://www1.folha.uol.com.br/x", curada=True).eh_agencia() is False
     assert ItemEvidencia(url="https://lupa.uol.com.br/x", curada=False).eh_agencia() is False
     assert confiabilidade.eh_agencia_checagem("https://dominio-qualquer.test/x") is False
+
+
+def test_r11_checagem_antiga_quase_nao_atenua_fonte_nova():
+    """R11 contínua: checagem de 2024 contra fonte de 2026 (Δ ≈ 700 dias ≫ h) → S ≈ 0, a SUSTENTA pesa inteira."""
+    itens = [_it("https://ag.test/a", "REFUTA", agencia=True, data="2024-11-14"),
+             _it("https://jornal.test/a", "SUSTENTA", agencia=False, data="2026-10-14")]
+    d = decidir(_ev(itens))
+    assert not d.posturas_suprimidas
+    assert d.posturas_atenuadas[0]["fracao"] == 1.0
+    assert abs(d.log_odds - 0.5) < 1e-6  # +1,5 − 1,0
+
+
+def test_r11_uma_meia_vida_depois_pesa_metade():
+    from factcheck_mvp import decisao
+    h = int(decisao.R11_MEIA_VIDA_DIAS)
+    itens = [_it("https://ag.test/a", "REFUTA", agencia=True, data="2026-01-01"),
+             _it("https://jornal.test/a", "SUSTENTA", agencia=False,
+                 data=(__import__("datetime").date(2026, 1, 1) + __import__("datetime").timedelta(days=h)).isoformat())]
+    d = decidir(_ev(itens))
+    assert d.posturas_atenuadas[0]["fracao"] == 0.5
+    assert abs(d.log_odds - 1.0) < 1e-6  # +1,5 − 0,5
+
+
+def test_r11_fonte_anterior_ou_sem_data_segue_suprimida():
+    for data_fonte in ("2026-01-01", "2025-12-01", None):
+        itens = [_it("https://ag.test/a", "REFUTA", agencia=True, data="2026-01-01"),
+                 _it("https://jornal.test/a", "SUSTENTA", agencia=False, data=data_fonte)]
+        d = decidir(_ev(itens))
+        assert [x["url"] for x in d.posturas_suprimidas] == ["https://jornal.test/a"], data_fonte
+        assert d.log_odds == 1.5
+
+
+def test_r11_checagem_mais_recente_e_a_que_conta():
+    """Com duas agências, vale a de maior S (a mais recente): uma checagem nova basta para suprimir."""
+    itens = [_it("https://ag1.test/a", "REFUTA", agencia=True, cluster="ag1", data="2024-01-01"),
+             _it("https://ag2.test/a", "REFUTA", agencia=True, cluster="ag2", data="2026-10-14"),
+             _it("https://jornal.test/a", "SUSTENTA", agencia=False, data="2026-10-14")]
+    d = decidir(_ev(itens))
+    assert [x["url"] for x in d.posturas_suprimidas] == ["https://jornal.test/a"]

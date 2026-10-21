@@ -30,7 +30,7 @@ Alegação da checagem = `afirmacao_checada`, o título e a 1ª frase do trecho;
 Sem nenhuma candidata utilizável, a similaridade é 0 (a checagem não diz o que checou: não decide sozinha).
 
 Módulo puro: sem I/O nem telemetria (quem emite é `Pipeline._emitir_decisao`). Atrás de
-`INDICE_TRAVA_SIMILARIDADE` (padrão 1 desde a Missão G; 0 desliga).
+`INDICE_TRAVA_SIMILARIDADE` (padrão 0 desde 19/10/2026; 1 liga).
 """
 from __future__ import annotations
 

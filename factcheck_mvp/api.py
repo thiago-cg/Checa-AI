@@ -153,6 +153,14 @@ async def checar(entrada: EntradaConsulta, request: Request):
         raise HTTPException(status_code=502, detail="falha temporária, tente de novo em instantes")
 
 
+@app.post("/checar-html", response_class=HTMLResponse)
+async def checar_html(entrada: EntradaConsulta, request: Request):
+    """Mesma checagem do /checar, devolvendo o bloco do relatório já montado (o JS da página só o
+    insere): um desenho só para a página, com o raciocínio filtrado (C1) e as fontes fora do tema."""
+    rel = await checar(entrada, request)
+    return HTMLResponse(_relatorio_html(entrada.conteudo, rel))
+
+
 def _descontos_html(decisao: dict | None) -> str:
     """E4 Task 6 (web): cada fonte com desconto por data, com os dias além da janela, r e bits.
     Os bits ficam só aqui (o bot não os mostra: técnico demais). A URL vem escapada."""
@@ -181,93 +189,113 @@ def _link_html(url: str) -> str:
     except ValueError:
         esquema = ""
     if esquema in ("http", "https"):
-        return f"<a href=\"{html.escape(u)}\" target='_blank' rel='noopener'>{html.escape(u[:80])}</a>"
-    return html.escape(u[:80])
+        # Visual de botão inline do Telegram: largura total, fundo translúcido, ↗ no canto.
+        return (f"<a href=\"{html.escape(u)}\" target='_blank' rel='noopener' "
+                f"class='relative block w-full mt-3 py-2 px-8 rounded-lg text-center text-sm font-medium "
+                f"bg-sky-500/10 hover:bg-sky-500/20 active:bg-sky-500/30 text-sky-700 dark:text-sky-300 "
+                f"transition-colors no-underline'>"
+                f"Acessar fonte original"
+                f"<span class='absolute top-1 right-2 text-[10px] opacity-70'>↗</span></a>")
+    return f"<span class='text-xs text-slate-500'>{html.escape(u[:80])}</span>"
+
+
+def _relatorio_html(entrada_txt: str, rel: RelatorioChecagem) -> str:
+    """Bloco do relatório (o mesmo para /checar-web e para o JS da página, via /checar-html)."""
+    from .agregador import (NOMES_ETAPAS, STATUS_ETAPA, data_publicacao_exibida, direcoes_por_url,
+                            linha_raciocinio, postura_legivel, rotulo_selo, texto_de_linha)
+    from .confiabilidade import ROTULO
+    esc = html.escape
+    from .agregador import preparar_para_pessoa
+    preparar_para_pessoa(rel)
+    direcoes = direcoes_por_url(rel.decisao)
+    nao_lidas = _urls_nao_analisadas(rel)
+    uteis = [f for f in rel.fontes if f.relevante is not False]
+    # Fora do tema segundo o juiz: listadas à parte (acessadas, mas não são evidência).
+    fora = [f for f in rel.fontes if f.relevante is False]
+    cor = {"contesta o que o texto afirma": "#f87171", "confirma o que o texto afirma": "#4ade80"}
+    # E4: mesma regra do bot (ver telegram_bot.formatar): `decisao` validado pelo schema, sem try.
+    _dec = rel.decisao or {}
+    _descontadas = {x.get("url") for x in _dec.get("descontos_temporais", []) or [] if x.get("url")}
+
+    def _cartao(f) -> str:
+        post = postura_legivel(f, direcoes)
+        if bool(getattr(f, "corpo_lido", False)) and f.url not in nao_lidas:
+            leitura = "📄 texto lido"
+        else:
+            leitura = "📰 só manchete — não analisada integralmente"
+        _r = getattr(f, "relevancia_temporal", None)
+        _linha_data = ""
+        if (_r is not None and _r < 1.0) or (f.url in _descontadas):
+            _dtxt = data_publicacao_exibida(getattr(f, "data_pub", None), getattr(f, "data_pub_precisao", None),
+                                            getattr(f, "data_pub_bruta", None))
+            if _dtxt:
+                _linha_data = f"<br/>📅 {esc(_dtxt)} · anterior ao período do texto"
+            else:
+                _linha_data = "<br/>📅 anterior ao período do texto"
+        _rac = linha_raciocinio(getattr(f, "raciocinio", None))
+        _html_rac = f"<span class='text-slate-500 dark:text-slate-400 block mt-1'>{esc(_rac)}</span><br/>" if _rac else ""
+        _cit = texto_de_linha(f.quote)[:300]
+        _tit = texto_de_linha(f.titulo)[:200]
+        if _cit and " ".join(_cit.lower().split()) == " ".join(_tit.lower().split()):
+            _cit = ""  # trecho igual ao título não se repete
+        return (f"<div class='p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 my-3 text-sm'>"
+                f"<b>{esc(texto_de_linha(f.portal_nome) or 'web')}</b> "
+                f"<span style='color:{cor.get(post, '#94a3b8')}'>{esc(post)}</span>"
+                f"{' · ' + esc(texto_de_linha(rotulo_selo(f))) if f.selo_visivel else ''}"
+                f" · {leitura}"
+                f"{' · ' + esc(ROTULO[f.confiabilidade]) if f.confiabilidade in ROTULO else ''}<br/>"
+                f"{esc(texto_de_linha(f.titulo)[:200])}<br/>"
+                f"{'<i>“' + esc(_cit) + '”</i><br/>' if _cit else ''}"
+                f"{_html_rac}"
+                f"{_linha_data}"
+                f"<br/>{_link_html(f.url)}</div>")
+
+    fontes = "".join(_cartao(f) for f in uteis)
+    outras = (f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Outras fontes acessadas ({len(fora)})</h3>"
+              f"<p class='text-sm text-slate-500 dark:text-slate-400'>Estas páginas foram lidas, mas não tratam do assunto; não entram na estimativa.</p>"
+              f"{''.join(_cartao(f) for f in fora)}") if fora else ""
+    etapas = "".join(f"<li>{esc(t)}</li>" for t in rel.etapas_pessoa)
+    etapas_tecnicas = "".join(f"<li>{STATUS_ETAPA.get(e.status, '')} <b>{esc(NOMES_ETAPAS.get(e.nome, e.nome))}</b>: "
+                              f"{esc(e.detalhe)}</li>" for e in rel.etapas)
+    lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes_pessoa[:5])
+    guia = "".join(f"<li>{esc(p)}</li>" for p in rel.perguntas_guia)
+    aviso = ("<p class='text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-2'>"
+             "<i>Não encontrado na base de checagens; resultado de outras fontes</i></p>"
+             if rel.onde_encontrado == "web" else "")
+
+    rel_bloco = (
+        f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors'>"
+        f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
+        f"<div>"
+        f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Resultado da checagem</h4></div>"
+        f"</div>"
+        f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
+        f"<span class='text-xs text-slate-500 block mb-1'>Conteúdo submetido para análise:</span>"
+        f"<p class='text-sm text-slate-700 dark:text-slate-300 italic '>“{esc(entrada_txt)}”</p></div>"
+        f"<h2 class='text-xl font-bold text-slate-900 dark:text-white mt-6'>{esc(rel.header or rel.propensao)}</h2>"
+        f"<p class='resumo text-slate-700 dark:text-slate-300 leading-relaxed my-3'>{esc(rel.resumo_pessoa)}</p>"
+        f"{aviso}"
+        f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>O que as fontes dizem ({len(uteis)})</h3>"
+        f"{fontes or '<p class=\"text-sm text-slate-500 dark:text-slate-400 italic\">Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
+        f"{outras}"
+        f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Para avaliar você mesmo</h3><ul class='list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1'>{guia}</ul>"
+        f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-petroleo-600 dark:text-petroleo-300'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
+        f"<details class=\"tecnico mt-3 text-xs text-slate-500 dark:text-slate-400\"><summary class='cursor-pointer'>Detalhes técnicos</summary><ul class='mt-2 space-y-1'>{etapas_tecnicas}</ul>"
+        f"{_descontos_html(rel.decisao)}</details></details>"
+        f"{'<h3 class=' + chr(39) + 'text-base font-bold text-slate-900 dark:text-white mt-6 mb-2' + chr(39) + '>Limitações desta análise</h3><ul class=' + chr(39) + 'list-disc pl-5 text-sm text-slate-600 dark:text-slate-400 space-y-1' + chr(39) + '>' + lims + '</ul>' if lims else ''}"
+        f"</div>"
+    )
+    return rel_bloco
 
 
 def _render_html(entrada_txt: str, rel: RelatorioChecagem | None = None, erro_msg: str = "") -> str:
     from pathlib import Path
-    from .agregador import (NOMES_ETAPAS, STATUS_ETAPA, data_publicacao_exibida, direcoes_por_url,
-                            linha_raciocinio, postura_legivel, rotulo_selo, texto_de_linha)
-    from .confiabilidade import ROTULO
     esc = html.escape
     tmpl_path = Path(__file__).resolve().parent / "templates" / "index.html"
     template = tmpl_path.read_text(encoding="utf-8") if tmpl_path.exists() else ""
 
     if rel:
-        from .agregador import preparar_para_pessoa
-        preparar_para_pessoa(rel)
-        direcoes = direcoes_por_url(rel.decisao)
-        nao_lidas = _urls_nao_analisadas(rel)
-        uteis = [f for f in rel.fontes if f.relevante is not False][:5]
-        cor = {"contesta o que o texto afirma": "#f87171", "confirma o que o texto afirma": "#4ade80"}
-        _dec = rel.decisao or {}
-        _descontadas = {x.get("url") for x in _dec.get("descontos_temporais", []) or [] if x.get("url")}
-
-        def _cartao(f) -> str:
-            post = postura_legivel(f, direcoes)
-            if bool(getattr(f, "corpo_lido", False)) and f.url not in nao_lidas:
-                leitura = "📄 texto lido"
-            else:
-                leitura = "📰 só manchete — não analisada integralmente"
-            _r = getattr(f, "relevancia_temporal", None)
-            _linha_data = ""
-            if (_r is not None and _r < 1.0) or (f.url in _descontadas):
-                _dtxt = data_publicacao_exibida(getattr(f, "data_pub", None), getattr(f, "data_pub_precisao", None),
-                                                getattr(f, "data_pub_bruta", None))
-                if _dtxt:
-                    _linha_data = f"<br/>📅 {esc(_dtxt)} · anterior ao período do texto"
-                else:
-                    _linha_data = "<br/>📅 anterior ao período do texto"
-            _rac = linha_raciocinio(getattr(f, "raciocinio", None))
-            _html_rac = f"<span class='text-slate-500 dark:text-slate-400 block mt-1'>{esc(_rac)}</span><br/>" if _rac else ""
-            _cit = texto_de_linha(f.quote)[:300]
-            _tit = texto_de_linha(f.titulo)[:200]
-            if _cit and " ".join(_cit.lower().split()) == " ".join(_tit.lower().split()):
-                _cit = ""  # trecho igual ao título não se repete
-            return (f"<div class='p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 my-3 text-sm'>"
-                    f"<b>{esc(texto_de_linha(f.portal_nome) or 'web')}</b> "
-                    f"<span style='color:{cor.get(post, '#94a3b8')}'>{esc(post)}</span>"
-                    f"{' · ' + esc(texto_de_linha(rotulo_selo(f))) if f.selo_visivel else ''}"
-                    f" · {leitura}"
-                    f"{' · ' + esc(ROTULO[f.confiabilidade]) if f.confiabilidade in ROTULO else ''}<br/>"
-                    f"{esc(texto_de_linha(f.titulo)[:200])}<br/>"
-                    f"{'<i>“' + esc(_cit) + '”</i><br/>' if _cit else ''}"
-                    f"{_html_rac}"
-                    f"{_linha_data}"
-                    f"<br/>{_link_html(f.url)}</div>")
-
-        fontes = "".join(_cartao(f) for f in uteis)
-        etapas = "".join(f"<li>{esc(t)}</li>" for t in rel.etapas_pessoa)
-        etapas_tecnicas = "".join(f"<li>{STATUS_ETAPA.get(e.status, '')} <b>{esc(NOMES_ETAPAS.get(e.nome, e.nome))}</b>: "
-                                  f"{esc(e.detalhe)}</li>" for e in rel.etapas)
-        lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes_pessoa[:5])
-        guia = "".join(f"<li>{esc(p)}</li>" for p in rel.perguntas_guia)
-        aviso = ("<p class='text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-2.5 rounded-lg my-2'>"
-                 "<i>Não encontrado na base de checagens; resultado de outras fontes</i></p>"
-                 if rel.onde_encontrado == "web" else "")
-
-        rel_bloco = (
-            f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors'>"
-            f"<div class='flex flex-wrap items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4'>"
-            f"<div>"
-            f"<h4 class='text-lg font-bold text-slate-900 dark:text-white mt-0.5'>Resultado da checagem</h4></div>"
-            f"</div>"
-            f"<div class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800'>"
-            f"<span class='text-xs text-slate-500 block mb-1'>Conteúdo submetido para análise:</span>"
-            f"<p class='text-sm text-slate-700 dark:text-slate-300 italic '>“{esc(entrada_txt)}”</p></div>"
-            f"<h2 class='text-xl font-bold text-slate-900 dark:text-white mt-6'>{esc(rel.header or rel.propensao)}</h2>"
-            f"<p class='resumo text-slate-700 dark:text-slate-300 leading-relaxed my-3'>{esc(rel.resumo_pessoa)}</p>"
-            f"{aviso}"
-            f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>O que as fontes dizem</h3>"
-            f"{fontes or '<p class=\"text-sm text-slate-500 dark:text-slate-400 italic\">Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
-            f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Para avaliar você mesmo</h3><ul class='list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1'>{guia}</ul>"
-            f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-petroleo-600 dark:text-petroleo-300'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
-            f"<details class=\"tecnico mt-3 text-xs text-slate-500 dark:text-slate-400\"><summary class='cursor-pointer'>Detalhes técnicos</summary><ul class='mt-2 space-y-1'>{etapas_tecnicas}</ul>"
-            f"{_descontos_html(rel.decisao)}</details></details>"
-            f"{'<h3 class=' + chr(39) + 'text-base font-bold text-slate-900 dark:text-white mt-6 mb-2' + chr(39) + '>Limitações desta análise</h3><ul class=' + chr(39) + 'list-disc pl-5 text-sm text-slate-600 dark:text-slate-400 space-y-1' + chr(39) + '>' + lims + '</ul>' if lims else ''}"
-            f"</div>"
-        )
+        rel_bloco = _relatorio_html(entrada_txt, rel)
     else:
         rel_bloco = (
             f"<div class='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 sm:p-8 shadow-sm shadow-sm relative transition-colors'>"

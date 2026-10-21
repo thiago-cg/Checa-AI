@@ -1300,13 +1300,8 @@ class Pipeline:
                 confiabilidade=p.get("confiabilidade"),
                 afirmacao=afs[ai].texto if ai is not None else None)))
         fontes.sort(key=lambda x: x[:3])
-        # N×1 avalia cada relevante (sem corte por JUIZ_MAX_NOTICIAS); o teto aqui é
-        # só de EXIBIÇÃO no relatório — com PISO 10 (compat: testes legados fixam
-        # JUIZ_MAX_NOTICIAS=2 e exigem a 3ª fonte no relatório). Na prática
-        # JUIZ_MAX_NOTICIAS só eleva o teto acima de 10, nunca corta abaixo disso.
-        teto_exib = max(int(getattr(config, "JUIZ_MAX_NOTICIAS", 10) or 10),
-                        int(getattr(config, "MAX_EVIDENCIAS", 5) or 5) * 2, 10)
-        return [f for *_, f in fontes][: teto_exib]
+        # Todas as fontes acessadas vão ao relatório (sem teto): cada canal decide o que exibe.
+        return [f for *_, f in fontes]
 
     @staticmethod
     def _relatorio(entrada, dec, sinais, fontes, etapas, limitacoes,
