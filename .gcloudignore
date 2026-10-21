@@ -1,0 +1,29 @@
+# Lido pelo gcloud ao enviar o código (gcloud run deploy --source). Mantenha igual ao .dockerignore.
+.gcloudignore
+
+# Segredos: nunca entram na imagem (no Cloud Run vêm do Secret Manager).
+.env
+.env*
+bot.log
+*.log
+# Pesados ou só locais
+.venv/
+modelos/
+runs/
+eval/
+avaliacao/
+reports/
+brag-output/
+entrega/
+docs/
+tests/
+scripts/
+output*/
+.crawl4ai/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.claude/
+bot.lock
+feedback.jsonl
