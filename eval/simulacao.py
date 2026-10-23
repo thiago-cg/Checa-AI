@@ -120,8 +120,8 @@ def passos_do_run(dir_run: Optional[Path]) -> Dict[str, Any]:
     return {"etapas": etapas, "llm": llm, "juiz_fontes": juiz}
 
 
-def buscas_serpapi_do_run(dir_run: Optional[Path]) -> Optional[int]:
-    """Buscas reais (não cache) à SerpAPI registradas no trace do run."""
+def buscas_web_do_run(dir_run: Optional[Path]) -> Optional[int]:
+    """Buscas reais (não cache) à web registradas no trace do run: SerpAPI (serpapi.com) ou ddgs (ddgs://)."""
     if not dir_run:
         return None
     n = 0
@@ -129,11 +129,16 @@ def buscas_serpapi_do_run(dir_run: Optional[Path]) -> Optional[int]:
         for linha in (dir_run / "trace.jsonl").read_text(encoding="utf-8").splitlines():
             e = json.loads(linha)
             d = e.get("dados") or {}
-            if e.get("tipo") == "http" and "serpapi.com" in (d.get("url") or "") and d.get("cache") == "live":
+            url = d.get("url") or ""
+            if e.get("tipo") == "http" and ("serpapi.com" in url or url.startswith("ddgs://")) \
+                    and d.get("cache") == "live":
                 n += 1
     except (OSError, ValueError):
         return None
     return n
+
+
+buscas_serpapi_do_run = buscas_web_do_run  # nome antigo, mantido por compatibilidade
 
 
 def payload_do_caso(frase: Dict[str, Any], excluir_fonte: bool = False, repeticao: int = 0) -> Dict[str, Any]:
@@ -163,11 +168,12 @@ def executar_caso(frase: Dict[str, Any], enviar: Callable[[Dict[str, Any]], Dict
         return registro
     registro["tempo_s"] = round(time.time() - t0, 1)
     dir_run = _run_do_caso(dir_runs, frase["texto"], inicio)
-    buscas = buscas_serpapi_do_run(dir_run)
+    buscas = buscas_web_do_run(dir_run)
     if buscas is None and uso_serpapi and antes is not None:
         depois = uso_serpapi()
         buscas = (depois - antes) if depois is not None else None
-    registro.update(run_id=dir_run.name if dir_run else None, serpapi=buscas, passos=passos_do_run(dir_run),
+    registro.update(run_id=dir_run.name if dir_run else None, serpapi=buscas, busca_web=buscas,
+                    passos=passos_do_run(dir_run),
                     **extrair(rel))
     return registro
 
@@ -330,7 +336,7 @@ _INDICADORES = [("total", "Casos"), ("sucessos", "Sucessos"), ("erros", "Erros")
                 ("evidencia_insuficiente_pct", "Evidência insuficiente (%)"),
                 ("resolvido_base_pct", "Resolvido pela base (%)"), ("resolvido_web_pct", "Resolvido pela web (%)"),
                 ("acerto_casos_data", "Acerto nos casos de data"), ("regra_data_acionada", "Regra de data acionada"),
-                ("tempo_medio_s", "Tempo médio (s)"), ("serpapi_total", "Chamadas à SerpAPI")]
+                ("tempo_medio_s", "Tempo médio (s)"), ("serpapi_total", "Buscas web (SerpAPI/ddgs)")]
 
 
 def _html_passos(p: Dict[str, Any]) -> str:
@@ -436,7 +442,7 @@ def html_relatorio(dados: Dict[str, Any]) -> str:
                f"<p><b>{_e(r.get('header'))}</b><br>{_e(r.get('why'))}</p><p>{_e(r.get('justificativa'))}</p>"
                f"<p><b>Onde foi encontrado:</b> {_e(r.get('onde_encontrado'))} · <b>Regra de data:</b> {_e(r.get('alerta_data'))} · "
                f"<b>Selos:</b> {_e(', '.join(s['agencia'] + ': ' + s['selo'] for s in r.get('selos', [])) or '—')} · "
-               f"<b>Tempo:</b> {_e(r.get('tempo_s'))}s · <b>SerpAPI:</b> {_e(r.get('serpapi'))} · <b>run:</b> {_e(r.get('run_id'))}</p>"
+               f"<b>Tempo:</b> {_e(r.get('tempo_s'))}s · <b>Buscas web:</b> {_e(r.get('serpapi'))} · <b>run:</b> {_e(r.get('run_id'))}</p>"
                f"<ul>{fontes}</ul>" + _html_passos(r.get("passos") or {}))
             + "</details>")
     partes.append("</body></html>")

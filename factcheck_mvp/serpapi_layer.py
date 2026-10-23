@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import config, replay, serpapi_chaves, telemetria
+from .busca_web import ClienteBusca
 from .catalogo import Catalogo
 
 log = logging.getLogger("factcheck.serpapi")
@@ -254,7 +255,7 @@ class ResultadoBusca:
     cache: bool = False  # veio do cache em memória do cliente (não gastou busca)
 
 
-class SerpAPIClient:
+class SerpAPIClient(ClienteBusca):
     def __init__(self, api_key: str | None = None, ttl: int | None = None, timeout: int | None = None,
                  cache_max: int = 200, engine: str | None = None):
         # None = usa env (com rodízio: SERPAPI_KEY_2…, SERPAPI_KEYS); "" explícito = força desligado (testes offline)
@@ -341,10 +342,6 @@ class SerpAPIClient:
             except replay.CotaSerpAPIEsgotada:
                 if not self.rodizio or not serpapi_chaves.alguma_disponivel(config.SERPAPI_KEY):
                     raise
-
-    def buscar(self, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Retorna o JSON bruto ou None (sem chave, timeout, erro). Nunca levanta."""
-        return self.buscar_ex(params).payload
 
     def buscar_ex(self, params: Dict[str, Any]) -> ResultadoBusca:
         """Como `buscar`, mas devolve o motivo e se veio do cache DESTA chamada.
@@ -447,7 +444,7 @@ def normalizar_item(item: Dict[str, Any], engine: str = "google_news",
         "links_fontes": [],
         "coletado_em": datetime.now(timezone.utc).isoformat(),
         "idioma": "pt-BR",
-        "origem": "serpapi",
+        "origem": item.get("_origem") or "serpapi",  # ddgs marca "ddgs:<backend>"
         "_snippet": item.get("snippet"),
         "_fonte_desc": desc_fonte,
         "_secao_checagem": None,  # preenchido abaixo (URL final conhecida)

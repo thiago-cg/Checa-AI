@@ -1,4 +1,4 @@
-"""Agente de descoberta (busca aberta via SerpAPI) com o JUIZ no laço.
+"""Agente de descoberta (busca aberta via SerpAPI ou ddgs) com o JUIZ no laço.
 
 Fluxo (orquestrado por `pipeline.Pipeline`; este módulo não chama extração nem juiz):
 
@@ -35,7 +35,7 @@ primeiros são fora do tema e há mais ondas extras (`BUSCA_EXTRAS_MAX`). Deslig
 
 Telemetria: evento `etapa` (nome `agente-onda`) por busca de cada onda — afirmação, query,
 n resultados, n novos — e evento `agente` por decisão do crítico (parar|nova_onda, motivo,
-contagens usadas). Todo I/O passa por `serpapi_layer.SerpAPIClient` (replay) e `llm`.
+contagens usadas). Todo I/O passa pelo cliente de `busca_web` (SerpAPIClient/DDGSClient, via replay) e `llm`.
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from pydantic import BaseModel
 
-from . import config, corroboracao, eval_modo, llm, selos, telemetria
+from . import busca_web, config, corroboracao, eval_modo, llm, selos, telemetria
 from . import planejador_busca as planejador  # Missão F / A5
 from . import serpapi_layer as camada
 
@@ -281,10 +281,11 @@ class EstadoBusca:
 
 # ----------------------------------------------------------------------------- busca
 def _buscar(cliente: Any, q: Dict[str, Any]) -> "camada.ResultadoBusca":
-    """1 busca com motivo DESTA chamada. Fakes que sobrescrevem só `buscar` continuam valendo."""
+    """1 busca com motivo DESTA chamada. Fakes que sobrescrevem só `buscar` continuam valendo: os clientes
+    reais (SerpAPIClient e DDGSClient) herdam `buscar` de `busca_web.ClienteBusca` sem sobrescrevê-lo."""
     try:
         if (hasattr(cliente, "buscar_ex")
-                and getattr(type(cliente), "buscar", None) is camada.SerpAPIClient.buscar):
+                and getattr(type(cliente), "buscar", None) is busca_web.ClienteBusca.buscar):
             return cliente.buscar_ex(q)
         payload = cliente.buscar(q)
         motivo = "ok" if payload else (getattr(cliente, "ultimo_motivo", "") or "vazio")
@@ -354,11 +355,11 @@ async def _executar_plano(estado: EstadoBusca, cliente: Any,
                 estado.buscas_cache += 1
             if res.motivo == "cap" and estado.parar_motivo != "cap":
                 estado.parar_motivo = "cap"
-                estado.decisoes.append("teto diário SerpAPI: ondas restantes canceladas")
+                estado.decisoes.append("teto diário da busca web: ondas restantes canceladas")
             if (estado.planejador and res.motivo == "erro" and not estado.parar_motivo
                     and planejador.orcamento_esgotado()):  # A5: não insistir depois do teto global
                 estado.parar_motivo = "orcamento"
-                estado.decisoes.append("teto de buscas SerpAPI do processo/arquivo: ondas restantes canceladas")
+                estado.decisoes.append("teto de buscas do processo/arquivo: ondas restantes canceladas")
                 planejador.evento("parou_orcamento", onda=onda, consulta=q["q"])
         sem_resultado: List[int] = []
         for ai in ais:
@@ -479,7 +480,7 @@ async def onda1(estado: EstadoBusca, cliente: Any, alvos: Sequence[Alvo],
     """Onda 1 com reserva: deixa `n_afirmações × max_extras` buscas para as ondas extras
     (nunca menos que 1 busca por afirmação na onda 1)."""
     if cliente is None or not getattr(cliente, "ativo", False):
-        estado.decisoes.append("sem SerpAPI: nenhuma busca")
+        estado.decisoes.append("busca web desligada: nenhuma busca")
         return estado
     plano = plano_onda1(alvos, agencias)
     n = len(alvos)

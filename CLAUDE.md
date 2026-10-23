@@ -16,7 +16,8 @@ python3 -m factcheck_mvp.cli runs --n 10
 
 - Traces: `runs/<run_id>/{trace.jsonl,resultado.json}`. Resultados do eval:
   `eval/resultados/<ts>-<nome>/{relatorio.md,metricas.json,casos.jsonl}`. Baseline: `eval/baseline.json`.
-- Cassetes (HTTP+LLM gravados): `eval/cassettes/`. Uso da SerpAPI: `eval/serpapi_uso.json`.
+- Cassetes (HTTP+LLM gravados): `eval/cassettes/`; buscas do ddgs são `ddgs://…` (um por backend). Uso das
+  buscas live (SerpAPI e ddgs, campo `por_provedor`): `eval/serpapi_uso.json` (outro caminho: `BUSCA_USO_ARQ`).
 
 ## O loop
 
@@ -31,14 +32,25 @@ python3 -m factcheck_mvp.cli runs --n 10
 
 - Principal = perfil **busca aberta** (padrão do eval: `INDICE_CHECAGENS=0`). O atalho do índice é
   métrica secundária: `--env INDICE_CHECAGENS=1 --nome indice`.
-- Se `metricas.descoberta.pulada` for alta (sem `SERPAPI_KEY`), o eval **não** julga mudanças de
-  busca/juiz. Olhe sempre esse campo antes de concluir algo.
+- Provedor de busca: `BUSCA_PROVEDOR=serpapi` (padrão) ou `ddgs`. O padrão só muda quando o eval aprovar o
+  ddgs; até lá, meça o ddgs com `--env BUSCA_PROVEDOR=ddgs`.
+- Se `metricas.descoberta.pulada` for alta (sem busca web: `BUSCA_WEB=0` ou, no serpapi, sem `SERPAPI_KEY`),
+  o eval **não** julga mudanças de busca/juiz. Olhe sempre esse campo antes de concluir algo.
 - **replay** (padrão) para iterar em lógica (sinais, agregador, travas, parsing): determinístico, sem rede.
 - **record** quando a mudança altera queries, prompts ou páginas lidas (prompt novo = cassete novo;
   record reusa o que já existe e grava o que falta). Em replay, `http_miss_total > 0` = faltou gravar.
-- SerpAPI: cada busca live é contada em `eval/serpapi_uso.json`; teto opcional via
-  `SERPAPI_ORCAMENTO_RESTANTE` ou `--max-buscas-serpapi`. Erro de cota (HTTP 401/403/429) aparece como
-  `fallback` pedindo nova `SERPAPI_KEY` no `.env`: pare e avise o usuário.
+- Trocar de provedor = cassetes novos: `--modo record --env BUSCA_PROVEDOR=ddgs`.
+- Buscas live (SerpAPI ou ddgs) são contadas no arquivo de uso; teto opcional via
+  `SERPAPI_ORCAMENTO_RESTANTE` (só SerpAPI) e `--max-buscas` (alias `--max-buscas-serpapi`; todas as chamadas,
+  1 por backend do ddgs tentado). Erro de cota da SerpAPI
+  (HTTP 401/403/429) aparece como `fallback` pedindo nova `SERPAPI_KEY` no `.env`: pare e avise o usuário.
+- ddgs não tem cota, mas tem rate limit e bloqueio de IP: busca perdida = `fallback onde=ddgs`; desvio entre
+  backends = `onde=ddgs.cadeia` (1 backend limitado só passa ao próximo). Limitado em todos os backends = `busca_bloqueada` em
+  `metricas.json` e aviso no fim do eval: pare e avise o usuário. Fora do eval, limitado em todos os backends
+  a busca cai na SerpAPI (`BUSCA_FALLBACK_SERPAPI=1`, gasta cota; o eval desliga) e o ddgs pausa
+  `DDGS_PAUSA_BLOQUEIO_S` (300 s). Em replay, backend que falhou na gravação
+  aparece como miss (`sem cassete`) e a cadeia segue: miss de `ddgs://` com resposta no backend seguinte é
+  esperado, não falta de gravação.
 
 ## Regras anti-autoengano
 
@@ -55,6 +67,9 @@ python3 -m factcheck_mvp.cli runs --n 10
 - LLM local OpenAI-compatível (Unsloth Studio) em `http://127.0.0.1:8888/v1`, modelo carregado hoje:
   `unsloth/LFM2.5-8B-A1B-GGUF`. **Não carregar outro modelo no Studio sem pedir** (troca o do usuário).
   Checar: `curl -s -m 3 http://127.0.0.1:8888/v1/models`.
+- Busca web: `BUSCA_PROVEDOR` (`serpapi`|`ddgs`); `BUSCA_WEB=0` desliga. ddgs: `DDGS_TEXT_BACKENDS`,
+  `DDGS_NEWS_BACKENDS`, `DDGS_RPS`, `DDGS_PROXY` (segredo: nunca imprimir). `/saude` mostra `busca_provedor`,
+  `busca_backends`, `busca_uso_hoje`, `busca_cap`. Lista completa em `.env.mvp.example`.
 - `.env` tem `SERPAPI_KEY`; não há `OPENROUTER_API_KEY` → juiz (OpenRouter) cai em fallback léxico
   (aparece como `fallback onde=juiz`/`openrouter.chat` no trace).
 - O pipeline grava sites descobertos em `factcheck_mvp/data/catalogo.json`; CLI e eval usam cópia

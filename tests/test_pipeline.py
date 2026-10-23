@@ -1334,3 +1334,31 @@ def test_rede_social_listada_sem_baixar_e_listagem_fora(amb):
     assert amb.get("_baixadas")                                          # a leitura rodou (guarda anti-vácuo)
     assert "https://www.instagram.com/p/abc/" not in amb["_baixadas"]   # mas não tentou a rede social
     assert rel.propensao == "alta"                                      # evidência legível segue decidindo
+
+
+def test_pipeline_busca_e_o_mesmo_objeto_de_serpapi(monkeypatch):
+    from factcheck_mvp import busca_web
+    from factcheck_mvp.serpapi_layer import SerpAPIClient
+    c = SerpAPIClient(api_key="")
+    pipe = Pipeline(Catalogo.carregar(), Indice(), Indice(), serpapi=c, detector=MockDetector())
+    assert pipe.busca is c and pipe.serpapi is c
+    outro = SerpAPIClient(api_key="")
+    pipe.busca = outro
+    assert pipe.serpapi is outro
+    sentinela = SerpAPIClient(api_key="")
+    monkeypatch.setattr(busca_web, "cliente_padrao", lambda: sentinela)
+    assert Pipeline(Catalogo.carregar(), Indice(), Indice(), detector=MockDetector()).busca is sentinela
+
+
+def test_tier_data_ddgs_tem_o_peso_da_serpapi():
+    from factcheck_mvp import corroboracao as cor
+    assert cor.tier_data("ddgs", "dia") == cor.tier_data("serpapi", "dia") == 5
+    assert cor.tier_data("ddgs:bing", "dia") == 5
+    assert cor.tier_data("ddgs:google", None, relativa=True) == 3
+    assert cor.tier_data("ddgs", "ano") == 2 and cor.tier_data("readerlm", "dia") == 1
+    assert cor.tier_data("jsonld", "dia") == 6 and cor.tier_data("trafilatura", "dia") == 4
+
+
+def test_mensagens_de_busca_sao_neutras_e_constantes_batem():
+    assert pl.LIM_BUSCA_SEM_RESULTADOS == "Busca web sem resultados para as afirmações."
+    assert "SerpAPI" not in pl.LIM_BUSCA_DESLIGADA and "BUSCA_WEB" in pl.LIM_BUSCA_DESLIGADA

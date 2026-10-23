@@ -17,7 +17,7 @@ from .catalogo import Catalogo
 from .indice import Indice
 from .pipeline import Pipeline
 from .schemas import EntradaConsulta, RelatorioChecagem
-from .serpapi_layer import SerpAPIClient
+from . import busca_web
 
 try:
     from .telegram_bot import (LINK_SEM_TEXTO_MSG, _texto_link, _urls_nao_analisadas,
@@ -66,15 +66,26 @@ def pipeline() -> Pipeline:
                 # Índice de checagens (ClaimReview/RSS): atalho opcional atrás de INDICE_CHECAGENS
                 idx_ver = Indice.de_checagens()
                 idx_not = Indice()
-                _pipe = Pipeline(catalogo, idx_ver, idx_not, SerpAPIClient())
+                _pipe = Pipeline(catalogo, idx_ver, idx_not, busca_web.cliente_padrao())
     return _pipe
 
 
 @app.get("/saude")
 def saude():
     p = pipeline()
+    provedor = busca_web.provedor_configurado()
+    backends = None
+    if provedor == "ddgs":
+        backends = {"text": getattr(config, "DDGS_TEXT_BACKENDS", ""),
+                    "news": getattr(config, "DDGS_NEWS_BACKENDS", "")}
     return {"ok": True, "portais": len(p.catalogo), "vereditos": len(p.idx_ver),
-            "noticias": len(p.idx_not), "serpapi": p.serpapi.ativo,
+            "noticias": len(p.idx_not),
+            # Busca web: provedor ativo (serpapi|ddgs), backends do ddgs, uso e teto do dia.
+            "busca_provedor": provedor, "busca_backends": backends,
+            "busca_uso_hoje": p.serpapi.uso_hoje,
+            "busca_cap": getattr(config, "BUSCA_DAILY_CAP", getattr(config, "SERPAPI_DAILY_CAP", 100)),
+            # Chaves serpapi_* mantidas por compatibilidade (um ciclo); use as busca_* acima.
+            "serpapi": p.serpapi.ativo,
             "serpapi_engine": p.serpapi.engine_default,
             "serpapi_estrategia": getattr(config, "SERP_ESTRATEGIA", "agente"),
             "serpapi_uso_hoje": p.serpapi.uso_hoje,

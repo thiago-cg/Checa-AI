@@ -1,7 +1,7 @@
 """RF01: bot do Telegram. Entrada texto/título/link (RF02/RF03), progresso e
 resposta neutra com fontes, % do modelo e etapas (RF07/RF09/RF11/RNF02/RNF04).
 
-Privacidade: o texto enviado é consultado em bases externas (SerpAPI/Google).
+Privacidade: o texto enviado é consultado em bases externas de busca (SerpAPI/Google ou DuckDuckGo/Bing via ddgs).
 Sem fotos/vídeos: mídia recebe orientação, não silêncio (RF03).
 """
 from __future__ import annotations

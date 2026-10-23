@@ -54,7 +54,7 @@ Cada consulta passa por um pipeline de seis etapas:
 | 1. Recebimento | A mensagem é classificada como texto, título ou link. O link só é lido quando pertence a um portal do catálogo; senão, o robô pede o texto. Imagem, vídeo e áudio recebem uma orientação. |
 | 2. Afirmações | Um modelo de linguagem transforma o texto em afirmações verificáveis, sem a moldura de encaminhamento ("me mandaram que…") e mantendo o autor de uma fala. |
 | 3. Base de checagens | Cada afirmação é procurada nas checagens já publicadas por 9 agências (cerca de 22 mil registros) e, com chave configurada, na Google Fact Check Tools. |
-| 4. Busca na web | Só quando a base não tem checagem aplicável: busca na web (SerpAPI) pelo que veículos e agências publicaram. |
+| 4. Busca na web | Só quando a base não tem checagem aplicável: busca na web (SerpAPI ou ddgs, conforme `BUSCA_PROVEDOR`) pelo que veículos e agências publicaram. |
 | 5. Leitura e julgamento | As páginas são lidas por inteiro, e um modelo de linguagem (o "juiz") diz se cada uma confirma, contesta ou só relata a afirmação, com um trecho citado que é conferido na página. |
 | 6. Estimativa | Uma regra fixa e documentada, e não um modelo de linguagem, combina as fontes independentes e os selos das agências e chega à propensão. A conclusão é escrita por modelos de texto neutros. |
 
@@ -102,7 +102,7 @@ técnico estão em [`entrega/`](entrega/).
 | | **Pydantic** | Estruturas tipadas de entrada e saída, compartilhadas por todos os canais, e validação das respostas do modelo de linguagem |
 | Modelos de linguagem | **OpenRouter** | Extração das afirmações e julgamento das fontes (provedor principal) |
 | | **LLM local OpenAI-compatível** (Unsloth Studio) | Provedor reserva; sem nenhum dos dois, o sistema cai em regras fixas e responde "indeterminada" |
-| Busca | **SerpAPI** | Busca na web por veículos e agências |
+| Busca | **SerpAPI** (padrão) ou **ddgs** (opcional, sem chave) | Busca na web por veículos e agências |
 | | **Google Fact Check Tools** | Checagens indexadas pelo Google (opcional) |
 | Base de checagens | **rank-bm25** + **NLTK** (stopwords e RSLPStemmer) | Índice de busca textual sobre as cerca de 22 mil checagens |
 | | **lxml** | Leitura dos feeds RSS/Atom e mapas de site das agências |
@@ -159,13 +159,31 @@ Para ligar o modelo próprio (BERTimbau), instale também `pip install -r requir
 | Chave no `.env` | Para quê | Sem ela |
 |---|---|---|
 | `OPENROUTER_API_KEY` | Modelo de linguagem (afirmações e julgamento das fontes) | Usa o LLM local, se houver; senão as fontes não são julgadas e a resposta é "indeterminada" |
-| `SERPAPI_KEY` | Busca na web | Só a base de checagens é consultada |
+| `SERPAPI_KEY` | Busca na web pela SerpAPI (provedor padrão) | Só a base de checagens é consultada, a não ser que se use `BUSCA_PROVEDOR=ddgs` |
 | `TELEGRAM_TOKEN` | Robô do Telegram | A página e a interface de programação funcionam |
 | `GOOGLE_FACTCHECK_API_KEY` | Checagens da Google Fact Check Tools (opcional) | Só a base própria |
 | `UNSLOTH_BASE_URL` | Endereço de um LLM local OpenAI-compatível (opcional) | Só o OpenRouter |
 
 Todas as variáveis, com explicação, estão em [`.env.mvp.example`](.env.mvp.example). O `.env` nunca vai para o
 repositório.
+
+#### Busca na web
+
+O provedor da busca na web é escolhido por `BUSCA_PROVEDOR`:
+
+- `serpapi` (padrão): usa `SERPAPI_KEY`. A conta tem cota; quando ela acaba, a busca para e a resposta declara a
+  limitação.
+- `ddgs`: usa a biblioteca `ddgs`, sem chave e sem cota. O risco é o limite de taxa dos buscadores e o bloqueio do
+  IP do servidor. Se um backend limita a taxa, o sistema tenta o próximo. Se todos limitam, a busca vai para a
+  SerpAPI quando há `SERPAPI_KEY` (`BUSCA_FALLBACK_SERPAPI=1`, padrão; gasta cota) e o `ddgs` fica
+  `DDGS_PAUSA_BLOQUEIO_S` (300 s) sem buscas; sem chave, a busca é pulada e registrada na telemetria.
+
+O padrão continua `serpapi` até a avaliação aprovar o `ddgs`. `BUSCA_WEB=0` desliga a busca web nos dois casos. As
+variáveis `DDGS_*` (ordem dos backends, região, ritmo, proxy) estão em `.env.mvp.example`.
+
+Com o `ddgs`, há perdas em relação à SerpAPI: o resultado orgânico não traz a data relativa ("há 2 dias"), as
+notícias de destaque vêm de uma busca de notícias e o Google Scholar não é consultado. O `ddgs` raspa os buscadores,
+o que pode contrariar os termos de uso deles; a escolha do provedor é de quem mantém o projeto.
 
 ### Executando
 
@@ -217,7 +235,9 @@ Checa-AI/
 │   ├── afirmacoes.py         Extração das afirmações verificáveis
 │   ├── indice.py             Busca na base de checagens (BM25)
 │   ├── ingestor.py           Coleta das checagens das agências (RSS, WordPress, mapas de site)
-│   ├── serpapi_layer.py      Busca na web
+│   ├── busca_web.py          Escolhe o provedor de busca (serpapi ou ddgs)
+│   ├── serpapi_layer.py      Busca na web pela SerpAPI
+│   ├── ddgs_layer.py         Busca na web pelo ddgs (sem chave)
 │   ├── agente.py             Planejamento e execução das buscas
 │   ├── extracao.py           Extração do corpo das páginas
 │   ├── juiz_llm.py           Julgamento das fontes pelo modelo de linguagem

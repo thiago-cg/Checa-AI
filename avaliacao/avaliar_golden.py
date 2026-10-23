@@ -103,9 +103,14 @@ def main() -> None:
         g = g.groupby("classe").sample(frac=min(1.0, args.n / len(g)), random_state=42)
     from factcheck_mvp import api
     pipe = api.pipeline()
-    if args.offline:
-        from factcheck_mvp.serpapi_layer import SerpAPIClient
-        pipe.serpapi = SerpAPIClient(api_key="")
+    if args.offline:  # busca web desligada, qualquer que seja o BUSCA_PROVEDOR
+        from factcheck_mvp import busca_web
+        if busca_web.provedor_configurado() == "ddgs":
+            from factcheck_mvp.ddgs_layer import DDGSClient
+            pipe.busca = DDGSClient(ativo=False)
+        else:
+            from factcheck_mvp.serpapi_layer import SerpAPIClient
+            pipe.busca = SerpAPIClient(api_key="")
 
     res = asyncio.run(rodar(pipe, g, usar_llm=not args.offline))
     resumo = resumir(res)
