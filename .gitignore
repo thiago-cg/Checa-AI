@@ -11,6 +11,8 @@ output*/
 bertimbau-*/
 *.safetensors
 *.bin
+# Zip do BERTimbau v6 (~400 MB, acima do limite do GitHub) e sua extração: vão ao Cloud Run pelo --source, não ao git
+modelo/
 # Telemetria (traces por execução) e resultados de eval (versionar só eval/baseline.json)
 runs/
 eval/resultados/*/

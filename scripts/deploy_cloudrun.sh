@@ -60,8 +60,9 @@ done
 
 # --max-instances 1: limita o gasto (SerpAPI/OpenRouter) e mantém o limitador de taxa em memória
 # coerente. --timeout 300: uma checagem pode levar até 180 s. --min-instances 0: dorme sem acesso.
+# --memory 2Gi: torch + BERTimbau carregados ocupam ~1 GB além da API.
 args=(--source . --region "$REGIAO" --allow-unauthenticated
-      --memory 1Gi --cpu 1 --timeout 300 --concurrency 4
+      --memory 2Gi --cpu 1 --timeout 300 --concurrency 4
       --min-instances 0 --max-instances 1
       --set-secrets "$(IFS=,; echo "${set_secrets[*]}")")
 [ ${#env_vars[@]} -gt 0 ] && args+=(--set-env-vars "^@^$(IFS=@; echo "${env_vars[*]}")")

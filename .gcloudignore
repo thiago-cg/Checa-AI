@@ -9,6 +9,8 @@ bot.log
 # Pesados ou só locais
 .venv/
 modelos/
+# Cópia local extraída do modelo: na imagem entra só modelo/bertimbau_v6.zip (o Dockerfile extrai)
+modelo/bertimbau_v6/
 runs/
 eval/
 avaliacao/

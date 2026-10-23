@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checa AI — Cobalt Grid</title>
+
+<!-- Fontes: Archivo (display), Nunito (texto), IBM Plex Mono (código) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   TEMA (mude aqui para mudar o deck inteiro)
+   =========================================== */
+:root {
+    --stage-bg: #e6e6e2;      /* faixas fora do palco 16:9 */
+    --slide-bg: #fafaf8;      /* papel */
+    --ink: #0b0b0b;           /* preto */
+    --red: #ff3300;           /* acento único (e nível ALTA) */
+    --green: #1f9d55;         /* nível BAIXA */
+    --amber: #f2b705;         /* nível MÉDIA */
+    --mute: #74746d;
+    --line: rgba(11, 11, 11, .10);
+    --soft: #efefea;
+
+    --f-display: 'Archivo', sans-serif;
+    --f-body: 'Nunito', sans-serif;
+    --f-mono: 'IBM Plex Mono', monospace;
+
+    --pad: 160px;             /* margem lateral do palco */
+    --ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   VIEWPORT BASE (fixed 16:9 stage) — obrigatório
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+    .slide .r { opacity: 1 !important; transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   ESTRUTURA DE SLIDE (grade suíça)
+   Cada slide: grade de fundo + meta (topo) + rodapé + conteúdo.
+   =========================================== */
+.slide { font-family: var(--f-body); color: var(--ink); }
+.meta, .foot {
+    position: absolute; left: var(--pad); right: var(--pad);
+    display: flex; justify-content: space-between;
+    font: 700 20px var(--f-display); letter-spacing: .18em; text-transform: uppercase;
+}
+.meta { top: 64px; }
+.meta span:last-child, .foot { color: var(--mute); }
+.foot { bottom: 52px; font-weight: 600; font-size: 18px; letter-spacing: .08em; }
+
+/* Kicker vermelho + título de seção */
+.kicker {
+    position: absolute; left: var(--pad); top: 160px;
+    display: flex; align-items: center; gap: 18px;
+    font: 800 24px var(--f-display); letter-spacing: .2em; text-transform: uppercase; color: var(--red);
+}
+.kicker::before { content: ""; width: 44px; height: 8px; background: var(--red); }
+.h2 {
+    position: absolute; left: 152px; top: 206px; right: var(--pad);
+    font: 900 112px/1 var(--f-display); letter-spacing: -.04em;
+}
+.body { position: absolute; left: var(--pad); right: var(--pad); top: 390px; bottom: 140px; }
+
+/* Tipografia utilitária */
+.mono { font-family: var(--f-mono); }
+.lead { font: 400 38px/1.4 var(--f-body); }
+.small { font-size: 24px; color: var(--mute); line-height: 1.4; }
+.lab { font: 800 20px var(--f-display); letter-spacing: .18em; text-transform: uppercase; color: var(--mute); }
+.red { color: var(--red); }
+.hl { background: var(--red); color: var(--inv-fg); padding: 0 10px; }
+.ul { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 6px; text-underline-offset: 8px; }
+.strike { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 4px; color: var(--mute); }
+
+/* Réguas e caixas */
+.rule { border-top: 3px solid var(--ink); }
+.box { border: 3px solid var(--ink); padding: 32px 36px; background: var(--slide-bg); }
+.box.soft { border: 0; background: var(--soft); }
+.tag { display: inline-block; font: 800 18px var(--f-display); letter-spacing: .14em; text-transform: uppercase; padding: 6px 12px; border: 2px solid var(--ink); }
+.tag.llm { background: var(--red); border-color: var(--red); color: var(--inv-fg); }
+.sq { display: inline-block; width: 44px; height: 44px; flex: none; }
+.sq.g { background: var(--green); } .sq.a { background: var(--amber); } .sq.r { background: var(--alta); }
+.sq.o { border: 4px solid var(--ink); }
+
+/* ===========================================
+   ANIMAÇÕES — disparadas quando o slide fica .visible
+   Use class="r" e style="--d:.3s" para escalonar.
+   =========================================== */
+.r { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .8s var(--ease); transition-delay: var(--d, 0s); }
+.slide.visible .r { opacity: 1; transform: none; }
+.wipe { transform: scaleX(0); transform-origin: left; transition: transform .9s cubic-bezier(.7, 0, .2, 1); transition-delay: var(--d, 0s); }
+.slide.visible .wipe { transform: scaleX(1); }
+.kicker, .h2 { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .7s var(--ease); }
+.h2 { transition-delay: .08s; }
+.slide.visible .kicker, .slide.visible .h2 { opacity: 1; transform: none; }
+
+/* ===========================================
+   COMPONENTES ESPECÍFICOS
+   =========================================== */
+/* Título (slide 1) */
+.t-bar { position: absolute; left: var(--pad); top: 250px; width: 640px; height: 22px; background: var(--red); }
+.t-h1 { position: absolute; left: 150px; top: 300px; font: 900 300px/.86 var(--f-display); letter-spacing: -.045em; }
+.t-h1 .l { display: block; overflow: hidden; }
+.t-h1 .l span { display: block; transform: translateY(105%); transition: transform .9s var(--ease); }
+.slide.visible .t-h1 .l span { transform: none; }
+.slide.visible .t-h1 .l:nth-child(2) span { transition-delay: .12s; }
+.scale4 { position: absolute; right: var(--pad); top: 300px; width: 480px; }
+.scale4 .row { display: flex; align-items: center; gap: 24px; height: 120px; border-top: 2px solid var(--ink); }
+.scale4 .row:last-child { border-bottom: 2px solid var(--ink); }
+.scale4 .sq { width: 56px; height: 56px; }
+.scale4 b { font: 800 34px var(--f-display); }
+.scale4 i { margin-left: auto; font: 500 22px var(--f-display); font-style: normal; color: var(--mute); }
+
+/* Grade de colunas genérica */
+.cols { display: grid; gap: 40px; }
+.c2 { grid-template-columns: 1fr 1fr; } .c3 { grid-template-columns: repeat(3, 1fr); } .c4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Lista com marcadores ✓ – ✗ */
+.checks { list-style: none; }
+.checks li { display: flex; gap: 22px; align-items: baseline; font-size: 34px; line-height: 1.3; padding: 18px 0; border-bottom: 2px solid var(--line); }
+.checks li .m { flex: none; width: 40px; font: 900 34px var(--f-display); }
+.checks li .m.y { color: var(--green); } .checks li .m.n { color: var(--red); } .checks li .m.s { color: var(--mute); }
+.checks li small { display: block; font-size: 24px; color: var(--mute); }
+
+/* Visão geral: 10 etapas */
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
+.step { position: relative; height: 210px; border-top: 6px solid var(--ink); padding-top: 18px; }
+.step.llm { border-top-color: var(--red); }
+.step .n { font: 900 56px/1 var(--f-display); letter-spacing: -.03em; }
+.step.llm .n { color: var(--red); }
+.step .t { font: 800 32px/1.1 var(--f-display); margin-top: 14px; }
+.step .d { font-size: 22px; color: var(--mute); margin-top: 8px; }
+
+/* JSON / código */
+.code { font: 400 26px/1.6 var(--f-mono); background: var(--inv-bg); color: var(--inv-fg); padding: 32px 36px; }
+.code .k { color: var(--code-k); } .code .s { color: var(--code-ok); }
+
+/* Linha de equação */
+.eq { display: flex; align-items: center; gap: 22px; font: 700 30px var(--f-display); }
+.eq .op { font-size: 44px; color: var(--mute); }
+.eq .cell { border: 3px solid var(--ink); padding: 14px 20px; }
+.eq .cell small { display: block; font: 600 18px var(--f-body); color: var(--mute); }
+
+/* Clusters (slide independência) */
+.dots { display: grid; grid-template-columns: repeat(5, 72px); gap: 18px; }
+.dot { width: 72px; height: 72px; background: var(--ink); }
+.cluster { border: 3px solid var(--ink); padding: 22px; display: flex; gap: 14px; align-items: center; }
+.cluster .dot { width: 48px; height: 48px; }
+.cluster .lbl { margin-left: auto; text-align: right; font: 800 24px var(--f-display); }
+.cluster .lbl small { display: block; font: 600 18px var(--f-body); color: var(--mute); }
+
+/* Classes do juiz */
+.classes { display: flex; gap: 14px; flex-wrap: wrap; }
+.classes span { font: 800 22px var(--f-mono); padding: 10px 16px; border: 2px solid var(--ink); }
+.classes span.on { background: var(--inv-bg); color: var(--inv-fg); }
+
+/* Eixo de log-odds */
+.axis { position: relative; width: 900px; height: 230px; }
+.axis .zone { position: absolute; top: 60px; height: 70px; display: flex; align-items: center; justify-content: center; font: 900 26px var(--f-display); letter-spacing: .08em; color: var(--inv-fg); }
+.axis .tick { position: absolute; top: 140px; font: 600 22px var(--f-mono); transform: translateX(-50%); }
+.axis .mk { position: absolute; top: 18px; width: 4px; height: 120px; background: var(--ink); transform: translateX(-50%); }
+.axis .mk b { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); white-space: nowrap; font: 800 24px var(--f-display); }
+
+/* Tabela simples */
+.tbl { width: 100%; border-collapse: collapse; font-size: 30px; }
+.tbl td { padding: 18px 0; border-bottom: 2px solid var(--line); }
+.tbl td:last-child { text-align: right; font: 800 34px var(--f-display); }
+.tbl tr:first-child td { border-top: 3px solid var(--ink); }
+
+/* Barras de resultado */
+.bar { display: grid; grid-template-columns: 380px 1fr 150px; align-items: center; gap: 28px; height: 96px; border-bottom: 2px solid var(--line); }
+.bar .nm { font: 800 30px var(--f-display); }
+.bar .nm small { display: block; font: 600 20px var(--f-body); color: var(--mute); }
+.bar .tr { height: 40px; background: var(--soft); position: relative; }
+.bar .fi { position: absolute; inset: 0 auto 0 0; background: var(--ink); }
+.bar .v { font: 900 44px var(--f-display); text-align: right; }
+
+/* Linha do trace */
+.trace { font: 400 24px/1.75 var(--f-mono); }
+.trace span { color: var(--mute); display: inline-block; width: 130px; }
+
+/* Grandes declarações */
+.stmt { position: absolute; left: 150px; right: var(--pad); top: 300px; font: 900 150px/.95 var(--f-display); letter-spacing: -.045em; }
+
+/* ===========================================
+   NOTAS DO APRESENTADOR, PROGRESSO, EDIÇÃO
+   (fora do palco: não fazem parte do slide)
+   =========================================== */
+.progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--red); z-index: 900; transition: width .4s var(--ease); }
+.notes {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(20px);
+    width: min(1100px, 92vw); max-height: 34vh; overflow: auto;
+    background: rgba(11, 11, 11, .92); color: var(--inv-fg); padding: 18px 22px;
+    font: 400 17px/1.5 var(--f-body); border-left: 6px solid var(--red);
+    opacity: 0; pointer-events: none; transition: .25s; z-index: 950;
+}
+.notes.on { opacity: 1; transform: translateX(-50%); pointer-events: auto; }
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 16px; left: 16px; z-index: 10001; width: 44px; height: 44px;
+    border: 2px solid var(--ink); background: #fff; font-size: 20px; cursor: pointer;
+    opacity: 0; pointer-events: none; transition: opacity .3s ease;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--red); border-color: var(--red); }
+body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--red); outline-offset: 4px; }
+
+/* ===========================================
+   TEMA B · COBALT GRID
+   Duas cores apenas: papel creme + tinta cobalto (risografia).
+   Newsreader 400 nos títulos, Hanken Grotesk no texto, DM Mono no "chrome".
+   A propensão usa padrões de cobalto, não cores:
+   baixa = hachura · média = cobalto claro · alta = cobalto sólido · indeterminada = contorno.
+   =========================================== */
+:root {
+    --stage-bg: #d9d3c2; --slide-bg: #F0EBDE; --paper: #F0EBDE;
+    --ink: #1F2BE0; --red: #1F2BE0; --mute: #5560E5; --soft: #E6E0CE;
+    --line: rgba(31, 43, 224, .18); --ink-faint: rgba(31, 43, 224, .18);
+    --green: repeating-linear-gradient(45deg, rgba(31,43,224,.5) 0 2px, transparent 2px 10px);
+    --amber: rgba(31, 43, 224, .22); --alta: #1F2BE0; --amber-text: #1F2BE0;
+    --inv-bg: #1F2BE0; --inv-fg: #F0EBDE; --inv-mute: rgba(240, 235, 222, .75);
+    --code-ok: #F0EBDE; --code-k: #c9cdfa;
+    --f-display: 'Newsreader', Georgia, serif;
+    --f-body: 'Hanken Grotesk', sans-serif;
+    --f-mono: 'DM Mono', monospace;
+}
+.slide { font-synthesis: none; }
+/* papel milimetrado permanente (10%) */
+.slide::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .10;
+    background-image: linear-gradient(#1F2BE0 1px, transparent 1px), linear-gradient(90deg, #1F2BE0 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+/* moldura: filetes de 1,5px no topo e na base */
+.slide::after {
+    content: ""; position: absolute; left: 96px; right: 96px; top: 104px; bottom: 96px; pointer-events: none;
+    border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);
+}
+.meta, .foot { left: 96px; right: 96px; font: 400 20px var(--f-mono) !important; letter-spacing: .08em; color: var(--ink) !important; }
+.foot { bottom: 52px; }
+.kicker, .lab, .tag { font-family: var(--f-body) !important; font-weight: 600 !important; letter-spacing: .18em; }
+.kicker { color: var(--ink); }
+.kicker::before { background: var(--ink); height: 2px; }
+.h2 { font-weight: 400; letter-spacing: -.01em; }
+.red { color: var(--ink) !important; font-style: italic; }
+.small, .lead { color: var(--ink); }
+.small { opacity: .78; }
+.sq.g { background: var(--green); outline: 1.5px solid var(--ink); }
+.sq.a { background: var(--amber); outline: 1.5px solid var(--ink); }
+.sq.o { border-width: 1.5px; }
+.rule, .scale4 .row, .tbl tr:first-child td { border-color: var(--ink) !important; }
+.box { border-width: 1.5px; }
+.tag { border-width: 1.5px; }
+.tag.llm { background: var(--ink); color: var(--paper); }
+.hl { background: var(--ink); color: var(--paper); }
+.ul { text-decoration: none; background: var(--ink-faint); }
+.strike { text-decoration-color: var(--ink); color: var(--mute); }
+.checks li { border-bottom: 1px solid var(--line); }
+.checks li .m, .checks li .m.y, .checks li .m.n { color: var(--ink) !important; font-family: var(--f-mono); }
+.checks li .m.s { color: var(--mute) !important; }
+.step { border-top-width: 1.5px; }
+.step.llm { border-top: 6px solid var(--ink); }
+.step.llm .n { font-style: italic; color: var(--ink); }
+.t-bar { height: 6px; background: var(--ink); }
+.t-h1 { font-weight: 400; letter-spacing: -.035em; }
+.stmt { font-weight: 400; letter-spacing: -.02em; }
+.axis .zone { color: var(--ink) !important; font: 500 24px var(--f-mono) !important; border: 1.5px solid var(--ink); }
+.axis .zone:first-child { background: var(--green) !important; }
+.axis .zone:first-child, .axis .zone:nth-child(2) { text-shadow: 0 0 6px var(--paper), 0 0 2px var(--paper); }
+.axis .zone:nth-child(3) { color: var(--paper) !important; }
+.bar .tr { background: rgba(31, 43, 224, .10); }
+.bar .fi { background: repeating-linear-gradient(90deg, var(--ink) 0 14px, transparent 14px 18px); }
+.dot, .cluster .dot { background: var(--ink); }
+.progress { background: var(--ink); }
+.notes { border-left-color: #5560E5; }
+/* coluna "pixel-glitch" e bloco QR (slides de declaração) */
+.glitch { position: absolute; right: 40px; top: 110px; width: 44px; height: 860px; pointer-events: none; z-index: 3; }
+.glitch i { position: absolute; right: 0; height: 5px; background: var(--ink); }
+.qr { position: absolute; right: 120px; top: 128px; width: 76px; height: 76px; padding: 4px; background: var(--paper);
+      box-shadow: 0 0 0 1.5px var(--paper); display: grid; grid-template-columns: repeat(8, 1fr); z-index: 3; }
+.qr b { background: transparent; } .qr b.on { background: var(--ink); }
+.slide:first-child .t-bar { top: 196px; }
+.slide:first-child .t-h1 { font-size: 260px; line-height: 1.02; top: 236px; }
+.slide:first-child .foot { font-size: 13px !important; letter-spacing: .02em; }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Modo edição (E)" aria-label="Alternar modo de edição">✏️</button>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- =========================================================
+     01 · TÍTULO
+     ========================================================= -->
+<section class="slide" data-sec="Residência · 2026">
+  <div class="t-bar wipe" style="--d:.15s"></div>
+  <h1 class="t-h1"><span class="l"><span>Checa</span></span><span class="l"><span>AI.</span></span></h1>
+  <p class="lead r" style="position:absolute;left:160px;top:830px;width:900px;font-size:34px;--d:.6s">Checagem cruzada de fatos em português — <b>propensão</b> de desinformação, com o caminho à mostra.</p>
+  <div class="scale4">
+    <div class="row r" style="--d:.7s"><span class="sq g"></span><b>Baixa</b><i>L ≤ −1,1</i></div>
+    <div class="row r" style="--d:.8s"><span class="sq a"></span><b>Média</b><i>|L| &lt; 1,1</i></div>
+    <div class="row r" style="--d:.9s"><span class="sq r"></span><b>Alta</b><i>L ≥ 1,1</i></div>
+    <div class="row r" style="--d:1s"><span class="sq o"></span><b>Indeterminada</b><i>sem voto</i></div>
+  </div>
+  <div class="foot" style="font-size:15px;letter-spacing:.04em;white-space:nowrap"><span>Eliane O. do Carmo · Thiago C. Gonzaga · Maria Eduarda D. D. Marques · Guilherme S. Dutra · Gabriella O. de S. Dias · Daltro O. Vinuto</span><span>Desafio First Challenge</span></div>
+</section>
+
+<!-- =========================================================
+     02 · GANCHO
+     ========================================================= -->
+<section class="slide" data-sec="O problema">
+  <div class="kicker">Grupo da família · mensagem encaminhada</div>
+  <div class="stmt" style="top:290px;font-size:230px">
+    <div class="r" style="--d:.15s">“Café cura</div>
+    <div class="r" style="--d:.3s">câncer.”</div>
+  </div>
+  <div class="r" style="position:absolute;left:160px;top:820px;font:900 88px var(--f-display);letter-spacing:-.03em;--d:.8s">Verdade ou <span class="red">mentira?</span></div>
+</section>
+
+<!-- =========================================================
+     03 · PRINCÍPIO: PROPENSÃO
+     ========================================================= -->
+<section class="slide" data-sec="Princípio de projeto">
+  <div class="kicker">A saída</div>
+  <h2 class="h2">Propensão, não veredito.</h2>
+  <div class="body cols c4" style="top:430px">
+    <div class="r" style="--d:.2s"><div class="rule"></div><span class="sq g" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Baixa</div><div class="mono" style="font-size:24px;margin:10px 0 18px">L ≤ −1,10</div><p class="small" style="font-size:28px">Fontes independentes sustentam a afirmação.</p></div>
+    <div class="r" style="--d:.3s"><div class="rule"></div><span class="sq a" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Média</div><div class="mono" style="font-size:24px;margin:10px 0 18px">|L| &lt; 1,10</div><p class="small" style="font-size:28px">Evidência insuficiente ou em conflito.</p></div>
+    <div class="r" style="--d:.4s"><div class="rule"></div><span class="sq r" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Alta</div><div class="mono" style="font-size:24px;margin:10px 0 18px">L ≥ +1,10</div><p class="small" style="font-size:28px">Fontes independentes contestam a afirmação.</p></div>
+    <div class="r" style="--d:.5s"><div class="rule"></div><span class="sq o" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Indeterminada</div><div class="mono" style="font-size:24px;margin:10px 0 18px">nenhum voto</div><p class="small" style="font-size:28px">Nenhuma fonte trata do assunto.</p></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     04 · QUEM DECIDE
+     ========================================================= -->
+<section class="slide" data-sec="Princípio de projeto">
+  <div class="kicker">Quem decide</div>
+  <div class="stmt" style="top:250px;width:860px;font-size:110px">
+    <div class="r" style="--d:.1s">Ausência de evidência</div>
+    <div class="r red" style="--d:.25s">não é evidência.</div>
+  </div>
+  <p class="lead r" style="position:absolute;left:160px;top:720px;width:780px;font-size:32px;--d:.45s">Nada empurra o nível sem uma fonte que tenha tomado posição sobre a afirmação.</p>
+  <div style="position:absolute;left:1120px;right:160px;top:250px;display:grid;gap:36px">
+    <div class="box r" style="--d:.5s"><span class="tag llm">Modelo de linguagem</span><div style="font:900 48px/1.1 var(--f-display);margin:22px 0 12px">extrai · reescreve · classifica</div><p class="small" style="font-size:26px">Propõe — e é sempre conferido pelo código.</p></div>
+    <div class="box r" style="--d:.65s;background:var(--inv-bg);color:var(--inv-fg)"><span class="tag" style="border-color:var(--inv-fg)">Código determinístico</span><div style="font:900 48px/1.1 var(--f-display);margin:22px 0 12px">pesa · soma · decide · redige</div><p style="font-size:26px;color:var(--inv-mute)">O nível e o texto final nunca vêm do LLM.</p></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     05 · VISÃO GERAL — 10 ETAPAS
+     ========================================================= -->
+<section class="slide" data-sec="Pipeline">
+  <div class="kicker">Visão geral</div>
+  <h2 class="h2">Dez etapas com recibo.</h2>
+  <div class="body" style="top:420px">
+    <div class="steps">
+      <div class="step r" style="--d:.15s"><div class="n">01</div><div class="t">Recebimento</div><div class="d">regras: tempo, rumor, sátira</div></div>
+      <div class="step llm r" style="--d:.2s"><div class="n">02</div><div class="t">Afirmações</div><div class="d">LLM → JSON validado</div></div>
+      <div class="step r" style="--d:.25s"><div class="n">03</div><div class="t">Busca aberta</div><div class="d">SerpAPI · 2 consultas</div></div>
+      <div class="step r" style="--d:.3s"><div class="n">04</div><div class="t">Leitura</div><div class="d">deep crawl + extração</div></div>
+      <div class="step r" style="--d:.35s"><div class="n">05</div><div class="t">Independência</div><div class="d">clusters de fontes</div></div>
+      <div class="step llm r" style="--d:.4s"><div class="n">06</div><div class="t">Juiz</div><div class="d">4 classes + citação</div></div>
+      <div class="step llm r" style="--d:.45s"><div class="n">07</div><div class="t">Agente crítico</div><div class="d">para ou reescreve ↺ busca</div></div>
+      <div class="step r" style="--d:.5s"><div class="n">08</div><div class="t">Decisão</div><div class="d">log-odds · limiar</div></div>
+      <div class="step r" style="--d:.55s"><div class="n">09</div><div class="t">Travas</div><div class="d">só rebaixam</div></div>
+      <div class="step r" style="--d:.6s"><div class="n">10</div><div class="t">Relatório</div><div class="d">templates neutros</div></div>
+    </div>
+    <div class="r" style="display:flex;gap:56px;margin-top:20px;font:800 24px var(--f-display);--d:.75s">
+      <span style="display:flex;align-items:center;gap:14px"><span style="width:48px;height:6px;background:var(--ink)"></span>código determinístico · 7</span>
+      <span style="display:flex;align-items:center;gap:14px" class="red"><span style="width:48px;height:6px;background:var(--red)"></span>modelo de linguagem · 3</span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     06 · ETAPA 1 — RECEBIMENTO
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 01">
+  <div class="kicker">Etapa 01 · Recebimento</div>
+  <h2 class="h2">Ler o texto antes de buscar.</h2>
+  <div class="body cols c2" style="gap:80px">
+    <div>
+      <div class="lab r" style="--d:.15s">Entrada · exemplo ilustrativo</div>
+      <p class="r" style="font:800 46px/1.25 var(--f-display);margin-top:20px;--d:.25s"><span class="ul">Me passaram que</span> o governo vai bloquear as contas de todo mundo <span class="hl">hoje</span>.</p>
+      <div class="r" style="margin-top:46px;--d:.45s">
+        <div class="lab">Janela temporal</div>
+        <div style="position:relative;height:110px;margin-top:20px">
+          <div style="position:absolute;left:0;right:0;top:44px;height:3px;background:var(--ink)"></div>
+          <div class="wipe" style="position:absolute;left:520px;width:200px;top:32px;height:28px;background:var(--red);--d:.7s"></div>
+          <div style="position:absolute;left:700px;top:72px;font:800 22px var(--f-display)">hoje</div>
+          <div style="position:absolute;left:520px;top:72px;font:600 20px var(--f-body);color:var(--red)">2 dias</div>
+          <div style="position:absolute;left:120px;top:30px;width:28px;height:28px;border-radius:50%;background:var(--mute)"></div>
+          <div style="position:absolute;left:40px;top:72px;font:600 20px var(--f-body);color:var(--mute)">fonte de outro período</div>
+        </div>
+        <p class="small">Fora da janela, a fonte perde peso: provavelmente fala de outro episódio.</p>
+      </div>
+    </div>
+    <ul class="checks">
+      <li class="r" style="--d:.3s"><span class="m y">✓</span><span>Marcador de tempo<small>“hoje” → janela de 2 dias</small></span></li>
+      <li class="r" style="--d:.4s"><span class="m y">✓</span><span>Relato de segunda mão<small>“Me passaram que…”</small></span></li>
+      <li class="r" style="--d:.5s"><span class="m s">–</span><span>Opinião ou sátira</span></li>
+      <li class="r" style="--d:.6s"><span class="m s">–</span><span>Afirmação vaga</span></li>
+      <li class="r" style="--d:.7s;border:0"><span class="m n">✗</span><span>Foto ou vídeo<small>recebe só orientação; aceita texto, título ou link</small></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- =========================================================
+     07 · ETAPA 2 — AFIRMAÇÕES
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 02">
+  <div class="kicker">Etapa 02 · Afirmações · <span class="tag llm" style="font-size:16px;padding:3px 10px">LLM</span></div>
+  <h2 class="h2">Núcleo e polaridade.</h2>
+  <div class="body" style="top:380px">
+    <div class="cols" style="grid-template-columns:640px 1fr;gap:60px;align-items:start">
+      <div>
+        <div class="lab r" style="--d:.15s">Entrada do usuário</div>
+        <p class="r" style="font:900 60px/1.1 var(--f-display);letter-spacing:-.02em;margin-top:18px;--d:.25s">“É falso que a vacina altera o DNA.”</p>
+      </div>
+      <div class="code r" style="--d:.4s">{<br>
+&nbsp;&nbsp;<span class="k">"afirmacao"</span>: <span class="s">"A vacina não altera o DNA"</span>,<br>
+&nbsp;&nbsp;<span class="k">"nucleo"</span>: <span class="s">"A vacina altera o DNA"</span>,<br>
+&nbsp;&nbsp;<span class="k">"polaridade"</span>: <span class="s">"nega"</span>,<br>
+&nbsp;&nbsp;<span class="k">"consulta"</span>: <span class="s">"vacina covid altera DNA"</span><br>}</div>
+    </div>
+    <div class="eq r" style="margin-top:56px;--d:.6s">
+      <div class="cell">REFUTA o núcleo<small>o que o juiz diz</small></div><span class="op">×</span>
+      <div class="cell">nega<small>polaridade do usuário</small></div><span class="op">=</span>
+      <div class="cell" style="background:var(--inv-bg);color:var(--inv-fg);border-color:var(--ink)">voto −1<small style="color:var(--inv-mute)">a favor do usuário</small></div>
+      <span class="small" style="margin-left:24px;font-size:22px">JSON validado (Pydantic) · 1 nova tentativa · fallback regex marcado no recibo</span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     08 · ETAPA 3 — BUSCA
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 03">
+  <div class="kicker">Etapa 03 · Busca aberta</div>
+  <h2 class="h2">Duas buscas por afirmação.</h2>
+  <div class="body" style="top:400px">
+    <div class="cols" style="grid-template-columns:1fr 470px;gap:80px">
+      <div style="display:grid;gap:30px">
+        <div class="r" style="--d:.2s"><div class="lab">① Consulta pura · Google News</div><div class="mono" style="font-size:40px;font-weight:500;margin-top:14px;padding:20px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink)">vacina covid altera DNA</div></div>
+        <div class="r" style="--d:.35s"><div class="lab">② Dirigida às agências · Google orgânico</div><div class="mono" style="font-size:32px;font-weight:500;margin-top:14px;padding:20px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink)">vacina covid altera DNA <span class="red">(site:agência-1 OR site:agência-2 OR …)</span></div></div>
+        <p class="small r" style="--d:.5s">Atalho: índice local BM25 com ≈ 22 mil checagens — <b>desligado nas avaliações</b>, para medir a busca de verdade.</p>
+      </div>
+      <div style="display:grid;gap:22px;align-content:start">
+        <div class="r" style="--d:.45s;border-top:6px solid var(--ink);padding-top:14px"><div style="font:900 80px/1 var(--f-display)">23 <span style="font-size:40px">+</span> 13</div><div class="small">veículos + agências de checagem no catálogo curado</div></div>
+        <div class="r" style="--d:.55s;border-top:6px solid var(--ink);padding-top:14px"><div style="font:800 30px var(--f-display)">Rodízio de chaves</div><div class="small">HTTP 429 na chave 1 → a mesma busca segue na chave 2.</div></div>
+        <div class="r" style="--d:.65s;border-top:6px solid var(--ink);padding-top:14px"><div style="font:800 30px var(--f-display)">Planejador</div><div class="small">Consulta vazia é relaxada: 0 → 8 resultados.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     09 · ETAPA 4A — LEITURA: DEDUPE + DOWNLOAD SEGURO
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 04">
+  <div class="kicker">Etapa 04 · Leitura das páginas</div>
+  <h2 class="h2">Manchete não basta.</h2>
+  <div class="body cols c2" style="gap:90px">
+    <div>
+      <div class="lab r" style="--d:.15s">① Uma URL, uma peça</div>
+      <div class="mono r" style="font-size:25px;line-height:1.5;margin-top:22px;--d:.25s"><span class="strike">https://www.</span>exemplo.com.br/noticia/cafe-cura<br><span class="strike">?utm_source=zap&amp;amp#fim</span></div>
+      <div class="r" style="font-size:28px;color:var(--mute);margin:18px 0;--d:.35s">↓ a mesma matéria vinda de dois buscadores</div>
+      <div class="mono r" style="font-size:36px;font-weight:600;padding:18px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);--d:.45s">exemplo.com.br/noticia/cafe-cura</div>
+      <div class="r" style="display:flex;gap:16px;margin-top:28px;--d:.55s"><span class="tag" style="border-color:var(--red);color:var(--red)">✗ homepage</span><span class="tag" style="border-color:var(--red);color:var(--red)">✗ listagem /tag/</span><span class="tag" style="border-color:var(--red);color:var(--red)">✗ rede social · PDF</span></div>
+    </div>
+    <div>
+      <div class="lab r" style="--d:.3s">② Download seguro (anti-SSRF)</div>
+      <ul class="checks" style="margin-top:6px">
+        <li class="r" style="--d:.4s"><span class="m y">✓</span><span>Só http/https, portas 80/443</span></li>
+        <li class="r" style="--d:.5s"><span class="m y">✓</span><span>Bloqueia IP privado e loopback</span></li>
+        <li class="r" style="--d:.6s"><span class="m y">✓</span><span>Cada redirect é revalidado</span></li>
+        <li class="r" style="--d:.7s"><span class="m y">✓</span><span>Teto de 5 MB e 15 s por página</span></li>
+      </ul>
+      <p class="small r" style="margin-top:22px;--d:.8s">A URL nunca leva o servidor à rede interna. Download com curl_cffi, como um navegador.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     10 · ETAPA 4B — LEITURA: CASCATA
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 04">
+  <div class="kicker">Etapa 04 · Leitura das páginas</div>
+  <h2 class="h2">Provar que o corpo foi lido.</h2>
+  <div class="body cols" style="grid-template-columns:1fr 640px;gap:90px">
+    <ul class="checks">
+      <li class="r" style="--d:.2s"><span class="m n">✗</span><span>JSON-LD · articleBody<small>texto do próprio editor — ausente nesta página</small></span></li>
+      <li class="r" style="--d:.35s"><span class="m y">✓</span><span><b>trafilatura</b> <span class="red" style="font-size:26px">≥ 500 caracteres</span><small>o primeiro nível que vence encerra a cascata</small></span></li>
+      <li class="r" style="--d:.5s"><span class="m s">–</span><span style="color:var(--mute)">seletor do catálogo (não precisou)</span></li>
+      <li class="r" style="--d:.6s;border:0"><span class="m s">–</span><span style="color:var(--mute)">regex de &lt;p&gt; (não precisou)</span></li>
+    </ul>
+    <div style="display:grid;gap:30px;align-content:start">
+      <div class="r" style="background:var(--inv-bg);color:var(--inv-fg);padding:40px;--d:.7s"><div class="mono" style="font-size:44px;font-weight:600">corpo_lido = <span style="color:var(--code-ok)">true</span></div><div style="font:800 32px var(--f-display);margin-top:14px">→ a fonte pode votar</div></div>
+      <div class="r" style="border:3px dashed var(--ink);padding:36px;--d:.85s"><div style="font:800 32px var(--f-display)">Só título ou snippet?</div><div class="small" style="font-size:28px;margin-top:10px">A fonte aparece na resposta, mas <b style="color:var(--ink)">não vota</b>. Nenhum texto parcial finge ser corpo lido.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     11 · ETAPA 5 — INDEPENDÊNCIA
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 05">
+  <div class="kicker">Etapa 05 · Independência</div>
+  <h2 class="h2">10 matérias ≠ 10 votos.</h2>
+  <div class="body cols" style="grid-template-columns:480px 120px 1fr;gap:40px;align-items:center">
+    <div class="r" style="--d:.2s">
+      <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+      <div style="font:900 44px var(--f-display);margin-top:28px">10 matérias</div><div class="small">exemplo ilustrativo</div>
+    </div>
+    <div class="r" style="font:900 90px var(--f-display);color:var(--red);text-align:center;--d:.4s">→</div>
+    <div style="display:grid;gap:20px">
+      <div class="cluster r" style="--d:.5s"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><div class="lbl">1 voto<small>assinam a mesma agência</small></div></div>
+      <div class="cluster r" style="--d:.62s"><i class="dot"></i><i class="dot"></i><i class="dot"></i><div class="lbl">1 voto<small>mesmo grupo econômico</small></div></div>
+      <div class="cluster r" style="--d:.74s"><i class="dot"></i><i class="dot"></i><div class="lbl">1 voto<small>corpo quase idêntico (trechos de 5 palavras)</small></div></div>
+      <div class="r" style="font:900 52px var(--f-display);text-align:right;--d:.9s">= <span class="red">3 votos</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     12 · ETAPA 6 — JUIZ
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 06">
+  <div class="kicker">Etapa 06 · Juiz · <span class="tag llm" style="font-size:16px;padding:3px 10px">LLM</span> + código</div>
+  <h2 class="h2">O código confere o LLM.</h2>
+  <div class="body cols c2" style="gap:80px;top:380px">
+    <div>
+      <div class="lab r" style="--d:.15s">Núcleo: “A vacina altera o DNA”</div>
+      <div class="box soft r" style="margin-top:18px;font-size:27px;line-height:1.5;--d:.25s"><b>Vacina não altera o DNA, dizem especialistas.</b> O RNA não entra no núcleo da célula e, portanto, não modifica o DNA.</div>
+      <div class="classes r" style="margin-top:26px;--d:.4s"><span>SUSTENTA</span><span class="on">REFUTA</span><span>RELATA_SEM_ENDOSSO</span><span>NAO_TRATA</span></div>
+    </div>
+    <div>
+      <div class="lab r" style="--d:.45s">Citação ∈ texto visto pelo juiz (≥ 0,90)</div>
+      <ul class="checks" style="margin-top:6px">
+        <li class="r" style="--d:.55s"><span class="m y">✓</span><span>Citação literal<small>classe mantida</small></span></li>
+        <li class="r" style="--d:.65s;border:0"><span class="m n">✗</span><span>Citação inventada<small>rebaixada para NAO_TRATA</small></span></li>
+      </ul>
+      <div class="r" style="margin-top:34px;font:900 58px/1.05 var(--f-display);letter-spacing:-.02em;--d:.85s">Pode errar.<br><span class="red">Não pode inventar.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     13 · ETAPA 7 — AGENTE CRÍTICO
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 07">
+  <div class="kicker">Etapa 07 · Agente crítico</div>
+  <h2 class="h2">Parar ou buscar mais?</h2>
+  <div class="body cols c2" style="gap:90px">
+    <div>
+      <div class="lab r" style="--d:.15s">Para quando…</div>
+      <ul class="checks" style="margin-top:6px">
+        <li class="r" style="--d:.25s"><span class="m">■</span><span>há selo de checagem aplicável</span></li>
+        <li class="r" style="--d:.35s"><span class="m">■</span><span>≥ 2 clusters independentes tomaram posição</span></li>
+        <li class="r" style="--d:.45s"><span class="m">■</span><span>o juiz está indisponível</span></li>
+        <li class="r" style="--d:.55s;border:0"><span class="m">■</span><span>o orçamento de buscas acabou</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="lab r" style="--d:.4s">Senão, o <span class="red">LLM reescreve</span> a consulta</div>
+      <div class="r" style="margin-top:26px;--d:.5s"><div class="small">antes</div><div class="mono strike" style="font-size:36px;margin-top:6px">vacina covid altera DNA</div></div>
+      <div class="r" style="margin-top:30px;--d:.7s"><div class="small">depois — sabendo o que veio como NAO_TRATA</div><div class="mono" style="font-size:36px;font-weight:600;margin-top:6px;padding:16px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink)">vacina RNA mensageiro material genético</div></div>
+      <p class="small r" style="margin-top:22px;--d:.85s">→ nova onda de busca, leitura e juiz</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     14 · AUTOCONSISTÊNCIA
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 07">
+  <div class="kicker">Etapa 07 · Autoconsistência</div>
+  <h2 class="h2">Voto decisivo: julgado 3×.</h2>
+  <div class="body" style="top:430px">
+    <div class="r" style="display:grid;grid-template-columns:repeat(3,240px) 90px 1fr;gap:20px;align-items:center;padding:26px 0;border-top:3px solid var(--ink);--d:.2s">
+      <span class="tag" style="font-size:24px;text-align:center">REFUTA</span><span class="tag" style="font-size:24px;text-align:center">REFUTA</span><span class="tag" style="font-size:24px;text-align:center">REFUTA</span>
+      <span style="font:900 48px var(--f-display);text-align:center">→</span><span style="font:800 36px var(--f-display)">unânime · <span style="color:var(--green)">mantém</span></span>
+    </div>
+    <div class="r" style="display:grid;grid-template-columns:repeat(3,240px) 90px 1fr;gap:20px;align-items:center;padding:26px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);--d:.4s">
+      <span class="tag" style="font-size:24px;text-align:center">REFUTA</span><span class="tag" style="font-size:24px;text-align:center;border-color:var(--red);color:var(--red)">SUSTENTA</span><span class="tag" style="font-size:24px;text-align:center">REFUTA</span>
+      <span style="font:900 48px var(--f-display);text-align:center">→</span><span style="font:800 36px var(--f-display)">instável · <span class="red">RELATA_SEM_ENDOSSO</span></span>
+    </div>
+    <p class="r" style="font:800 44px/1.2 var(--f-display);margin-top:60px;--d:.65s">Falha segura: a repetição nunca inverte a direção —<br><span class="red">só perde a posição.</span></p>
+  </div>
+</section>
+
+<!-- =========================================================
+     15 · ETAPA 8 — DECISÃO
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 08">
+  <div class="kicker">Etapa 08 · Decisão · sem LLM, sem rede</div>
+  <h2 class="h2">Uma função pura decide.</h2>
+  <div class="body cols" style="grid-template-columns:560px 1fr;gap:100px;top:400px">
+    <div class="r" style="--d:.2s">
+      <div class="lab" style="margin-bottom:14px">Peso do voto por fonte</div>
+      <table class="tbl">
+        <tr><td>Agência de checagem curada</td><td>1,0</td></tr>
+        <tr><td>Órgão público · site muito acessado</td><td>0,6</td></tr>
+        <tr><td>Rede social</td><td>0,45</td></tr>
+        <tr><td>Site pouco acessado</td><td>0,3</td></tr>
+        <tr><td>Selo de checagem aplicável</td><td class="red">1,5</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="r mono" style="font-size:32px;line-height:1.6;--d:.35s">L = Σ votos <span style="color:var(--mute)">(um por cluster)</span><br>p = σ(L) &nbsp;·&nbsp; τ = ln 3 ≈ 1,10</div>
+      <div class="axis r" style="margin-top:70px;--d:.5s">
+        <div class="zone" style="left:0;width:285px;background:var(--green)">BAIXA</div>
+        <div class="zone" style="left:285px;width:330px;background:var(--amber);color:var(--ink)">MÉDIA</div>
+        <div class="zone" style="left:615px;width:285px;background:var(--alta)">ALTA</div>
+        <div class="tick" style="left:285px">−τ</div><div class="tick" style="left:450px">0</div><div class="tick" style="left:615px">+τ</div>
+        <div class="mk" id="mk1" style="left:600px"><b>1 fonte curada · +1,0</b></div>
+      </div>
+      <div class="r" style="font:800 30px/1.45 var(--f-display);--d:.7s">1 fonte curada → L = +1,0 → <span style="color:var(--amber-text)">média</span> (p 0,73)<br>2 independentes → L = +2,0 → <span class="red">alta</span> (p 0,88)</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     16 · ETAPA 9 — TRAVAS
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 09">
+  <div class="kicker">Etapa 09 · Travas de segurança</div>
+  <h2 class="h2">Travas só tiram certeza.</h2>
+  <div class="body" style="top:400px">
+    <div class="tbl" style="display:grid">
+      <div class="r" style="display:grid;grid-template-columns:330px 1fr;padding:20px 0;border-top:3px solid var(--ink);--d:.15s"><b style="font:800 32px var(--f-display)">Confiabilidade</b><span style="font-size:30px">Rede social ou site pouco acessado não crava alta nem baixa sozinho.</span></div>
+      <div class="r" style="display:grid;grid-template-columns:330px 1fr;padding:20px 0;border-top:2px solid var(--line);--d:.25s"><b style="font:800 32px var(--f-display)">Tempo</b><span style="font-size:30px">Fonte de outro período perde peso e nunca sustenta um extremo.</span></div>
+      <div class="r" style="display:grid;grid-template-columns:330px 1fr;padding:20px 0;border-top:2px solid var(--line);--d:.35s"><b style="font:800 32px var(--f-display)">Conjunção</b><span style="font-size:30px">Parte confirmada não apaga parte contestada.</span></div>
+      <div class="r" style="display:grid;grid-template-columns:330px 1fr;padding:20px 0;border-top:2px solid var(--line);--d:.45s"><b style="font:800 32px var(--f-display)">Similaridade</b><span style="font-size:30px">Selo do índice só vale se checou a mesma alegação (Dice ≥ 0,6).</span></div>
+      <div class="r" style="display:grid;grid-template-columns:330px 1fr;padding:20px 0;border-top:2px solid var(--line);border-bottom:3px solid var(--ink);--d:.55s"><b style="font:800 32px var(--f-display)">Sintetizador</b><span style="font-size:30px">Relê o conjunto e só pode rebaixar: alta/baixa → média → indeterminada.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     17 · ETAPA 10 — RELATÓRIO
+     ========================================================= -->
+<section class="slide" data-sec="Etapa 10">
+  <div class="kicker">Etapa 10 · Relatório</div>
+  <h2 class="h2">O caminho vai na resposta.</h2>
+  <div class="body cols" style="grid-template-columns:1fr 520px;gap:90px;top:390px;align-items:start">
+    <div class="box r" style="--d:.2s;padding:36px 40px">
+      <div style="display:flex;align-items:center;gap:18px"><span class="sq a"></span><b style="font:900 40px var(--f-display)">Propensão média</b></div>
+      <p style="font-size:27px;line-height:1.45;margin:16px 0 22px">1 fonte independente contesta o que o texto afirma e 1 a confirma. Isso não é um veredito: compare as fontes e tire sua própria conclusão.</p>
+      <div style="display:grid;gap:10px;font-size:24px">
+        <div><span class="tag" style="font-size:15px">REFUTA</span>&nbsp; Agência de checagem (curada) · corpo lido · 12/10</div>
+        <div><span class="tag" style="font-size:15px">SUSTENTA</span>&nbsp; Portal de notícias · corpo lido · 11/10</div>
+      </div>
+      <p class="small" style="font-size:22px;margin-top:20px">① compare datas &nbsp;② quem assina? &nbsp;③ aparece em outro veículo independente?</p>
+    </div>
+    <div>
+      <div class="lab r" style="--d:.4s">Bloqueado na saída</div>
+      <div class="r" style="font:800 38px/1.6 var(--f-display);margin-top:12px;--d:.5s"><div class="strike">“é falso”</div><div class="strike">“fake news confirmada”</div><div class="strike">“sem dúvida”</div><div class="strike">“com certeza”</div></div>
+      <p class="small r" style="margin-top:24px;--d:.7s">Recibo por etapa: ok · parcial · falha · pulada. Sinais de estilo aparecem, mas ficam fora do nível.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     18 · REPRODUTIBILIDADE
+     ========================================================= -->
+<section class="slide" data-sec="Método">
+  <div class="kicker">Método · Telemetria e replay</div>
+  <h2 class="h2">Tudo é reproduzível.</h2>
+  <div class="body cols" style="grid-template-columns:1fr 600px;gap:90px">
+    <div class="r" style="--d:.2s">
+      <div class="lab">runs/&lt;run_id&gt;/trace.jsonl</div>
+      <div class="trace" style="margin-top:18px;border-top:3px solid var(--ink);padding-top:14px">
+        <div><span>12 ms</span>run_inicio "Café cura câncer"</div>
+        <div><span>131 ms</span>etapa recebimento · ok</div>
+        <div><span>6491 ms</span>llm afirmacoes · 2,2 s</div>
+        <div><span>6524 ms</span>http 200 · cache=hit</div>
+        <div><span>9012 ms</span>fonte descartada · homepage</div>
+        <div><span>9400 ms</span><b class="red">fallback</b> onde=juiz</div>
+        <div><span>9812 ms</span>decisao nivel=media</div>
+      </div>
+    </div>
+    <div>
+      <div class="lab r" style="--d:.35s">Todo I/O externo passa por cassetes</div>
+      <ul class="checks" style="margin-top:6px">
+        <li class="r" style="--d:.45s"><span class="m s">○</span><span><b>live</b><small>rede de verdade, nada gravado</small></span></li>
+        <li class="r" style="--d:.55s"><span class="m n">●</span><span><b>record</b><small>rede + grava web e LLM</small></span></li>
+        <li class="r" style="--d:.65s;border:0"><span class="m">▶</span><span><b>replay</b><small>só cassetes · determinístico · sem rede</small></span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     19 · AVALIAÇÃO
+     ========================================================= -->
+<section class="slide" data-sec="Método">
+  <div class="kicker">Método · Avaliação</div>
+  <h2 class="h2">Erro grave pesa mais.</h2>
+  <div class="body" style="top:400px">
+    <div class="r eq" style="font-size:28px;--d:.2s">
+      <div class="cell">casos rotulados<small>dev · holdout</small></div><span class="op">→</span>
+      <div class="cell">pipeline em replay<small>sem rede</small></div><span class="op">→</span>
+      <div class="cell">métricas<small>acerto · erro grave · indeterminada</small></div><span class="op">→</span>
+      <div class="cell" style="background:var(--inv-bg);color:var(--inv-fg)">linha de base<small style="color:var(--inv-mute)">delta + gate</small></div>
+    </div>
+    <table class="tbl r" style="margin-top:50px;--d:.4s">
+      <tr><td><b>Falso</b> · esperado ALTA</td><td><span class="red">grave: BAIXA</span></td></tr>
+      <tr><td><b>Verdadeiro</b> · esperado BAIXA</td><td><span class="red">grave: ALTA</span></td></tr>
+      <tr><td><b>Sem evidência</b> · esperado INDETERMINADA</td><td style="color:var(--mute)">—</td></tr>
+    </table>
+    <p class="small r" style="margin-top:24px;--d:.6s">Itera-se só no dev; o holdout só abre no fim de cada rodada. Rótulos e baseline nunca são editados para “passar”.</p>
+  </div>
+</section>
+
+<!-- =========================================================
+     20 · RESULTADOS
+     ========================================================= -->
+<section class="slide" data-sec="Resultados">
+  <div class="kicker">Resultados · simulação com 50 frases</div>
+  <h2 class="h2">E funciona? Com cautela.</h2>
+  <div class="body cols" style="grid-template-columns:1fr 460px;gap:90px;top:400px">
+    <div>
+      <div class="bar r" style="--d:.15s;border-top:3px solid var(--ink)"><div class="nm">Controle<small>26 de 44 casos</small></div><div class="tr"><div class="fi wipe" style="width:59.1%;--d:.4s"></div></div><div class="v">59,1%</div></div>
+      <div class="bar r" style="--d:.25s"><div class="nm">Planejador de busca<small>28 de 44 casos</small></div><div class="tr"><div class="fi wipe" style="width:63.6%;--d:.5s"></div></div><div class="v">63,6%</div></div>
+      <div class="bar r" style="--d:.35s"><div class="nm">site: no orgânico<small>28 de 44 casos</small></div><div class="tr"><div class="fi wipe" style="width:63.6%;--d:.6s"></div></div><div class="v">63,6%</div></div>
+      <div class="bar r" style="--d:.45s"><div class="nm">Todas combinadas<small>28 de 45 casos</small></div><div class="tr"><div class="fi wipe" style="width:62.2%;--d:.7s"></div></div><div class="v">62,2%</div></div>
+    </div>
+    <div>
+      <div class="r" style="background:var(--inv-bg);color:var(--inv-fg);padding:36px;--d:.6s"><div style="font:900 120px/1 var(--f-display)">0</div><div style="font:800 30px var(--f-display);margin-top:10px">erros graves em todas as variantes</div></div>
+      <div class="r" style="margin-top:30px;--d:.8s"><div class="lab">Os 18 erros do controle</div>
+        <div style="font:800 32px/1.6 var(--f-display);margin-top:10px"><div>15 · indeterminada</div><div>3 · média</div><div class="red">0 · direção errada</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     21 · GARGALO
+     ========================================================= -->
+<section class="slide" data-sec="Resultados">
+  <div class="kicker">O que aprendemos</div>
+  <div class="stmt" style="top:270px;font-size:140px">
+    <div class="r" style="--d:.1s">O gargalo não é julgar.</div>
+    <div class="r red" style="--d:.3s">É recuperar evidência.</div>
+  </div>
+  <p class="lead r" style="position:absolute;left:160px;top:640px;width:1100px;font-size:34px;--d:.55s">O sistema prefere dizer “não sei” a errar de lado. O próximo passo é a busca.</p>
+  <p class="small r" style="position:absolute;left:160px;right:160px;top:860px;font-size:22px;--d:.75s">n ≈ 44–45 casos avaliáveis · IC 95% do controle 44–72% · diferenças entre variantes não são estatisticamente comprovadas (McNemar, p = 1,0) · 1.226 testes automatizados</p>
+</section>
+
+<!-- =========================================================
+     22 · ENCERRAMENTO
+     ========================================================= -->
+<section class="slide" data-sec="Checa AI">
+  <div class="t-bar wipe" style="top:200px;--d:.1s"></div>
+  <div class="stmt" style="top:250px;font-size:170px">
+    <div class="r" style="--d:.15s">Checa AI não</div>
+    <div class="r" style="--d:.3s">decide por você.</div>
+  </div>
+  <div class="cols c3" style="position:absolute;left:160px;right:160px;top:640px;gap:48px">
+    <div class="r" style="border-top:6px solid var(--ink);padding-top:16px;--d:.5s"><b style="font:900 40px var(--f-display)">As fontes</b><div class="small">com postura e citação</div></div>
+    <div class="r" style="border-top:6px solid var(--ink);padding-top:16px;--d:.6s"><b style="font:900 40px var(--f-display)">Os pesos</b><div class="small">cada voto, cada trava</div></div>
+    <div class="r" style="border-top:6px solid var(--red);padding-top:16px;--d:.7s"><b style="font:900 40px var(--f-display)" class="red">O caminho</b><div class="small">recibo de cada etapa</div></div>
+  </div>
+  <div class="foot" style="font-size:18px"><span>Python · FastAPI · Telegram · Pydantic · BM25 · SerpAPI · trafilatura</span><span>mariadenis.github.io/crosscheckbr-site</span></div>
+</section>
+
+</main>
+</div>
+
+<div class="notes" id="notes" aria-live="polite"></div>
+
+<script>
+/* ===========================================
+   NOTAS DO APRESENTADOR (tecla N) — uma por slide, na ordem
+   =========================================== */
+const NOTES = [
+ "Checa AI, ou CrossCheckBR: um checador de fatos em português que não dá veredito — estima a propensão de uma mensagem ser desinformação e mostra o caminho.",
+ "Chega uma mensagem no grupo da família: “Café cura câncer”. Verdade ou mentira? O sistema não responde com um veredito. Ele estima a propensão de ser desinformação — e mostra, passo a passo, como chegou lá.",
+ "A saída é uma escala: baixa, média, alta ou indeterminada. Nunca um simples verdadeiro ou falso. Sem fonte que trate do assunto, o sistema prefere dizer que não sabe.",
+ "Ausência de evidência não é evidência. E o nível é calculado por código determinístico: o modelo de linguagem extrai, reescreve e classifica, mas nunca redige a conclusão.",
+ "São dez etapas, e cada uma deixa um recibo auditável. Em preto, o que é código determinístico; em vermelho, onde um modelo de linguagem entra. O agente crítico pode voltar para a busca.",
+ "Etapa um: recebimento. Entra texto, título ou link; fotos e vídeos recebem só orientação. Regras simples leem o texto: há marcador de tempo? Relato de segunda mão? Opinião, sátira ou afirmação vaga? Um “hoje” abre uma janela de dois dias: fontes de outro período valerão menos adiante.",
+ "Etapa dois: um modelo de linguagem divide o texto em até três afirmações atômicas. Cada uma guarda a polaridade do usuário e um núcleo na forma afirmativa. Em “é falso que a vacina altera o DNA”, o núcleo é “a vacina altera o DNA”, com polaridade negativa. O juiz avalia o núcleo; a polaridade inverte a direção só no cálculo. A saída é validada por esquema, com uma nova tentativa e um fallback declarado no recibo.",
+ "Etapa três: para cada afirmação, duas consultas em paralelo. Uma é pura, no Google News. A outra restringe a busca aos domínios das agências de checagem do catálogo. Chaves da SerpAPI giram quando a cota acaba, e um planejador relaxa consultas que voltam vazias. O índice de quase vinte e duas mil checagens fica desligado nas avaliações, para medir a busca de verdade.",
+ "Etapa quatro, parte um: a mesma URL canônica, sem www, amp ou rastreadores, vira uma peça só; homepages, listagens e redes sociais saem. O download tem proteção contra SSRF: só portas web, nada de IP interno, redirect revalidado e teto de tamanho e tempo.",
+ "Parte dois: uma cascata extrai o texto — JSON-LD, trafilatura, seletor do catálogo e regex. O primeiro que der quinhentos caracteres de texto real vence. Abaixo disso, a leitura falha — e fonte lida só pelo título aparece, mas não vota.",
+ "Etapa cinco: dez veículos copiando a mesma agência não são dez confirmações. Fontes são agrupadas se assinam a mesma agência, pertencem ao mesmo grupo, ou têm corpos quase idênticos. Cada cluster vale um único voto.",
+ "Etapa seis: para cada fonte e afirmação, um LLM lê título, lide, frases de conclusão e frases com os termos da afirmação. Classifica em sustenta, refuta, relata sem endosso ou não trata — e copia uma citação literal. O código confere a citação no texto. Se não existir, a classe cai para “não trata”. O modelo pode errar, mas não pode inventar.",
+ "Etapa sete: o agente crítico decide, por afirmação, se já há evidência suficiente. Ele para com um selo de checagem aplicável ou com dois clusters independentes que tomaram posição. Senão, o LLM reescreve a consulta, sabendo quais páginas foram julgadas fora do tema, e abre uma nova onda de busca, dentro de um orçamento.",
+ "Se um único julgamento decidiria o nível, ele é repetido três vezes. Se as repetições discordam, vira “relata sem endosso”: uma falha segura, que nunca inverte a direção.",
+ "Etapa oito: uma função pura, sem LLM e sem rede. Cada cluster dá um voto: positivo se refuta, negativo se sustenta, com peso pela confiabilidade da fonte. A soma é o log-odds L; o limiar é ln 3, cerca de 1,1. Uma só fonte curada não crava nada: vale um, média. Duas independentes concordando, sim: dois, ou oitenta e oito por cento — alta.",
+ "Etapa nove: travas que só deixam o sistema mais cauteloso. Confiabilidade, tempo, conjunção, similaridade do selo do índice, e um sintetizador que relê as fontes mas só pode rebaixar o nível, nunca elevá-lo.",
+ "Etapa dez: a redação usa modelos de texto neutros, e uma varredura bloqueia frases como “é falso” ou “fake news confirmada”. Cada fonte aparece com postura, citação e data; sinais de estilo aparecem, mas ficam fora do nível. O recibo lista cada etapa com seu status.",
+ "Para ser ciência, precisa ser reproduzível. Cada execução grava um trace: etapas, chamadas ao LLM, requisições, descartes e fallbacks. Todo acesso externo passa por cassetes: record grava, replay reproduz tudo sem rede.",
+ "Um harness roda casos rotulados, separa desenvolvimento de holdout e mede acerto, erro grave e indeterminadas contra uma linha de base. Erro grave é dar baixa propensão ao que é falso, ou alta ao que é verdadeiro.",
+ "Numa simulação com cinquenta frases, sem a checagem original na busca, o acerto ficou entre cinquenta e nove e sessenta e quatro por cento — com zero erros graves. Dos dezoito erros do controle, quinze foram indeterminada e nenhum na direção errada.",
+ "O gargalo não é julgar, é recuperar evidência. A amostra é pequena e as diferenças entre variantes não são estatisticamente significativas; o próximo passo é a busca.",
+ "O Checa AI não decide por você. Ele mostra as fontes, os pesos e o caminho, para que você compare e tire a sua própria conclusão. Checagem cruzada, auditável, em português."
+];
+
+/* ===========================================
+   CONTROLADOR DA APRESENTAÇÃO
+   Teclas: ←/→, espaço, PageUp/PageDown, Home/End · N notas · F tela cheia · E edição
+   Também: roda do mouse, swipe, clique (metade direita avança). URL #n abre o slide n.
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.stage = document.getElementById('deckStage');
+        this.notes = document.getElementById('notes');
+        this.progress = document.getElementById('progress');
+        this.current = 0;
+        this.editing = false;
+        this.decorate();
+        this.setupStageScale();
+        this.setupNav();
+        const n = parseInt(location.hash.slice(1), 10);
+        this.show(isNaN(n) ? 0 : n - 1);
+    }
+
+    /* Meta do topo e numeração no rodapé, gerados para não repetir HTML */
+    decorate() {
+        const total = this.slides.length;
+        this.slides.forEach((s, i) => {
+            if (i === 0) return;
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            meta.dataset.gen = '1';
+            meta.innerHTML = `<span>Checa AI</span><span>${s.dataset.sec || ''}</span>`;
+            s.prepend(meta);
+            if (!s.querySelector('.foot')) {
+                const foot = document.createElement('div');
+                foot.className = 'foot';
+                foot.dataset.gen = '1';
+                foot.innerHTML = `<span>CrossCheckBR · Residência 2026</span><span>${String(i + 1).padStart(2, '0')} / ${total}</span>`;
+                s.appendChild(foot);
+            }
+        });
+    }
+
+    /* Escala o palco 1920×1080 para a janela (letterbox) */
+    setupStageScale() {
+        const fit = () => {
+            const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+            this.stage.style.transform = `translate(${(innerWidth - 1920 * k) / 2}px, ${(innerHeight - 1080 * k) / 2}px) scale(${k})`;
+        };
+        fit();
+        addEventListener('resize', fit);
+    }
+
+    setupNav() {
+        addEventListener('keydown', (e) => {
+            if (this.editing && e.key !== 'Escape' && !(e.key.toLowerCase() === 's' && (e.ctrlKey || e.metaKey))) return;
+            const k = e.key;
+            if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(k)) { e.preventDefault(); this.show(this.current + 1); }
+            else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k)) { e.preventDefault(); this.show(this.current - 1); }
+            else if (k === 'Home') this.show(0);
+            else if (k === 'End') this.show(this.slides.length - 1);
+            else if (k === 'n' || k === 'N') this.notes.classList.toggle('on');
+            else if (k === 'f' || k === 'F') {
+                document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+            }
+        });
+        let lock = false;
+        addEventListener('wheel', (e) => {
+            if (this.editing || lock || Math.abs(e.deltaY) < 30) return;
+            lock = true; setTimeout(() => (lock = false), 700);
+            this.show(this.current + (e.deltaY > 0 ? 1 : -1));
+        }, { passive: true });
+        let x0 = null;
+        addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+        addEventListener('touchend', (e) => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            if (Math.abs(dx) > 50) this.show(this.current + (dx < 0 ? 1 : -1));
+            x0 = null;
+        });
+        this.stage.addEventListener('click', (e) => {
+            if (this.editing) return;
+            this.show(this.current + (e.clientX > innerWidth / 2 ? 1 : -1));
+        });
+        addEventListener('hashchange', () => {
+            const n = parseInt(location.hash.slice(1), 10);
+            if (!isNaN(n) && n - 1 !== this.current) this.show(n - 1);
+        });
+    }
+
+    show(i) {
+        this.current = Math.max(0, Math.min(i, this.slides.length - 1));
+        this.slides.forEach((s, k) => {
+            const on = k === this.current;
+            s.classList.toggle('active', on);
+            s.classList.toggle('visible', false);
+        });
+        // reflow para reiniciar as transições do slide que entra
+        void this.slides[this.current].offsetWidth;
+        requestAnimationFrame(() => this.slides[this.current].classList.add('visible'));
+        this.notes.textContent = NOTES[this.current] || '';
+        this.progress.style.width = ((this.current + 1) / this.slides.length * 100) + '%';
+        history.replaceState(null, '', '#' + (this.current + 1));
+    }
+}
+
+/* ===========================================
+   EDIÇÃO INLINE (tecla E ou canto superior esquerdo)
+   Clique em qualquer texto para editar; Ctrl+S baixa o HTML editado.
+   As edições também ficam salvas no navegador (localStorage).
+   =========================================== */
+class InlineEditor {
+    constructor(deck) {
+        this.deck = deck;
+        this.isActive = false;
+        this.key = 'checaai-slides-v3';
+        this.btn = document.getElementById('editToggle');
+        this.targets = () => deck.stage.querySelectorAll('h1, h2, p, li, td, .lab, .stmt > div, .t, .d, .nm, .kicker, .mono, .tag');
+        this.restore();
+        this.bind();
+    }
+    restore() {
+        try {
+            const saved = localStorage.getItem(this.key);
+            if (!saved) return;
+            const data = JSON.parse(saved);
+            this.targets().forEach((el, i) => { if (data[i] !== undefined) el.innerHTML = data[i]; });
+        } catch (e) { /* armazenamento indisponível: segue sem restaurar */ }
+    }
+    save() {
+        try { localStorage.setItem(this.key, JSON.stringify([...this.targets()].map((el) => el.innerHTML))); } catch (e) {}
+    }
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.deck.editing = this.isActive;
+        document.body.classList.toggle('editing', this.isActive);
+        this.btn.classList.toggle('active', this.isActive);
+        this.targets().forEach((el) => {
+            if (this.isActive) el.setAttribute('contenteditable', 'true');
+            else el.removeAttribute('contenteditable');
+        });
+        if (!this.isActive) this.save();
+    }
+    download() {
+        this.save();
+        const clone = document.documentElement.cloneNode(true);
+        clone.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
+        clone.querySelectorAll('[data-gen]').forEach((el) => el.remove());  // meta/rodapé são recriados no load
+        const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'checa-ai-slides.html';
+        a.click();
+    }
+    bind() {
+        const hot = document.querySelector('.edit-hotzone');
+        let t = null;
+        const hide = () => { t = setTimeout(() => { if (!this.isActive) this.btn.classList.remove('show'); }, 400); };
+        hot.addEventListener('mouseenter', () => { clearTimeout(t); this.btn.classList.add('show'); });
+        hot.addEventListener('mouseleave', hide);
+        this.btn.addEventListener('mouseenter', () => clearTimeout(t));
+        this.btn.addEventListener('mouseleave', hide);
+        this.btn.addEventListener('click', () => this.toggleEditMode());
+        hot.addEventListener('click', () => this.toggleEditMode());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) this.toggleEditMode();
+            else if (e.key === 'Escape' && this.isActive) this.toggleEditMode();
+            else if (e.key.toLowerCase() === 's' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); this.download(); }
+        });
+        document.addEventListener('input', () => this.save());
+    }
+}
+
+
+/* Decoração Cobalt Grid: coluna glitch nos slides de declaração + QR no título */
+(function () {
+    const s = document.querySelectorAll('.slide');
+    [0, 1, 3, 20, 21].forEach((i) => {
+        if (!s[i]) return;
+        const g = document.createElement('div');
+        g.className = 'glitch'; g.dataset.gen = '1';
+        for (let k = 0; k < 52; k++) {
+            const e = document.createElement('i');
+            e.style.top = (k * 16.5) + 'px';
+            e.style.width = (44 - Math.floor(k / 9) * 6 - (k % 3) * 3) + 'px';
+            g.appendChild(e);
+        }
+        s[i].appendChild(g);
+    });
+    const qr = document.createElement('div');
+    qr.className = 'qr'; qr.dataset.gen = '1';
+    const on = [0,1,2,5,6,7,8,10,13,15,16,17,18,21,22,23,27,29,34,36,40,41,42,45,47,48,50,53,55,56,57,58,61,62,63];
+    for (let k = 0; k < 64; k++) { const b = document.createElement('b'); if (on.includes(k)) b.className = 'on'; qr.appendChild(b); }
+    s[0].appendChild(qr);
+})();
+
+const deck = new SlidePresentation();
+const editor = new InlineEditor(deck);
+</script>
+</body>
+</html>

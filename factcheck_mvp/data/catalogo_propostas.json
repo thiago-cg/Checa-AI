@@ -1457,46 +1457,6 @@
    "coletado_em": "2026-10-14T20:07:49.395317+00:00"
   },
   {
-   "id": "conjur-com-br",
-   "nome": "Consultor Jurídico",
-   "tipo": "geral",
-   "homepage": "https://conjur.com.br/",
-   "dominio": "conjur.com.br",
-   "rss": [
-    "https://conjur.com.br/feed/",
-    "https://conjur.com.br/comments/feed/"
-   ],
-   "sitemap": "https://conjur.com.br/sitemap.xml",
-   "editorias": [
-    "2026-out-14",
-    "minha-area",
-    "2026-out-03",
-    "noticias",
-    "colunas",
-    "artigos",
-    "entrevistas",
-    "anuncie-na-conjur"
-   ],
-   "article_url_patterns": [
-    "/2025-dez-30/",
-    "/2025-dez-30/risco-de-morte-justifica-transfusao-em-testemunha-de-jeova-decide-tj-sp/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article"
-   },
-   "titulo_exemplo": "Risco de morte justifica transfusão em testemunha de Jeová, decide TJ-SP",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://conjur.com.br/2025-dez-30/risco-de-morte-justifica-transfusao-em-testemunha-de-jeova-decide-tj-sp/"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T20:08:04.935773+00:00"
-  },
-  {
    "id": "jornaldotocantins-com-br",
    "nome": "Tocantins",
    "tipo": "geral",
@@ -3249,43 +3209,6 @@
    "coletado_em": "2026-10-21T13:57:19.436322+00:00"
   },
   {
-   "id": "agenciabrasil-ebc-com-br",
-   "nome": "Agência Brasil",
-   "tipo": "geral",
-   "homepage": "https://agenciabrasil.ebc.com.br/",
-   "dominio": "agenciabrasil.ebc.com.br",
-   "rss": [],
-   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
-   "editorias": [
-    "politica",
-    "internacional",
-    "meio-ambiente",
-    "esportes",
-    "economia",
-    "geral",
-    "saude",
-    "radioagencia-nacional"
-   ],
-   "article_url_patterns": [
-    "/politica/",
-    "/politica/noticia/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "[itemprop='articleBody'], main"
-   },
-   "titulo_exemplo": "Senado aprova fim da escala 6x1 e redução da jornada de trabalho",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-de-trabalho"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-21T14:27:53.352171+00:00"
-  },
-  {
    "id": "mtpolitica-com-br",
    "nome": "Senado aprova fim da escala 6x1",
    "tipo": "geral",
@@ -3465,6 +3388,83 @@
    "subsecoes": [],
    "status": "pendente",
    "coletado_em": "2026-10-21T14:43:48.956187+00:00"
+  },
+  {
+   "id": "agenciabrasil-ebc-com-br",
+   "nome": "Agência Brasil",
+   "tipo": "geral",
+   "homepage": "https://agenciabrasil.ebc.com.br/",
+   "dominio": "agenciabrasil.ebc.com.br",
+   "rss": [],
+   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
+   "editorias": [
+    "politica",
+    "justica",
+    "esportes",
+    "economia",
+    "geral",
+    "direitos-humanos",
+    "meio-ambiente",
+    "saude"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Acompanhe ao vivo: Senado vota PEC pelo fim da escala 6x1",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/acompanhe-ao-vivo-senado-vota-pec-pelo-fim-da-escala-6x1"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-23T01:45:14.575813+00:00"
+  },
+  {
+   "id": "conjur-com-br",
+   "nome": "Consultor Jurídico",
+   "tipo": "geral",
+   "homepage": "https://conjur.com.br/",
+   "dominio": "conjur.com.br",
+   "rss": [
+    "https://conjur.com.br/feed/",
+    "https://conjur.com.br/comments/feed/"
+   ],
+   "sitemap": "https://conjur.com.br/sitemap.xml",
+   "editorias": [
+    "2026-out-22",
+    "minha-area",
+    "2026-out-03",
+    "noticias",
+    "colunas",
+    "artigos",
+    "entrevistas",
+    "anuncie-na-conjur"
+   ],
+   "article_url_patterns": [
+    "/2026-out-15/",
+    "/2026-out-15/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-de-trabalho/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article"
+   },
+   "titulo_exemplo": "Senado aprova fim da escala 6x1 e redução da jornada de trabalho",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://conjur.com.br/2026-out-15/senado-aprova-fim-da-escala-6x1-e-reducao-da-jornada-de-trabalho/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-23T01:45:15.005725+00:00"
   }
  ]
 }

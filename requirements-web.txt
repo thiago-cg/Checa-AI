@@ -1,5 +1,5 @@
 # Dependências só da API web (Dockerfile / Cloud Run). Fica de fora o que a API não importa:
-# crawl4ai (não é usado no código), laya e torch/transformers (detector = mock), pytest.
+# crawl4ai (não é usado no código), laya e pytest. O torch (só CPU) é instalado à parte no Dockerfile.
 pydantic>=2.0
 curl_cffi>=0.10
 python-dotenv>=1.0
@@ -12,3 +12,4 @@ lxml>=5.0
 nltk>=3.8
 trafilatura>=2.0
 beautifulsoup4>=4.12
+transformers>=4.44          # detector BERTimbau (modelo/bertimbau_v6.zip, ver Dockerfile)
