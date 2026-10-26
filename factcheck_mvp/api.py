@@ -169,18 +169,26 @@ async def _ler_link(entrada: EntradaConsulta) -> EntradaConsulta | None:
     return entrada_de_link(entrada.conteudo, texto)
 
 
+def _log_timeout() -> None:
+    """Linha no log do servidor (Render/Cloud Run) para achar o trace do run cortado."""
+    from . import telemetria
+    log.warning("checagem cortada após %s s (CHECAGEM_TIMEOUT_S); run=%s",
+                config.CHECAGEM_TIMEOUT_S, telemetria.ultimo_run_id())
+
+
 @app.post("/checar", response_model=RelatorioChecagem)
 async def checar(entrada: EntradaConsulta, request: Request):
     if not _rate_ok(request):
         raise HTTPException(status_code=429, detail="muitas checagens; tente de novo em instantes")
     try:
-        async with asyncio.timeout(180):
+        async with asyncio.timeout(config.CHECAGEM_TIMEOUT_S):
             pronta = await _ler_link(entrada)
             if pronta is None:
                 raise HTTPException(status_code=422, detail=LINK_SEM_TEXTO_MSG)
             from .agregador import preparar_para_pessoa
             return preparar_para_pessoa(await pipeline().executar(pronta))
     except (asyncio.TimeoutError, TimeoutError):
+        _log_timeout()
         raise HTTPException(status_code=504, detail="checagem excedeu o tempo; tente um texto mais curto")
     except HTTPException:
         raise
@@ -391,13 +399,17 @@ async def checar_web(request: Request, conteudo: str = Form(...)):
     except Exception:
         return HTMLResponse(_render_html(conteudo, erro_msg="Entrada inválida."), status_code=400)
     try:
-        async with asyncio.timeout(180):
+        async with asyncio.timeout(config.CHECAGEM_TIMEOUT_S):
             pronta = await _ler_link(entrada)
             if pronta is None:
                 return HTMLResponse(_render_html(conteudo, erro_msg=LINK_SEM_TEXTO_MSG), status_code=422)
             rel = await pipeline().executar(pronta)
         from .agregador import preparar_para_pessoa
         return HTMLResponse(_render_html(conteudo, preparar_para_pessoa(rel)))
+    except (asyncio.TimeoutError, TimeoutError):
+        _log_timeout()
+        return HTMLResponse(_render_html(conteudo, erro_msg="A checagem excedeu o tempo; tente um texto mais curto."),
+                            status_code=504)
     except Exception:
         log.exception("falha no pipeline web")
         return HTMLResponse(_render_html(conteudo, erro_msg="Falha no pipeline web"), status_code=502)
