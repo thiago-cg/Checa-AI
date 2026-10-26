@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import asyncio
+import hmac
 import html
 import logging
 import threading
 import time
 from collections import defaultdict
+from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Form, HTTPException, Request
@@ -46,7 +48,41 @@ except Exception:  # telegram opcional p/ API/web (bot não quebra API)
     LINK_SEM_TEXTO_MSG = "Não consegui ler esse link. Cole aqui o título e o texto da notícia."
 
 log = logging.getLogger("factcheck.api")
-app = FastAPI(title="Checa AI", version="0.2.0")
+
+_tg = None  # Application do bot em modo webhook (None = desligado)
+
+
+@asynccontextmanager
+async def _ciclo(_app):
+    """Com TELEGRAM_WEBHOOK=1 e token, o bot roda neste processo: o Telegram entrega cada
+    atualização em POST /telegram/webhook e o Application a processa em segundo plano."""
+    global _tg
+    if config.TELEGRAM_WEBHOOK and config.TELEGRAM_TOKEN:
+        try:
+            from .telegram_bot import construir_app
+            tg = construir_app(webhook=True)
+            await tg.initialize()
+            await tg.start()
+            _tg = tg
+            log.info("bot do Telegram no ar (webhook)")
+        except Exception:
+            log.exception("bot do Telegram não subiu; a API segue sem ele")
+    if _tg is not None and config.TELEGRAM_WEBHOOK_URL:
+        try:
+            from .telegram_bot import registrar_webhook
+            await registrar_webhook(_tg.bot, config.TELEGRAM_WEBHOOK_URL)
+        except Exception:
+            log.exception("falha ao registrar o webhook do Telegram")
+    try:
+        yield
+    finally:
+        if _tg is not None:
+            await _tg.stop()
+            await _tg.shutdown()
+            _tg = None
+
+
+app = FastAPI(title="Checa AI", version="0.2.0", lifespan=_ciclo)
 
 _pipe: Pipeline | None = None
 _lock = threading.Lock()
@@ -365,6 +401,25 @@ async def checar_web(request: Request, conteudo: str = Form(...)):
     except Exception:
         log.exception("falha no pipeline web")
         return HTMLResponse(_render_html(conteudo, erro_msg="Falha no pipeline web"), status_code=502)
+
+
+@app.post("/telegram/webhook")
+async def telegram_webhook(request: Request):
+    """Recebe a atualização e responde na hora; a checagem (que pode levar minutos) roda depois,
+    no Application. Só aceita quem manda o segredo registrado no setWebhook."""
+    if _tg is None:
+        raise HTTPException(status_code=404)
+    from telegram import Update
+    from .telegram_bot import segredo_webhook
+    recebido = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "").encode()
+    if not hmac.compare_digest(recebido, segredo_webhook(config.TELEGRAM_TOKEN).encode()):
+        raise HTTPException(status_code=403)
+    try:
+        update = Update.de_json(await request.json(), _tg.bot)
+    except Exception:
+        raise HTTPException(status_code=400)
+    await _tg.update_queue.put(update)
+    return {"ok": True}
 
 
 @app.get("/progresso.json")

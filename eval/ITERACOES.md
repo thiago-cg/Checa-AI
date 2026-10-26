@@ -541,3 +541,17 @@ agentes Sonnet em paralelo (worktrees), integrados por merge; **tudo que muda de
   chaves não chegou a trocar de chave ao vivo (a chave 1 não se esgotou); coberto só por testes. Gasto: ~190 buscas.
 - **Verificação:** pytest 1.226 passed; `eval.decisao` a3-dev inalterado (acerto 0,1884, erro grave 0). Nenhum caso,
   rótulo, gabarito ou baseline alterado. Holdout não rodado.
+
+## 23/10 — T6: BERT com impacto baixo na postura
+
+- **Hipótese:** o fator `1 − prob_fake` dava peso demais ao BERTimbau. Página de checagem reproduz o boato que
+  desmente, recebe prob_fake alta e perdia quase todo o voto (agência com p = 0,99 votava ~0,015 em vez de 1,5);
+  e a confiabilidade da fonte já está no `f_fonte`, então o BERT descontava em dobro.
+- **Mudança (decisão do usuário: "o peso dele deve ter baixo impacto"):** `decisao._fator_credibilidade` passa a
+  `f_bert = 1 − (p − 0,5)²` se p > 0,5 (`BERT_LIMIAR`), senão 1; piso 0,75 (no máximo −25% do voto). Fonte curada
+  (inclui agência) e peça do índice ficam isentas (f_bert = 1). Com o piso, o BERT sozinho não dispara mais o D-c
+  (`posturas_fracas`); só o desconto temporal do E4 chega lá.
+- **Métricas:** não medidas. Replay `bert-raiz` (20261023-103256) não reproduziu nenhum caso do dev
+  (`llm_miss=554`: faltam cassetes de LLM); precisa de `--modo record` com o LLM local.
+- **Verificação:** pytest 1.234 passed, 1 falha pré-existente (`test_eval_harness::test_carregar_multiplos_arquivos_glob_e_validacao`,
+  já falhava antes). Testes do T6/D-c reescritos para a fórmula nova. Nenhum caso, rótulo ou baseline alterado.

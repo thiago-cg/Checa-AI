@@ -1,4 +1,4 @@
-# API web do Checa AI para o Google Cloud Run (ver scripts/deploy_cloudrun.sh).
+# API web e bot do Telegram (webhook) do Checa AI para o Google Cloud Run (ver scripts/deploy_cloudrun.sh).
 
 # Estágio só para extrair o modelo: o zip (~400 MB) não fica em nenhuma camada da imagem final.
 FROM python:3.12-slim AS modelo
@@ -14,7 +14,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     # O disco do Cloud Run é efêmero: estado de execução vai para /tmp.
     TELEMETRIA_DIR=/tmp/runs \
     SERPAPI_USO_ARQ=/tmp/serpapi_uso.json \
+    FEEDBACK_PATH=/tmp/feedback.jsonl \
     FACTCHECK_NLTK_DOWNLOAD=0 \
+    # Bot do Telegram dentro da API (POST /telegram/webhook); só liga se houver TELEGRAM_TOKEN.
+    TELEGRAM_WEBHOOK=1 \
     # Detector BERTimbau v6 (run D1_dedup_s42), extraído no estágio "modelo".
     FAKE_MODEL_PATH=/app/modelo/bertimbau_v6
 

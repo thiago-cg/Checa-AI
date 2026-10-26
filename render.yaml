@@ -1,0 +1,22 @@
+# Blueprint do Render (plano grátis): API web + bot do Telegram por webhook, sem o detector BERTimbau.
+# No painel do Render: New > Blueprint > escolha este repositório. As chaves (sync: false) são
+# pedidas na criação e ficam só no Render. A API registra o webhook sozinha ao subir
+# (RENDER_EXTERNAL_URL, definido pelo Render).
+services:
+  - type: web
+    name: checa-ai
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: SERPAPI_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GOOGLE_FACTCHECK_API_KEY
+        sync: false

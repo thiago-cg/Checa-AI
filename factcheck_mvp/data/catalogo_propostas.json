@@ -540,47 +540,6 @@
    "coletado_em": "2026-10-14T18:41:44.398891+00:00"
   },
   {
-   "id": "www12-senado-leg-br",
-   "nome": "Senado Federal",
-   "tipo": "geral",
-   "homepage": "https://www12.senado.leg.br/",
-   "dominio": "www12.senado.leg.br",
-   "rss": [
-    "https://www12.senado.leg.br/hpsenado/RSS",
-    "https://www12.senado.leg.br/hpsenado/rss.xml",
-    "https://www12.senado.leg.br/hpsenado/atom.xml"
-   ],
-   "sitemap": null,
-   "editorias": [
-    "institucional",
-    "noticias",
-    "transparencia",
-    "ecidadania",
-    "perguntas-frequentes",
-    "publicacoes",
-    "hpsenado",
-    "dados-abertos"
-   ],
-   "article_url_patterns": [
-    "/noticias/",
-    "/noticias/materias/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "main"
-   },
-   "titulo_exemplo": "Flávio Bolsonaro e Lula disputam o segundo turno das eleições para presidente",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://www12.senado.leg.br/noticias/materias/2026/10/04/flavio-bolsonaro-e-lula-disputam-o-segundo-turno-das-eleicoes-para-presidente"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-14T18:41:53.440350+00:00"
-  },
-  {
    "id": "revistagalileu-globo-com",
    "nome": "Brasileiros criam cerveja que repõe nutrientes e retarda o envelhecimento de cél",
    "tipo": "geral",
@@ -2585,45 +2544,6 @@
    "coletado_em": "2026-10-15T15:36:32.867288+00:00"
   },
   {
-   "id": "observador-pt",
-   "nome": "Observador",
-   "tipo": "geral",
-   "homepage": "https://observador.pt/",
-   "dominio": "observador.pt",
-   "rss": [
-    "https://observador.pt/feed/"
-   ],
-   "sitemap": "https://observador.pt/sitemap.xml",
-   "editorias": [
-    "seccao",
-    "2026",
-    "especiais",
-    "radio",
-    "jogos",
-    "liveblogs",
-    "apoio-a-cliente",
-    "opiniao"
-   ],
-   "article_url_patterns": [
-    "/factchecks/",
-    "/factchecks/fact-check-a-tv-globo-noticiou-a-morte-do-jogador-neymar/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "article, main"
-   },
-   "titulo_exemplo": "Fact Check. A TV Globo noticiou a morte do jogador Neymar?",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://observador.pt/factchecks/fact-check-a-tv-globo-noticiou-a-morte-do-jogador-neymar/"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-15T21:12:21.827499+00:00"
-  },
-  {
    "id": "aseguirniteroi-com-br",
    "nome": "A Seguir Niterói",
    "tipo": "geral",
@@ -3390,43 +3310,6 @@
    "coletado_em": "2026-10-21T14:43:48.956187+00:00"
   },
   {
-   "id": "agenciabrasil-ebc-com-br",
-   "nome": "Agência Brasil",
-   "tipo": "geral",
-   "homepage": "https://agenciabrasil.ebc.com.br/",
-   "dominio": "agenciabrasil.ebc.com.br",
-   "rss": [],
-   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
-   "editorias": [
-    "politica",
-    "justica",
-    "esportes",
-    "economia",
-    "geral",
-    "direitos-humanos",
-    "meio-ambiente",
-    "saude"
-   ],
-   "article_url_patterns": [
-    "/politica/",
-    "/politica/noticia/"
-   ],
-   "css_selectors": {
-    "titulo": "h1",
-    "corpo": "[itemprop='articleBody'], main"
-   },
-   "titulo_exemplo": "Acompanhe ao vivo: Senado vota PEC pelo fim da escala 6x1",
-   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
-   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
-   "exemplo_urls": [
-    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-10/acompanhe-ao-vivo-senado-vota-pec-pelo-fim-da-escala-6x1"
-   ],
-   "responsavel": null,
-   "subsecoes": [],
-   "status": "pendente",
-   "coletado_em": "2026-10-23T01:45:14.575813+00:00"
-  },
-  {
    "id": "conjur-com-br",
    "nome": "Consultor Jurídico",
    "tipo": "geral",
@@ -3439,13 +3322,13 @@
    "sitemap": "https://conjur.com.br/sitemap.xml",
    "editorias": [
     "2026-out-22",
+    "2026-out-23",
     "minha-area",
     "2026-out-03",
     "noticias",
     "colunas",
     "artigos",
-    "entrevistas",
-    "anuncie-na-conjur"
+    "entrevistas"
    ],
    "article_url_patterns": [
     "/2026-out-15/",
@@ -3464,7 +3347,124 @@
    "responsavel": null,
    "subsecoes": [],
    "status": "pendente",
-   "coletado_em": "2026-10-23T01:45:15.005725+00:00"
+   "coletado_em": "2026-10-23T11:31:22.668835+00:00"
+  },
+  {
+   "id": "observador-pt",
+   "nome": "Observador",
+   "tipo": "geral",
+   "homepage": "https://observador.pt/",
+   "dominio": "observador.pt",
+   "rss": [
+    "https://observador.pt/feed/"
+   ],
+   "sitemap": "https://observador.pt/sitemap.xml",
+   "editorias": [
+    "seccao",
+    "2026",
+    "radio",
+    "jogos",
+    "programas",
+    "especiais",
+    "liveblogs",
+    "apoio-a-cliente"
+   ],
+   "article_url_patterns": [
+    "/factchecks/",
+    "/factchecks/fact-check-vacina-mrna-para-a-covid-19-altera-adn-humano/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "article, main"
+   },
+   "titulo_exemplo": "Fact Check. Vacina mRNA para a Covid-19 altera ADN&nbsp;humano?",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://observador.pt/factchecks/fact-check-vacina-mrna-para-a-covid-19-altera-adn-humano/"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-23T14:00:14.753008+00:00"
+  },
+  {
+   "id": "agenciabrasil-ebc-com-br",
+   "nome": "Agência Brasil",
+   "tipo": "geral",
+   "homepage": "https://agenciabrasil.ebc.com.br/",
+   "dominio": "agenciabrasil.ebc.com.br",
+   "rss": [],
+   "sitemap": "https://agenciabrasil.ebc.com.br/sitemap.xml",
+   "editorias": [
+    "politica",
+    "justica",
+    "economia",
+    "esportes",
+    "meio-ambiente",
+    "internacional",
+    "direitos-humanos",
+    "geral"
+   ],
+   "article_url_patterns": [
+    "/politica/",
+    "/politica/noticia/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "[itemprop='articleBody'], main"
+   },
+   "titulo_exemplo": "Senado: oposição obstrui e fim da escala 6x1 não vai a plenário",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://agenciabrasil.ebc.com.br/politica/noticia/2026-09/senado-oposicao-obstrui-e-fim-da-escala-6x1-nao-vai-plenario"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-23T14:04:23.110919+00:00"
+  },
+  {
+   "id": "www12-senado-leg-br",
+   "nome": "Senado Federal",
+   "tipo": "geral",
+   "homepage": "https://www12.senado.leg.br/",
+   "dominio": "www12.senado.leg.br",
+   "rss": [
+    "https://www12.senado.leg.br/hpsenado/RSS",
+    "https://www12.senado.leg.br/hpsenado/rss.xml",
+    "https://www12.senado.leg.br/hpsenado/atom.xml"
+   ],
+   "sitemap": null,
+   "editorias": [
+    "institucional",
+    "noticias",
+    "transparencia",
+    "ecidadania",
+    "perguntas-frequentes",
+    "publicacoes",
+    "hpsenado",
+    "dados-abertos"
+   ],
+   "article_url_patterns": [
+    "/noticias/",
+    "/noticias/materias/"
+   ],
+   "css_selectors": {
+    "titulo": "h1",
+    "corpo": "main"
+   },
+   "titulo_exemplo": "Fim da escala 6x1 passa na CCJ e vai a Plenário",
+   "estrategia_recomendada": "JsonCssExtractionStrategy (barato) + LLM local como fallback/validação",
+   "observacoes": "Proposta automática do modo descoberta — curadoria pendente. Evidência na origem: corpo_lido=True.",
+   "exemplo_urls": [
+    "https://www12.senado.leg.br/noticias/materias/2026/09/02/aguardar-fim-da-escala-6x1-passa-na-ccj-e-vai-a-plenario"
+   ],
+   "responsavel": null,
+   "subsecoes": [],
+   "status": "pendente",
+   "coletado_em": "2026-10-23T14:04:23.900803+00:00"
   }
  ]
 }

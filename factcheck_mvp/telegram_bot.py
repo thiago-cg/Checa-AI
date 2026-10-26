@@ -509,16 +509,30 @@ async def _erro(update: object, ctx: ContextTypes.DEFAULT_TYPE) -> None:
     log.error("erro no bot", exc_info=ctx.error)
 
 
-def main() -> None:
-    if not config.TELEGRAM_TOKEN:
-        raise SystemExit("TELEGRAM_TOKEN vazio (veja .env.mvp.example).")
-    if not _instancia_unica():
-        raise SystemExit("já há outra instância do bot rodando (bot.lock).")
-    _vigia_instancia_unica()
+def segredo_webhook(token: str) -> str:
+    """Valor do cabeçalho X-Telegram-Bot-Api-Secret-Token. Derivado do token (quem tem o token já
+    controla o bot), então não é mais um segredo a guardar; scripts/deploy_cloudrun.sh calcula o mesmo."""
+    import hashlib
+
+    return hashlib.sha256(f"webhook:{token}".encode()).hexdigest()
+
+
+async def registrar_webhook(bot, url_base: str) -> None:
+    """Aponta o webhook para `url_base`/telegram/webhook (o mesmo que scripts/deploy_cloudrun.sh faz)."""
+    url = f"{url_base.rstrip('/')}/telegram/webhook"
+    await bot.set_webhook(url=url, secret_token=segredo_webhook(config.TELEGRAM_TOKEN),
+                          allowed_updates=["message", "callback_query"])
+    log.info("webhook do Telegram -> %s", url)
+
+
+def construir_app(webhook: bool = False) -> Application:
+    """Bot com os handlers. webhook=True: sem Updater; as atualizações chegam pela API web
+    (POST /telegram/webhook em api.py) e entram em `update_queue`."""
     from .api import pipeline as fabrica
 
-    app = (Application.builder().token(config.TELEGRAM_TOKEN)
-           .request(_requisicao(256)).get_updates_request(_requisicao(1)).build())
+    b = Application.builder().token(config.TELEGRAM_TOKEN).request(_requisicao(256))
+    b = b.updater(None) if webhook else b.get_updates_request(_requisicao(1))
+    app = b.build()
     app.bot_data["pipeline"] = fabrica()
     app.add_handler(CommandHandler("start", _start))
     app.add_handler(CallbackQueryHandler(_feedback, pattern=r"^fb:"))
@@ -526,6 +540,33 @@ def main() -> None:
                                    | filters.VOICE | filters.AUDIO, _midia))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, _checar))
     app.add_error_handler(_erro)
+    return app
+
+
+def _webhook_ativo() -> str:
+    """URL do webhook registrado no Telegram ("" = nenhum ou falha ao consultar)."""
+    import httpx
+
+    try:
+        r = httpx.get(f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN}/getWebhookInfo", timeout=10)
+        return (r.json().get("result") or {}).get("url") or ""
+    except Exception:
+        return ""
+
+
+def main() -> None:
+    if not config.TELEGRAM_TOKEN:
+        raise SystemExit("TELEGRAM_TOKEN vazio (veja .env.mvp.example).")
+    # O polling apaga o webhook ao iniciar: rodar o bot aqui tiraria do ar o bot do Cloud Run.
+    url = _webhook_ativo()
+    if url and not config.TELEGRAM_FORCAR_POLLING:
+        raise SystemExit(f"o bot está em modo webhook ({url}); o polling apagaria esse webhook. "
+                         "Para usar o bot local mesmo assim, defina TELEGRAM_FORCAR_POLLING=1 "
+                         "(depois, rode o deploy de novo para voltar ao webhook).")
+    if not _instancia_unica():
+        raise SystemExit("já há outra instância do bot rodando (bot.lock).")
+    _vigia_instancia_unica()
+    app = construir_app()
     log.info("bot no ar. /start para ajuda.")
     app.run_polling()
 

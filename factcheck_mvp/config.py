@@ -48,6 +48,13 @@ def _bool(name: str, default: bool = False) -> bool:
 
 
 TELEGRAM_TOKEN = _get("TELEGRAM_TOKEN")
+# 1 = a API web recebe o bot por webhook (POST /telegram/webhook; ligado no Dockerfile do Cloud Run).
+TELEGRAM_WEBHOOK = _bool("TELEGRAM_WEBHOOK")
+# Endereço público da API: com ele, a API registra o próprio webhook ao subir. O Render define
+# RENDER_EXTERNAL_URL sozinho; no Cloud Run quem registra é scripts/deploy_cloudrun.sh.
+TELEGRAM_WEBHOOK_URL = _get("TELEGRAM_WEBHOOK_URL") or _get("RENDER_EXTERNAL_URL")
+# 1 = roda o bot local em polling mesmo com webhook registrado (o polling apaga o webhook).
+TELEGRAM_FORCAR_POLLING = _bool("TELEGRAM_FORCAR_POLLING")
 SERPAPI_KEY = _get("SERPAPI_KEY")
 SERPAPI_TIMEOUT_S = _int("SERPAPI_TIMEOUT_S", 15)  # por tentativa; timeout/conexão ganha 1 nova tentativa
 # Google Fact Check Tools API (ClaimReview de várias agências; base extra, só com INDICE_CHECAGENS=1).

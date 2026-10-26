@@ -1,0 +1,32 @@
+# API web e bot do Telegram (webhook) do Checa AI para o plano grátis do Render (ver render.yaml).
+# Versão leve do Dockerfile: sem o detector BERTimbau (torch + modelo não cabem nos 512 MB). Sem
+# FAKE_MODEL_PATH o pipeline usa o mock explícito, que não entra na decisão (ver modelo_fake.py).
+
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    NLTK_DATA=/usr/share/nltk_data \
+    # O disco do Render é efêmero: estado de execução vai para /tmp.
+    TELEMETRIA_DIR=/tmp/runs \
+    SERPAPI_USO_ARQ=/tmp/serpapi_uso.json \
+    FEEDBACK_PATH=/tmp/feedback.jsonl \
+    FACTCHECK_NLTK_DOWNLOAD=0 \
+    # Bot do Telegram dentro da API (POST /telegram/webhook); só liga se houver TELEGRAM_TOKEN.
+    TELEGRAM_WEBHOOK=1
+
+WORKDIR /app
+
+# transformers só serve ao detector, que fica de fora.
+COPY requirements-web.txt .
+RUN grep -v '^transformers' requirements-web.txt > /tmp/req.txt \
+ && pip install -r /tmp/req.txt \
+ && python -m nltk.downloader -d "$NLTK_DATA" rslp
+
+RUN useradd --create-home app && chown app /app
+COPY --chown=app factcheck_mvp/ factcheck_mvp/
+USER app
+
+# O Render informa a porta em $PORT.
+CMD exec uvicorn factcheck_mvp.api:app --host 0.0.0.0 --port "${PORT:-8080}" --proxy-headers --forwarded-allow-ips="*"

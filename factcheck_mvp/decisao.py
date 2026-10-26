@@ -19,8 +19,10 @@ Fórmula (log-odds, prior neutro L0 = 0), por afirmação a:
     s_a       = +1 se o usuário afirma o núcleo, -1 se nega (polaridade)
     contrib   = s_a * d * w
       postura : d = +1 REFUTA, -1 SUSTENTA (RELATA/NAO_TRATA não votam)
-                w = W_POSTURA * f_fonte * (1 − prob_fake_pagina)  (T6; sem modelo real, fator 1,0)
-                w < 5% de W_POSTURA·f_fonte (prob_fake > 0,95): não vota (D-c, FRACAO_MIN_VOTO); vale também para o desconto temporal do E4
+                w = W_POSTURA * f_fonte * f_bert  (T6; sem modelo real, fator 1,0)
+                f_bert = 1 − (prob_fake_pagina − 0,5)² se prob_fake > 0,5, senão 1 (piso 0,75);
+                só para fonte NÃO curada e fora do índice (curada/agência/índice: f_bert = 1)
+                w < 5% de W_POSTURA·f_fonte: não vota (D-c, FRACAO_MIN_VOTO); com o piso do f_bert, só o desconto temporal do E4 chega lá
       veredito: d = selos.direcao(veredito) (FALSO +1 … VERDADEIRO -1; SATIRA 0 = não vota)
                 só com classe SUSTENTA ou REFUTA (P2, 13/10): RELATA_SEM_ENDOSSO não deixa o selo votar
                 w = W_VEREDITO * f_fonte; só selo do ÍNDICE (origem "pagina" não vota: T6)
@@ -103,9 +105,12 @@ from . import aplicabilidade, confiabilidade, observabilidade, selos, trava_indi
 TAU = math.log(3)            # faixa média: |L| < ln 3  <=>  0,25 < p < 0,75
 W_POSTURA = 1.0              # postura com citação verificada, fonte curada, corpo lido
 W_VEREDITO = 1.5             # selo de checagem tipado, aplicável à afirmação
-# D-c (09/10): postura cujo peso ficou abaixo desta fração do peso sem o BERT (1 − prob_fake < 5%) não vota,
+# D-c (09/10): postura cujo peso ficou abaixo desta fração do peso sem o BERT não vota,
 # como se não existisse. Sem isso, um voto de valor ≈0 entrava na conjunção com σ(0) = 0,5.
 FRACAO_MIN_VOTO = 0.05
+# T6 (23/10): o BERT só desconta acima deste P(fake) e pelo quadrado do excesso: f_bert = 1 − (p − limiar)²
+# (desconto suave perto do limiar, maior só nos extremos).
+BERT_LIMIAR = 0.5
 # R11: meia-vida (dias) da validade de uma checagem de agência frente a uma fonte mais nova que a confirma.
 # Decaimento exponencial (HALO 2025, Chronofy 2026); valor inicial, a estimar no split dev.
 R11_MEIA_VIDA_DIAS = 7.0
@@ -475,11 +480,14 @@ def _descontar(valor: float, r: float) -> float:
 
 
 def _fator_credibilidade(it: ItemEvidencia) -> float:
-    """T6/D1: fator (1 − prob_fake_pagina) da postura, com prob_fake limitada a [0, 1].
-    Sem modelo real (None: snapshot antigo, página não lida, mock) o fator é 1,0."""
-    if it.prob_fake_pagina is None:
+    """T6/D1 (23/10): f_bert = 1 − (prob_fake − BERT_LIMIAR)² se prob_fake > BERT_LIMIAR, senão 1,0
+    (prob_fake limitada a [0, 1]; piso 0,75). Fonte curada (inclui agência) ou peça do índice
+    de checagens já tem credibilidade própria: fator 1,0. Sem modelo real (None: snapshot antigo, página
+    não lida, mock) o fator é 1,0."""
+    if it.prob_fake_pagina is None or it.curada or it.origem_veredito == "indice":
         return 1.0
-    return 1.0 - min(1.0, max(0.0, float(it.prob_fake_pagina)))
+    excesso = min(1.0, max(0.0, float(it.prob_fake_pagina))) - BERT_LIMIAR
+    return 1.0 - excesso ** 2 if excesso > 0 else 1.0
 
 
 def _validade_checagem(data_fonte: Optional[str], datas_checagem: List[Optional[str]]) -> float:
@@ -735,7 +743,9 @@ def decidir(ev: Evidencias) -> Decisao:
                               "f_nao_curada": F_NAO_CURADA, "f_veredito_nao_curada": F_VEREDITO_NAO_CURADA,
                               "f_postura_por_nivel": dict(confiabilidade.FATOR_POSTURA),
                               "f_veredito_por_nivel": dict(confiabilidade.FATOR_VEREDITO),
-                              "postura": "W_POSTURA·f_fonte·(1−prob_fake_pagina)",
+                              "postura": "W_POSTURA·f_fonte·f_bert",
+                              "f_bert": "1−(prob_fake−0,5)² se prob_fake>0,5 e fonte não curada/fora do índice; senão 1",
+                              "bert_limiar": BERT_LIMIAR,
                               "fracao_min_voto": FRACAO_MIN_VOTO,
                               "r11_meia_vida_dias": R11_MEIA_VIDA_DIAS,
                               "r11": "SUSTENTA de não-agência × (1 − max_i 2^(−Δ_i/h)), Δ_i = fonte − checagem i",

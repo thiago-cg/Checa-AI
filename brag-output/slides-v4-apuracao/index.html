@@ -123,7 +123,7 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
 /* Título (slide 1) */
 .t-bar { position: absolute; left: var(--pad); top: 250px; width: 640px; height: 22px; background: var(--red); }
 .t-h1 { position: absolute; left: 150px; top: 300px; font: 900 300px/.86 var(--f-display); letter-spacing: -.045em; }
-.t-h1 .l { display: block; overflow: hidden; }
+.t-h1 .l { display: block; overflow: hidden; padding: 0 .12em; margin: 0 -.12em; }  /* folga lateral: o itálico passa da caixa */
 .t-h1 .l span { display: block; transform: translateY(105%); transition: transform .9s var(--ease); }
 .slide.visible .t-h1 .l span { transform: none; }
 .slide.visible .t-h1 .l:nth-child(2) span { transition-delay: .12s; }
@@ -311,9 +311,9 @@ body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--r
      ========================================================= -->
 <section class="slide" data-sec="O problema">
   <div class="kicker">Grupo da família · mensagem encaminhada</div>
-  <div class="stmt" style="top:290px;font-size:230px">
-    <div class="r" style="--d:.15s">“Café cura</div>
-    <div class="r" style="--d:.3s">câncer.”</div>
+  <div class="stmt" style="top:290px;font-size:190px">
+    <div class="r" style="--d:.15s">“Vacina altera</div>
+    <div class="r" style="--d:.3s">o DNA.”</div>
   </div>
   <div class="r" style="position:absolute;left:160px;top:820px;font:900 88px var(--f-display);letter-spacing:-.03em;--d:.8s">Verdade ou <span class="red">mentira?</span></div>
 </section>
@@ -329,22 +329,6 @@ body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--r
     <div class="r" style="--d:.3s"><div class="rule"></div><span class="sq a" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Média</div><div class="mono" style="font-size:24px;margin:10px 0 18px">|L| &lt; 1,10</div><p class="small" style="font-size:28px">Evidência insuficiente ou em conflito.</p></div>
     <div class="r" style="--d:.4s"><div class="rule"></div><span class="sq r" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Alta</div><div class="mono" style="font-size:24px;margin:10px 0 18px">L ≥ +1,10</div><p class="small" style="font-size:28px">Fontes independentes contestam a afirmação.</p></div>
     <div class="r" style="--d:.5s"><div class="rule"></div><span class="sq o" style="margin:28px 0 22px;width:64px;height:64px"></span><div style="font:900 56px var(--f-display)">Indeterminada</div><div class="mono" style="font-size:24px;margin:10px 0 18px">nenhum voto</div><p class="small" style="font-size:28px">Nenhuma fonte trata do assunto.</p></div>
-  </div>
-</section>
-
-<!-- =========================================================
-     04 · QUEM DECIDE
-     ========================================================= -->
-<section class="slide" data-sec="Princípio de projeto">
-  <div class="kicker">Quem decide</div>
-  <div class="stmt" style="top:250px;width:860px;font-size:110px">
-    <div class="r" style="--d:.1s">Ausência de evidência</div>
-    <div class="r red" style="--d:.25s">não é evidência.</div>
-  </div>
-  <p class="lead r" style="position:absolute;left:160px;top:720px;width:780px;font-size:32px;--d:.45s">Nada empurra o nível sem uma fonte que tenha tomado posição sobre a afirmação.</p>
-  <div style="position:absolute;left:1120px;right:160px;top:250px;display:grid;gap:36px">
-    <div class="box r" style="--d:.5s"><span class="tag llm">Modelo de linguagem</span><div style="font:900 48px/1.1 var(--f-display);margin:22px 0 12px">extrai · reescreve · classifica</div><p class="small" style="font-size:26px">Propõe — e é sempre conferido pelo código.</p></div>
-    <div class="box r" style="--d:.65s;background:var(--inv-bg);color:var(--inv-fg)"><span class="tag" style="border-color:var(--inv-fg)">Código determinístico</span><div style="font:900 48px/1.1 var(--f-display);margin:22px 0 12px">pesa · soma · decide · redige</div><p style="font-size:26px;color:var(--inv-mute)">O nível e o texto final nunca vêm do LLM.</p></div>
   </div>
 </section>
 
@@ -465,9 +449,9 @@ body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--r
   <div class="body cols c2" style="gap:90px">
     <div>
       <div class="lab r" style="--d:.15s">① Uma URL, uma peça</div>
-      <div class="mono r" style="font-size:25px;line-height:1.5;margin-top:22px;--d:.25s"><span class="strike">https://www.</span>exemplo.com.br/noticia/cafe-cura<br><span class="strike">?utm_source=zap&amp;amp#fim</span></div>
+      <div class="mono r" style="font-size:25px;line-height:1.5;margin-top:22px;--d:.25s"><span class="strike">https://www.</span>exemplo.com.br/noticia/vacina-altera-dna<br><span class="strike">?utm_source=zap&amp;amp#fim</span></div>
       <div class="r" style="font-size:28px;color:var(--mute);margin:18px 0;--d:.35s">↓ a mesma matéria vinda de dois buscadores</div>
-      <div class="mono r" style="font-size:36px;font-weight:600;padding:18px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);--d:.45s">exemplo.com.br/noticia/cafe-cura</div>
+      <div class="mono r" style="font-size:36px;font-weight:600;padding:18px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);--d:.45s">exemplo.com.br/noticia/vacina-altera-dna</div>
       <div class="r" style="display:flex;gap:16px;margin-top:28px;--d:.55s"><span class="tag" style="border-color:var(--red);color:var(--red)">✗ homepage</span><span class="tag" style="border-color:var(--red);color:var(--red)">✗ listagem /tag/</span><span class="tag" style="border-color:var(--red);color:var(--red)">✗ rede social · PDF</span></div>
     </div>
     <div>
@@ -573,25 +557,6 @@ body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--r
 </section>
 
 <!-- =========================================================
-     14 · AUTOCONSISTÊNCIA
-     ========================================================= -->
-<section class="slide" data-sec="Etapa 07">
-  <div class="kicker">Etapa 07 · Autoconsistência</div>
-  <h2 class="h2">Voto decisivo: julgado 3×.</h2>
-  <div class="body" style="top:430px">
-    <div class="r" style="display:grid;grid-template-columns:repeat(3,240px) 90px 1fr;gap:20px;align-items:center;padding:26px 0;border-top:3px solid var(--ink);--d:.2s">
-      <span class="tag" style="font-size:24px;text-align:center">REFUTA</span><span class="tag" style="font-size:24px;text-align:center">REFUTA</span><span class="tag" style="font-size:24px;text-align:center">REFUTA</span>
-      <span style="font:900 48px var(--f-display);text-align:center">→</span><span style="font:800 36px var(--f-display)">unânime · <span style="color:var(--green)">mantém</span></span>
-    </div>
-    <div class="r" style="display:grid;grid-template-columns:repeat(3,240px) 90px 1fr;gap:20px;align-items:center;padding:26px 0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);--d:.4s">
-      <span class="tag" style="font-size:24px;text-align:center">REFUTA</span><span class="tag" style="font-size:24px;text-align:center;border-color:var(--red);color:var(--red)">SUSTENTA</span><span class="tag" style="font-size:24px;text-align:center">REFUTA</span>
-      <span style="font:900 48px var(--f-display);text-align:center">→</span><span style="font:800 36px var(--f-display)">instável · <span class="red">RELATA_SEM_ENDOSSO</span></span>
-    </div>
-    <p class="r" style="font:800 44px/1.2 var(--f-display);margin-top:60px;--d:.65s">Falha segura: a repetição nunca inverte a direção —<br><span class="red">só perde a posição.</span></p>
-  </div>
-</section>
-
-<!-- =========================================================
      15 · ETAPA 8 — DECISÃO
      ========================================================= -->
 <section class="slide" data-sec="Etapa 08">
@@ -664,58 +629,6 @@ body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--r
 </section>
 
 <!-- =========================================================
-     18 · REPRODUTIBILIDADE
-     ========================================================= -->
-<section class="slide" data-sec="Método">
-  <div class="kicker">Método · Telemetria e replay</div>
-  <h2 class="h2">Tudo é reproduzível.</h2>
-  <div class="body cols" style="grid-template-columns:1fr 600px;gap:90px">
-    <div class="r" style="--d:.2s">
-      <div class="lab">runs/&lt;run_id&gt;/trace.jsonl</div>
-      <div class="trace" style="margin-top:18px;border-top:3px solid var(--ink);padding-top:14px">
-        <div><span>12 ms</span>run_inicio "Café cura câncer"</div>
-        <div><span>131 ms</span>etapa recebimento · ok</div>
-        <div><span>6491 ms</span>llm afirmacoes · 2,2 s</div>
-        <div><span>6524 ms</span>http 200 · cache=hit</div>
-        <div><span>9012 ms</span>fonte descartada · homepage</div>
-        <div><span>9400 ms</span><b class="red">fallback</b> onde=juiz</div>
-        <div><span>9812 ms</span>decisao nivel=media</div>
-      </div>
-    </div>
-    <div>
-      <div class="lab r" style="--d:.35s">Todo I/O externo passa por cassetes</div>
-      <ul class="checks" style="margin-top:6px">
-        <li class="r" style="--d:.45s"><span class="m s">○</span><span><b>live</b><small>rede de verdade, nada gravado</small></span></li>
-        <li class="r" style="--d:.55s"><span class="m n">●</span><span><b>record</b><small>rede + grava web e LLM</small></span></li>
-        <li class="r" style="--d:.65s;border:0"><span class="m">▶</span><span><b>replay</b><small>só cassetes · determinístico · sem rede</small></span></li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- =========================================================
-     19 · AVALIAÇÃO
-     ========================================================= -->
-<section class="slide" data-sec="Método">
-  <div class="kicker">Método · Avaliação</div>
-  <h2 class="h2">Erro grave pesa mais.</h2>
-  <div class="body" style="top:400px">
-    <div class="r eq" style="font-size:28px;--d:.2s">
-      <div class="cell">casos rotulados<small>dev · holdout</small></div><span class="op">→</span>
-      <div class="cell">pipeline em replay<small>sem rede</small></div><span class="op">→</span>
-      <div class="cell">métricas<small>acerto · erro grave · indeterminada</small></div><span class="op">→</span>
-      <div class="cell" style="background:var(--inv-bg);color:var(--inv-fg)">linha de base<small style="color:var(--inv-mute)">delta + gate</small></div>
-    </div>
-    <table class="tbl r" style="margin-top:50px;--d:.4s">
-      <tr><td><b>Falso</b> · esperado ALTA</td><td><span class="red">grave: BAIXA</span></td></tr>
-      <tr><td><b>Verdadeiro</b> · esperado BAIXA</td><td><span class="red">grave: ALTA</span></td></tr>
-      <tr><td><b>Sem evidência</b> · esperado INDETERMINADA</td><td style="color:var(--mute)">—</td></tr>
-    </table>
-    <p class="small r" style="margin-top:24px;--d:.6s">Itera-se só no dev; o holdout só abre no fim de cada rodada. Rótulos e baseline nunca são editados para “passar”.</p>
-  </div>
-</section>
-
-<!-- =========================================================
      20 · RESULTADOS
      ========================================================= -->
 <section class="slide" data-sec="Resultados">
@@ -777,9 +690,8 @@ body.editing .slide [contenteditable="true"]:hover { outline: 2px dashed var(--r
    =========================================== */
 const NOTES = [
  "Checa AI, ou CrossCheckBR: um checador de fatos em português que não dá veredito — estima a propensão de uma mensagem ser desinformação e mostra o caminho.",
- "Chega uma mensagem no grupo da família: “Café cura câncer”. Verdade ou mentira? O sistema não responde com um veredito. Ele estima a propensão de ser desinformação — e mostra, passo a passo, como chegou lá.",
+ "Chega uma mensagem no grupo da família: “Vacina altera o DNA”. Verdade ou mentira? O sistema não responde com um veredito. Ele estima a propensão de ser desinformação — e mostra, passo a passo, como chegou lá.",
  "A saída é uma escala: baixa, média, alta ou indeterminada. Nunca um simples verdadeiro ou falso. Sem fonte que trate do assunto, o sistema prefere dizer que não sabe.",
- "Ausência de evidência não é evidência. E o nível é calculado por código determinístico: o modelo de linguagem extrai, reescreve e classifica, mas nunca redige a conclusão.",
  "São dez etapas, e cada uma deixa um recibo auditável. Em preto, o que é código determinístico; em vermelho, onde um modelo de linguagem entra. O agente crítico pode voltar para a busca.",
  "Etapa um: recebimento. Entra texto, título ou link; fotos e vídeos recebem só orientação. Regras simples leem o texto: há marcador de tempo? Relato de segunda mão? Opinião, sátira ou afirmação vaga? Um “hoje” abre uma janela de dois dias: fontes de outro período valerão menos adiante.",
  "Etapa dois: um modelo de linguagem divide o texto em até três afirmações atômicas. Cada uma guarda a polaridade do usuário e um núcleo na forma afirmativa. Em “é falso que a vacina altera o DNA”, o núcleo é “a vacina altera o DNA”, com polaridade negativa. O juiz avalia o núcleo; a polaridade inverte a direção só no cálculo. A saída é validada por esquema, com uma nova tentativa e um fallback declarado no recibo.",
@@ -789,12 +701,9 @@ const NOTES = [
  "Etapa cinco: dez veículos copiando a mesma agência não são dez confirmações. Fontes são agrupadas se assinam a mesma agência, pertencem ao mesmo grupo, ou têm corpos quase idênticos. Cada cluster vale um único voto.",
  "Etapa seis: para cada fonte e afirmação, um LLM lê título, lide, frases de conclusão e frases com os termos da afirmação. Classifica em sustenta, refuta, relata sem endosso ou não trata — e copia uma citação literal. O código confere a citação no texto. Se não existir, a classe cai para “não trata”. O modelo pode errar, mas não pode inventar.",
  "Etapa sete: o agente crítico decide, por afirmação, se já há evidência suficiente. Ele para com um selo de checagem aplicável ou com dois clusters independentes que tomaram posição. Senão, o LLM reescreve a consulta, sabendo quais páginas foram julgadas fora do tema, e abre uma nova onda de busca, dentro de um orçamento.",
- "Se um único julgamento decidiria o nível, ele é repetido três vezes. Se as repetições discordam, vira “relata sem endosso”: uma falha segura, que nunca inverte a direção.",
  "Etapa oito: uma função pura, sem LLM e sem rede. Cada cluster dá um voto: positivo se refuta, negativo se sustenta, com peso pela confiabilidade da fonte. A soma é o log-odds L; o limiar é ln 3, cerca de 1,1. Uma só fonte curada não crava nada: vale um, média. Duas independentes concordando, sim: dois, ou oitenta e oito por cento — alta.",
  "Etapa nove: travas que só deixam o sistema mais cauteloso. Confiabilidade, tempo, conjunção, similaridade do selo do índice, e um sintetizador que relê as fontes mas só pode rebaixar o nível, nunca elevá-lo.",
  "Etapa dez: a redação usa modelos de texto neutros, e uma varredura bloqueia frases como “é falso” ou “fake news confirmada”. Cada fonte aparece com postura, citação e data; sinais de estilo aparecem, mas ficam fora do nível. O recibo lista cada etapa com seu status.",
- "Para ser ciência, precisa ser reproduzível. Cada execução grava um trace: etapas, chamadas ao LLM, requisições, descartes e fallbacks. Todo acesso externo passa por cassetes: record grava, replay reproduz tudo sem rede.",
- "Um harness roda casos rotulados, separa desenvolvimento de holdout e mede acerto, erro grave e indeterminadas contra uma linha de base. Erro grave é dar baixa propensão ao que é falso, ou alta ao que é verdadeiro.",
  "Numa simulação com cinquenta frases, sem a checagem original na busca, o acerto ficou entre cinquenta e nove e sessenta e quatro por cento — com zero erros graves. Dos dezoito erros do controle, quinze foram indeterminada e nenhum na direção errada.",
  "O gargalo não é julgar, é recuperar evidência. A amostra é pequena e as diferenças entre variantes não são estatisticamente significativas; o próximo passo é a busca.",
  "O Checa AI não decide por você. Ele mostra as fontes, os pesos e o caminho, para que você compare e tire a sua própria conclusão. Checagem cruzada, auditável, em português."

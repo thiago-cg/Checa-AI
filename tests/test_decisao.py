@@ -677,21 +677,32 @@ def test_e4_bot_mostra_data_quando_descontada_e_neutro():
 
 
 # ------------------------------------------------------------------ T6 (B1c): BERTimbau × avaliador
-def test_t6_pagina_que_bert_acha_fake_quase_nao_vota():
-    """D1: o BERTimbau mede a CREDIBILIDADE da página; a direção vem do avaliador.
-    Peso da postura = W_POSTURA·f_fonte·(1 − prob_fake_pagina): com prob_fake 0,9 a mesma
-    REFUTA pesa no máximo 0,1 da de prob_fake 0."""
-    limpa = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", pf=0.0)]))
-    fake = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", pf=0.9)]))
-    assert limpa.votos[0].direcao == fake.votos[0].direcao == 1
-    assert 0 < abs(fake.votos[0].valor) <= 0.1 * abs(limpa.votos[0].valor) + 1e-9
-    assert abs(fake.log_odds) <= 0.1 * abs(limpa.log_odds) + 1e-9
+def _f_bert(pf):
+    return 1.0 - (pf - 0.5) ** 2 if pf > 0.5 else 1.0
+
+
+def test_t6_bert_desconta_pelo_quadrado_do_excesso_sobre_0_5():
+    """T6 (23/10): fonte não curada, f_bert = 1 − (prob_fake − 0,5)² acima de 0,5; até 0,5, nenhum desconto."""
+    base = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=None)])).votos[0].valor
+    for pf in (0.0, 0.3, 0.5, 0.51, 0.75, 0.9, 1.0):
+        v = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=pf)])).votos[0].valor
+        assert v == pytest.approx(base * _f_bert(pf), abs=1e-4)
+
+
+def test_t6_bert_nao_afeta_curada_nem_indice():
+    """Curada (inclui agência) e peça do índice de checagens têm credibilidade própria: o BERT não desconta."""
+    assert decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", pf=1.0)])).log_odds == 1.0
+    sem = decidir(_ev([_it("https://x.com.br/a", "REFUTA", curada=False, veredito="FALSO", origem="indice")]))
+    com = decidir(_ev([_it("https://x.com.br/a", "REFUTA", curada=False, veredito="FALSO", origem="indice", pf=1.0)]))
+    assert com.log_odds == sem.log_odds
 
 
 def test_t6_prob_fake_limitada_entre_0_e_1():
-    """Fora de [0, 1] é limitada: 1,7 vira 1 (a postura não vota); −0,5 vira 0 (fator 1)."""
-    assert decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", pf=1.7)])).votos == []
-    assert decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", pf=-0.5)])).log_odds == 1.0
+    """Fora de [0, 1] é limitada: 1,7 vira 1 (piso 0,75, ainda vota); −0,5 vira 0 (fator 1)."""
+    base = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False)])).votos[0].valor
+    alto = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=1.7)])).votos[0].valor
+    baixo = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=-0.5)])).votos[0].valor
+    assert alto == pytest.approx(base * _f_bert(1.0), abs=1e-4) and baixo == base
 
 
 def test_t6_sem_bert_identico_ao_comportamento_anterior():
@@ -741,58 +752,24 @@ def test_t6_origem_ausente_vota_como_antes():
 
 def test_t6_formula_registrada_em_parametros():
     d = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA")]))
-    assert d.parametros["postura"] == "W_POSTURA·f_fonte·(1−prob_fake_pagina)"
+    assert d.parametros["postura"] == "W_POSTURA·f_fonte·f_bert"
+    assert d.parametros["bert_limiar"] == decisao.BERT_LIMIAR == 0.5
 
 
 # ------------------------------------------------------------------ D-c (09/10): voto < 5% do peso não conta
-def _d_c_texto(pf):
-    """Repro do revisor: P1 com 1 REFUTA curada (prob_fake = pf) e P2 com 2 SUSTENTA curadas."""
-    itens = [_it("https://g1.globo.com/a", "REFUTA", cluster="g1", af=0, pf=pf)]
-    itens += [_it("https://estadao.com.br/b", "SUSTENTA", cluster="estadao", af=1),
-              _it("https://bbc.com/b", "SUSTENTA", cluster="bbc", af=1)]
-    return decidir(_ev_afs(itens, ["Parte 1", "Parte 2"]))
+def test_d_c_bert_nunca_tira_o_voto_sozinho():
+    """Com o piso 0,75, o BERT sozinho não leva a postura abaixo de 5%: ela continua votando."""
+    d = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=1.0)]))
+    assert len(d.votos) == 1 and d.posturas_fracas == []
 
 
-@pytest.mark.parametrize("pf", [1.0, 0.99999, 0.9999, 0.96])
-def test_d_c_postura_com_menos_de_5_por_cento_nao_vota(pf):
-    """Peso da postura < 5% do peso sem o BERT (1 − prob_fake < 0,05): não vota, como se não existisse. P1 sai
-    da conjunção e o texto é o de P2 (baixa)."""
-    d = _d_c_texto(pf)
-    assert d.por_afirmacao[0]["n_votos"] == 0
-    assert d.nivel == "baixa" and d.log_odds == pytest.approx(-2.0)
-    assert len(d.posturas_fracas) == 1 and d.posturas_fracas[0]["url"] == "https://g1.globo.com/a"
-
-
-def test_d_c_prob_fake_9999_e_1_dao_o_mesmo_nivel():
-    """O caso do revisor: antes, 1,0 dava baixa e 0,99999 dava média. Agora os dois dão o mesmo resultado."""
-    assert _d_c_texto(0.99999).nivel == _d_c_texto(1.0).nivel == "baixa"
-    assert _d_c_texto(0.99999).log_odds == _d_c_texto(1.0).log_odds
-
-
-@pytest.mark.parametrize("pf", [0.9, 0.94])
-def test_d_c_postura_com_mais_de_5_por_cento_ainda_vota(pf):
-    """Com 10% (prob_fake 0,9) ou 6% do peso, a postura ainda vota: P1 é contestada, com L = 1 − prob_fake.
-    Não some e não é tratada como 'sem voto'."""
-    d = _d_c_texto(pf)
-    assert d.por_afirmacao[0]["n_votos"] == 1
-    assert d.por_afirmacao[0]["L"] == pytest.approx(1.0 - pf, abs=1e-4)
-    assert d.posturas_fracas == []
-
-
-def test_d_c_nao_afeta_veredito_do_indice():
-    """O fator BERT só reduz a postura. Um selo do índice (1,5, sem BERT) continua votando com prob_fake 1,0."""
-    it = _it("https://lupa.uol.com.br/x", "REFUTA", veredito="FALSO", origem="indice", pf=1.0)
-    d = decidir(_ev([it]))
-    assert d.nivel == "alta" and len(d.vereditos_aplicados) == 1
-    assert len(d.posturas_fracas) == 1
-
-
-def test_d_c_constante_e_trace_registram_o_caso():
-    """A fração mínima fica nomeada em `parametros` e o caso sem voto aparece no trace (`posturas_fracas`)."""
-    d = _d_c_texto(1.0)
+def test_d_c_constante_e_trace_registram_o_caso(monkeypatch):
+    """A fração mínima fica nomeada em `parametros` e o caso sem voto aparece no trace (`posturas_fracas`).
+    Com limiar 0 o f_bert de prob_fake 1,0 é 0, o único jeito de o BERT zerar a postura."""
+    monkeypatch.setattr(decisao, "BERT_LIMIAR", 0.0)
+    d = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=1.0)]))
     assert d.parametros["fracao_min_voto"] == decisao.FRACAO_MIN_VOTO == 0.05
-    r = d.resumo_trace()
-    assert r["posturas_fracas"] == ["af0 REFUTA@https://g1.globo.com/a pf=1.0"]
+    assert d.votos == [] and d.resumo_trace()["posturas_fracas"] == ["af0 REFUTA@https://g1.globo.com/a pf=1.0"]
 
 
 # ------------------------------------------------------------------ T7 (B2): conjunção entre afirmações (D2)
@@ -1423,8 +1400,9 @@ def test_desconto_temporal_acima_de_5_por_cento_ainda_vota(monkeypatch):
     assert len(d.votos) == 1 and 0 < d.votos[0].valor < 1.0
 
 
-def test_unica_postura_descartada_pelo_bert_tem_motivo_proprio():
-    d = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", pf=1.0)]))
+def test_unica_postura_descartada_pelo_bert_tem_motivo_proprio(monkeypatch):
+    monkeypatch.setattr(decisao, "BERT_LIMIAR", 0.0)
+    d = decidir(_ev([_it("https://g1.globo.com/a", "REFUTA", curada=False, pf=1.0)]))
     assert d.nivel == "indeterminada" and len(d.posturas_fracas) == 1
     assert "anulam" not in d.motivo and "conflitam" not in d.motivo
     assert not verificar_neutralidade(d.motivo)
