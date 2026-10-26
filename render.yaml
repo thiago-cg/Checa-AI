@@ -16,6 +16,9 @@ services:
         sync: false
       - key: SERPAPI_KEY
         sync: false
+      # Chaves extras do rodízio (usadas quando a anterior esgota a cota), separadas por vírgula.
+      - key: SERPAPI_KEYS
+        sync: false
       - key: OPENROUTER_API_KEY
         sync: false
       - key: GOOGLE_FACTCHECK_API_KEY
