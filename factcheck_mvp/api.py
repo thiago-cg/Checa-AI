@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import hmac
 import html
+import json
 import logging
 import threading
 import time
@@ -12,7 +13,7 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 
 from . import config, llm_openrouter
 from .catalogo import Catalogo
@@ -176,17 +177,25 @@ def _log_timeout() -> None:
                 config.CHECAGEM_TIMEOUT_S, telemetria.ultimo_run_id())
 
 
-@app.post("/checar", response_model=RelatorioChecagem)
-async def checar(entrada: EntradaConsulta, request: Request):
+def _checar_rate(request: Request) -> None:
     if not _rate_ok(request):
         raise HTTPException(status_code=429, detail="muitas checagens; tente de novo em instantes")
+
+
+async def _checagem(entrada: EntradaConsulta, progresso=None) -> RelatorioChecagem:
+    """Checagem com teto de tempo; toda falha sai como HTTPException com mensagem para a pessoa.
+    `progresso`: callback async com os avisos do pipeline (os mesmos que o bot mostra)."""
     try:
         async with asyncio.timeout(config.CHECAGEM_TIMEOUT_S):
             pronta = await _ler_link(entrada)
             if pronta is None:
                 raise HTTPException(status_code=422, detail=LINK_SEM_TEXTO_MSG)
             from .agregador import preparar_para_pessoa
-            return preparar_para_pessoa(await pipeline().executar(pronta))
+            if progresso is None:
+                rel = await pipeline().executar(pronta)
+            else:
+                rel = await pipeline().executar(pronta, progresso=progresso)
+            return preparar_para_pessoa(rel)
     except (asyncio.TimeoutError, TimeoutError):
         _log_timeout()
         raise HTTPException(status_code=504, detail="checagem excedeu o tempo; tente um texto mais curto")
@@ -197,12 +206,53 @@ async def checar(entrada: EntradaConsulta, request: Request):
         raise HTTPException(status_code=502, detail="falha temporária, tente de novo em instantes")
 
 
+@app.post("/checar", response_model=RelatorioChecagem)
+async def checar(entrada: EntradaConsulta, request: Request):
+    _checar_rate(request)
+    return await _checagem(entrada)
+
+
 @app.post("/checar-html", response_class=HTMLResponse)
 async def checar_html(entrada: EntradaConsulta, request: Request):
     """Mesma checagem do /checar, devolvendo o bloco do relatório já montado (o JS da página só o
     insere): um desenho só para a página, com o raciocínio filtrado (C1) e as fontes fora do tema."""
     rel = await checar(entrada, request)
     return HTMLResponse(_relatorio_html(entrada.conteudo, rel))
+
+
+@app.post("/checar-stream")
+async def checar_stream(entrada: EntradaConsulta, request: Request):
+    """O /checar-html com a etapa real: NDJSON com uma linha {"etapa"} por aviso do pipeline e, no
+    fim, {"html"} (o bloco do relatório) ou {"erro", "status"}. A página mostra o que está rodando."""
+    _checar_rate(request)  # antes do stream: o 429 sai como resposta HTTP normal
+    fila: asyncio.Queue = asyncio.Queue()
+
+    async def progresso(msg: str) -> None:
+        await fila.put({"etapa": msg})
+
+    async def rodar() -> None:
+        try:
+            rel = await _checagem(entrada, progresso)
+            await fila.put({"html": _relatorio_html(entrada.conteudo, rel)})
+        except HTTPException as e:
+            await fila.put({"erro": e.detail, "status": e.status_code})
+        except Exception:
+            log.exception("falha ao montar o relatório")
+            await fila.put({"erro": "falha temporária, tente de novo em instantes", "status": 502})
+        finally:
+            await fila.put(None)
+
+    async def linhas():
+        tarefa = asyncio.create_task(rodar())
+        try:
+            while (item := await fila.get()) is not None:
+                yield json.dumps(item, ensure_ascii=False) + "\n"
+        finally:
+            tarefa.cancel()  # a pessoa fechou a página: não segue gastando busca e LLM
+
+    # X-Accel-Buffering: proxies (Render, nginx) não seguram as linhas até o fim.
+    return StreamingResponse(linhas(), media_type="application/x-ndjson",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 def _descontos_html(decisao: dict | None) -> str:
@@ -246,7 +296,8 @@ def _link_html(url: str) -> str:
 def _relatorio_html(entrada_txt: str, rel: RelatorioChecagem) -> str:
     """Bloco do relatório (o mesmo para /checar-web e para o JS da página, via /checar-html)."""
     from .agregador import (NOMES_ETAPAS, STATUS_ETAPA, data_publicacao_exibida, direcoes_por_url,
-                            linha_raciocinio, postura_legivel, rotulo_selo, texto_de_linha)
+                            linha_raciocinio, passos_para_pessoa, postura_legivel, rotulo_selo,
+                            texto_de_linha)
     from .confiabilidade import ROTULO
     esc = html.escape
     from .agregador import preparar_para_pessoa
@@ -298,7 +349,18 @@ def _relatorio_html(entrada_txt: str, rel: RelatorioChecagem) -> str:
     outras = (f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Outras fontes acessadas ({len(fora)})</h3>"
               f"<p class='text-sm text-slate-500 dark:text-slate-400'>Estas páginas foram lidas, mas não tratam do assunto; não entram na estimativa.</p>"
               f"{''.join(_cartao(f) for f in fora)}") if fora else ""
-    etapas = "".join(f"<li>{esc(t)}</li>" for t in rel.etapas_pessoa)
+    passos = passos_para_pessoa(rel)
+    if passos:  # passo a passo com os números do caso; sem decisão detalhada, a lista curta de etapas
+        etapas = "".join(
+            f"<li class='pl-1'><b class='text-slate-900 dark:text-white'>{esc(p['titulo'])}</b>"
+            f"<p class='mt-0.5'>{esc(p['texto'])}</p>"
+            + (f"<ul class='list-disc pl-5 mt-1 space-y-0.5'>{''.join(f'<li>{esc(i)}</li>' for i in p['itens'])}</ul>"
+               if p["itens"] else "")
+            + "</li>" for p in passos)
+        etapas = f"<ol class='list-decimal pl-5 mt-2 space-y-3 text-slate-700 dark:text-slate-300'>{etapas}</ol>"
+    else:
+        etapas = ("<ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>"
+                  + "".join(f"<li>{esc(t)}</li>" for t in rel.etapas_pessoa) + "</ul>")
     etapas_tecnicas = "".join(f"<li>{STATUS_ETAPA.get(e.status, '')} <b>{esc(NOMES_ETAPAS.get(e.nome, e.nome))}</b>: "
                               f"{esc(e.detalhe)}</li>" for e in rel.etapas)
     lims = "".join(f"<li>{esc(l)}</li>" for l in rel.limitacoes_pessoa[:5])
@@ -323,7 +385,7 @@ def _relatorio_html(entrada_txt: str, rel: RelatorioChecagem) -> str:
         f"{fontes or '<p class=\"text-sm text-slate-500 dark:text-slate-400 italic\">Não encontramos fontes que tratem do assunto. Na dúvida, não compartilhe.</p>'}"
         f"{outras}"
         f"<h3 class='text-base font-bold text-slate-900 dark:text-white mt-6 mb-2'>Para avaliar você mesmo</h3><ul class='list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1'>{guia}</ul>"
-        f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-petroleo-600 dark:text-petroleo-300'>Como chegamos aqui</summary><ul class='mt-2 space-y-1 text-slate-700 dark:text-slate-300'>{etapas}</ul>"
+        f"<details class='mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-sm'><summary class='font-bold cursor-pointer text-petroleo-600 dark:text-petroleo-300'>Como chegamos aqui</summary>{etapas}"
         f"<details class=\"tecnico mt-3 text-xs text-slate-500 dark:text-slate-400\"><summary class='cursor-pointer'>Detalhes técnicos</summary><ul class='mt-2 space-y-1'>{etapas_tecnicas}</ul>"
         f"{_descontos_html(rel.decisao)}</details></details>"
         f"{'<h3 class=' + chr(39) + 'text-base font-bold text-slate-900 dark:text-white mt-6 mb-2' + chr(39) + '>Limitações desta análise</h3><ul class=' + chr(39) + 'list-disc pl-5 text-sm text-slate-600 dark:text-slate-400 space-y-1' + chr(39) + '>' + lims + '</ul>' if lims else ''}"

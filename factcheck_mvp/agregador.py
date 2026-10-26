@@ -322,6 +322,193 @@ def resumo_para_pessoa(decisao: Any, reserva: str = "") -> str:
     return (base + " Isso não é um veredito: compare as fontes abaixo e decida por conta própria.").strip()
 
 
+def _plural(n: int, um: str, varios: str) -> str:
+    return f"{n} {um if n == 1 else varios}"
+
+
+def _num(x: float, sinal: bool = True) -> str:
+    """Número com vírgula decimal e sinal explícito (+1,50 / −0,60)."""
+    s = f"{abs(x):.2f}".replace(".", ",")
+    return (("+" if x >= 0 else "−") + s) if sinal else s
+
+
+_FAIXA = {"alta": "alta", "baixa": "baixa", "media": "média", "indeterminada": "indeterminada"}
+
+# Razão de uma trava ter limitado a pontuação de uma afirmação (decisao._agregar).
+_TRAVAS_SOMA = (
+    ("sem_fonte_confiavel", "nenhum veículo verificado, órgão público ou site muito acessado toma essa posição; "
+                            "redes sociais e sites pouco acessados sozinhos não definem o resultado"),
+    ("so_fontes_de_outro_periodo", "as fontes que tomam essa posição são de antes do período que o texto descreve"),
+    ("indice_similaridade_baixa", "a única checagem encontrada trata de uma alegação parecida, mas não igual"),
+)
+
+
+def _peso_explicado(v: Dict[str, Any], nivel: Optional[str], dec: Dict[str, Any]) -> str:
+    """Por que o voto pesou o que pesou, a partir do motivo do voto e da confiabilidade da fonte.
+    Sem a confiabilidade (relatório antigo), só diz o tipo do voto: não inventa uma redução."""
+    from . import confiabilidade as cf
+    motivo = str(v.get("motivo") or "")
+    if "agência" not in motivo and nivel not in cf.FATOR_POSTURA:
+        return "selo de checagem publicada" if motivo.startswith("selo") else "fonte"
+    if "agência" in motivo:
+        quem, base = "agência de checagem contestando", 1.5
+    elif motivo.startswith("selo"):
+        selo = ", ".join(v.get("vereditos") or []) or "da checagem"
+        quem, base = f"selo {selo} de checagem publicada", 1.5 * cf.FATOR_VEREDITO[nivel]
+    else:
+        quem, base = cf.ROTULO[nivel], cf.FATOR_POSTURA[nivel]
+    peso = abs(float(v.get("valor") or 0))
+    if peso >= base - 0.005:
+        return quem
+    urls = set(v.get("urls") or [])
+    if "data:" in motivo:
+        porque = "publicada fora do período que o texto descreve"
+    elif any(a.get("url") in urls for a in dec.get("posturas_atenuadas") or []):
+        porque = "uma agência de checagem já contestou essa afirmação"
+    else:
+        porque = "a página teve credibilidade baixa na avaliação automática"
+    return f"{quem}; reduzido de {_num(base, False)} porque {porque}"
+
+
+def _passos_da_soma(rel: Any, dec: Dict[str, Any], votos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Os passos "Peso de cada veículo" e "A soma": os mesmos números de decisao.decidir, só traduzidos."""
+    from . import confiabilidade as cf
+    nivel_url = {f.url: getattr(f, "confiabilidade", None) for f in getattr(rel, "fontes", None) or []}
+    tau = float((dec.get("parametros") or {}).get("tau") or 1.0986)
+    por_af = [a for a in dec.get("por_afirmacao") or [] if isinstance(a, dict)]
+    varias = sum(1 for a in por_af if a.get("n_votos")) > 1
+
+    itens = []
+    for v in votos:
+        nivel = v.get("nivel") or next((nivel_url[u] for u in v.get("urls") or [] if nivel_url.get(u)), None)
+        pos = "contesta" if float(v["valor"]) > 0 else "confirma"
+        af = f" (afirmação {int(v.get('afirmacao', 0)) + 1})" if varias else ""
+        itens.append(f"{v['cluster']}{af}: {pos}, {_num(float(v['valor']))} ({_peso_explicado(v, nivel, dec)})")
+    pesos = " · ".join(f"{cf.ROTULO[n]} {_num(cf.FATOR_POSTURA[n], False)}"
+                       for n in (cf.CURADA, cf.INSTITUCIONAL, cf.ALTO_TRAFEGO, cf.PLATAFORMA, cf.BAIXO_TRAFEGO))
+    passos = [{"titulo": "Peso de cada veículo",
+               "texto": ("Cada veículo que confirma ou contesta vale um voto; várias reportagens do mesmo veículo "
+                         "contam uma vez só. Contestar soma pontos (+) e confirmar tira pontos (−). O peso depende "
+                         f"de quem é a fonte: agência de checagem 1,50 · {pesos}."),
+               "itens": itens}]
+
+    contas = []
+    for i, a in enumerate(por_af):
+        vs = [float(v["valor"]) for v in votos if int(v.get("afirmacao", 0)) == i]
+        if not vs:
+            continue
+        soma, L_a = sum(vs), float(a.get("L") or 0)
+        conta = " ".join(_num(x) for x in vs) + f" = {_num(soma)}"
+        if varias:
+            conta = f"Afirmação {i + 1}: {conta}"
+        if abs(L_a - soma) > 0.005:
+            razoes = [r for chave, r in _TRAVAS_SOMA if (dec.get("travas") or {}).get(chave)]
+            conta += (f", limitada a {_num(L_a)} (fica na faixa média) porque "
+                      + ("; ".join(razoes) if razoes else "uma regra de segurança da decisão se aplicou"))
+        if a.get("fora_da_conjuncao"):
+            conta += " (não entra no total: só há fontes de outro período)"
+        contas.append(conta)
+    L = float(dec.get("log_odds") or 0)
+    if varias:
+        if L < 0:  # decisao._combinar_afirmacoes: sem parte contestada, vale a confirmação mais fraca
+            contas.append(f"Total do texto: {_num(L)}. Todas as partes foram confirmadas; vale a confirmação "
+                          "mais fraca entre elas.")
+        else:
+            contas.append(f"Total do texto: {_num(L)}. Basta uma parte contestada para o texto contar como "
+                          "contestado; partes confirmadas não compensam as contestadas.")
+    faixa = "alta" if L >= tau else "baixa" if L <= -tau else "media"
+    final = dec.get("nivel") or getattr(rel, "propensao", "")
+    if final == "indeterminada":
+        contas.append("Mesmo com essa pontuação, não foi possível estimar a propensão: "
+                      + str(dec.get("motivo") or "").rstrip(".") + ".")
+    elif final and final != faixa:
+        # Regra posterior à soma (ex.: o sintetizador viu contradição entre as fontes) mudou o nível.
+        porque = str(((dec.get("parametros") or {}).get("sintetizador") or {}).get("frase") or dec.get("motivo") or "")
+        contas.append(f"A pontuação cai na faixa {_FAIXA[faixa]}, mas o resultado foi ajustado para "
+                      f"{_FAIXA[final]}" + (f": {porque[:1].lower() + porque[1:].rstrip('.')}." if porque else "."))
+    t = _num(tau, False)
+    passos.append({"titulo": "A soma",
+                   "texto": (f"Pontuação final: {_num(L)}. Faixas: +{t} ou mais = propensão alta; −{t} ou menos "
+                             f"= propensão baixa; entre as duas = propensão média."),
+                   "itens": contas})
+    return passos
+
+
+def passos_para_pessoa(rel: Any) -> List[Dict[str, Any]]:
+    """"Como chegamos aqui" com os números do caso: o que foi checado, quanto se leu, o que cada fonte
+    disse, quantos veículos independentes contaram e por que o resultado saiu assim. Só dados já na
+    decisão (nada novo é calculado aqui). Cada passo: {"titulo", "texto", "itens"}. Lista vazia =
+    relatório sem decisão detalhada (a página usa a lista curta de `etapas_pessoa`)."""
+    dec = getattr(rel, "decisao", None)
+    if not isinstance(dec, dict) or not isinstance(dec.get("contagem"), dict):
+        return []
+    c = dec["contagem"]
+    status = {e.nome: e.status for e in (getattr(rel, "etapas", None) or [])}
+    passos: List[Dict[str, Any]] = []
+
+    afs = [str(a.get("afirmacao") or "").strip() for a in dec.get("por_afirmacao") or [] if isinstance(a, dict)]
+    afs = [a for a in afs if a]
+    if afs:
+        passos.append({"titulo": "O que checamos",
+                       "texto": ("Separamos do texto a afirmação que dá para verificar:" if len(afs) == 1 else
+                                 f"Separamos do texto {len(afs)} afirmações que dá para verificar:"),
+                       "itens": [f"“{a}”" for a in afs]})
+
+    agencias = [f for f in getattr(rel, "fontes", None) or [] if getattr(f, "tipo_fonte", "") == "veredito"]
+    busca_falhou = any(str(l).startswith("SerpAPI falhou") for l in getattr(rel, "limitacoes", None) or [])
+    if getattr(rel, "onde_encontrado", "web") == "base" and agencias:
+        passos.append({"titulo": "Checagens já publicadas",
+                       "texto": (f"Encontramos {_plural(len(agencias), 'checagem', 'checagens')} de agências sobre "
+                                 "o assunto. Por isso não buscamos outras notícias na web."), "itens": []})
+    elif busca_falhou or status.get("descoberta") == "falha":
+        passos.append({"titulo": "Busca na web", "texto": "A busca na web falhou nesta consulta: não foi "
+                                                          "possível procurar notícias sobre o assunto.", "itens": []})
+    elif status.get("descoberta") in ("ok", "parcial"):
+        consultadas = int(c.get("consultadas") or 0)
+        texto = (f"Buscamos notícias sobre o assunto e chegamos a {_plural(consultadas, 'página', 'páginas')}."
+                 if consultadas else "Buscamos notícias sobre o assunto, mas não encontramos nenhuma página.")
+        passos.append({"titulo": "Busca na web", "texto": texto, "itens": []})
+
+    consultadas, lidas = int(c.get("consultadas") or 0), int(c.get("lidas") or 0)
+    if consultadas:
+        if lidas >= consultadas:
+            texto = f"Lemos o texto completo {'da única página' if consultadas == 1 else f'das {consultadas} páginas'}."
+        else:
+            texto = (f"Lemos o texto completo de {lidas} das {consultadas} páginas. "
+                     "Das outras, só tivemos acesso ao título.")
+        passos.append({"titulo": "Leitura das páginas", "texto": texto, "itens": []})
+
+    julgadas = int(c.get("julgadas") or 0)
+    if julgadas:
+        itens = []
+        for chave, um, varios in (("refuta", "contesta o que o texto afirma", "contestam o que o texto afirma"),
+                                  ("sustenta", "confirma o que o texto afirma", "confirmam o que o texto afirma"),
+                                  ("relata", "só relata o assunto, sem confirmar nem contestar",
+                                   "só relatam o assunto, sem confirmar nem contestar"),
+                                  ("fora_do_tema", "trata de outro assunto e não conta",
+                                   "tratam de outro assunto e não contam")):
+            n = int(c.get(chave) or 0)
+            if n:
+                itens.append(f"{n} {um if n == 1 else varios}")
+        sem = int(c.get("sem_juiz") or 0)
+        if sem:
+            itens.append(f"{_plural(sem, 'página não pôde ser analisada', 'páginas não puderam ser analisadas')}")
+        passos.append({"titulo": "O que cada fonte diz",
+                       "texto": f"Comparamos cada página com a afirmação ({_plural(julgadas, 'página', 'páginas')}):",
+                       "itens": itens})
+
+    votos = [v for v in dec.get("votos") or [] if isinstance(v, dict) and v.get("cluster") and v.get("valor")]
+    if votos:
+        passos.extend(_passos_da_soma(rel, dec, votos))
+
+    motivo = str(dec.get("motivo") or "").strip().rstrip(".")
+    if motivo:
+        passos.append({"titulo": "Resultado",
+                       "texto": f"{getattr(rel, 'header', '') or titulo_propensao(rel.propensao)}: "
+                                f"{motivo[:1].lower() + motivo[1:]}.", "itens": []})
+    return passos
+
+
 _POSTURA_SEM_VOTO = {
     "RELATA_SEM_ENDOSSO": "relata o assunto sem tomar posição",
     "NAO_TRATA": "não trata do assunto",

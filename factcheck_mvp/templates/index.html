@@ -597,11 +597,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const relatorioArea = document.getElementById('relatorio-display-area');
 
   let timerInterval = null;
-  let stageTimeout = null;
 
   function setEtapa(texto, pct) {
     if (loadingStageText) loadingStageText.textContent = texto;
     if (loadingProgressBar) loadingProgressBar.style.width = pct + '%';
+  }
+
+  function mostrarErro(msg) {
+    if (errorBannerText) errorBannerText.textContent = msg;
+    if (errorBanner) errorBanner.classList.remove('hidden');
+  }
+
+  // /checar-stream: uma linha JSON por evento ({etapa} enquanto roda; {html} ou {erro} no fim).
+  async function lerEventos(res, aoEvento) {
+    const leitor = res.body.getReader();
+    const dec = new TextDecoder();
+    let resto = '';
+    for (;;) {
+      const { value, done } = await leitor.read();
+      if (done) break;
+      resto += dec.decode(value, { stream: true });
+      const linhas = resto.split('\n');
+      resto = linhas.pop();
+      for (const l of linhas) if (l.trim()) aoEvento(JSON.parse(l));
+    }
+    if (resto.trim()) aoEvento(JSON.parse(resto));
   }
 
   form.addEventListener('submit', async (e) => {
@@ -625,69 +645,61 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loadingTimer) loadingTimer.textContent = segundos + 's';
     }, 1000);
 
-    setEtapa('1/5 Extraindo afirmações factuais atômicas...', 20);
-    stageTimeout = setTimeout(() => {
-      setEtapa('2/5 Consultando índice de agências e desmentidos...', 40);
-      stageTimeout = setTimeout(() => {
-        setEtapa('3/5 Buscando na web e checando matérias recentes...', 65);
-        stageTimeout = setTimeout(() => {
-          setEtapa('4/5 Julgando evidências e aferindo corroboração...', 85);
-          stageTimeout = setTimeout(() => {
-            setEtapa('5/5 Consolidando cálculo de propensão e laudo...', 95);
-          }, 3000);
-        }, 3000);
-      }, 2500);
-    }, 2000);
+    // A etapa vem do servidor (os mesmos avisos do bot). O número de etapas varia com o texto,
+    // então a barra avança uma fração do que falta a cada aviso, sem chegar a 100% antes do fim.
+    let avisos = 0;
+    setEtapa('Começando a checagem…', 5);
 
+    let html = null;
+    let erro = null;
     try {
       const tipo = classificarTipo(texto);
-      const res = await fetch('/checar-html', {
+      const res = await fetch('/checar-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tipo: tipo, conteudo: texto })
       });
 
-      clearInterval(timerInterval);
-      clearTimeout(stageTimeout);
-
       if (!res.ok) {
-        let msg = 'Erro ao processar análise.';
+        erro = 'Erro ao processar análise.';
         try {
           const errData = await res.json();
-          if (errData && errData.detail) msg = errData.detail;
-        } catch (_) {
-          const txt = await res.text();
-          if (txt) msg = txt;
-        }
-        if (errorBannerText) errorBannerText.textContent = msg;
-        if (errorBanner) errorBanner.classList.remove('hidden');
-        if (loadingBanner) loadingBanner.classList.add('hidden');
-        if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Checar';
-        return;
+          if (errData && errData.detail) erro = errData.detail;
+        } catch (_) {}
+      } else {
+        await lerEventos(res, (ev) => {
+          if (ev.etapa) {
+            avisos++;
+            setEtapa(ev.etapa, Math.round(95 - 90 * Math.pow(0.75, avisos)));
+          } else if (ev.html !== undefined) {
+            html = ev.html;
+          } else if (ev.erro) {
+            erro = ev.erro;
+          }
+        });
+        if (html === null && !erro) erro = 'A conexão caiu antes do fim da checagem. Tente novamente.';
       }
-
-      // O servidor devolve o relatório já montado (mesmo desenho do /checar-web).
-      if (relatorioArea) relatorioArea.innerHTML = await res.text();
-
-      if (loadingBanner) loadingBanner.classList.add('hidden');
-      if (btn) btn.disabled = false;
-      if (btnText) btnText.textContent = 'Checar';
-
-      // Scroll suave até o relatório
-      const relSec = document.getElementById('relatorio');
-      if (relSec) {
-        relSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-
     } catch (err) {
-      clearInterval(timerInterval);
-      clearTimeout(stageTimeout);
-      if (errorBannerText) errorBannerText.textContent = 'Falha de conexão com a API. Tente novamente.';
-      if (errorBanner) errorBanner.classList.remove('hidden');
-      if (loadingBanner) loadingBanner.classList.add('hidden');
-      if (btn) btn.disabled = false;
-      if (btnText) btnText.textContent = 'Checar';
+      erro = 'Falha de conexão com a API. Tente novamente.';
+    }
+
+    clearInterval(timerInterval);
+    if (loadingBanner) loadingBanner.classList.add('hidden');
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Checar';
+
+    if (erro) {
+      mostrarErro(erro);
+      return;
+    }
+
+    // O servidor devolve o relatório já montado (mesmo desenho do /checar-web).
+    if (relatorioArea) relatorioArea.innerHTML = html;
+
+    // Scroll suave até o relatório
+    const relSec = document.getElementById('relatorio');
+    if (relSec) {
+      relSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
 });

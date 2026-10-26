@@ -199,6 +199,7 @@ class Voto:
     vereditos: List[str]
     motivo: str
     confiavel: bool = True     # algum item ATUAL (não descontado por data) do cluster é curado, institucional ou muito acessado
+    nivel: Optional[str] = None  # confiabilidade do item que deu o peso (só informativo: a página explica o peso)
 
 
 @dataclass
@@ -619,7 +620,8 @@ def _agregar(clusters: Dict[str, List[tuple]], a_idx: int, dec: Decisao, registr
             continue
         sinal = 1.0 if soma > 0 else -1.0
         peso = max(abs(v) for v, _, _ in contribs if v * sinal > 0)
-        voto = Voto(afirmacao=a_idx, cluster=cid, direcao=sinal, peso=round(peso, 4),
+        dono = max(((v, it) for v, _, it in contribs if v * sinal > 0), key=lambda x: abs(x[0]))[1]
+        voto = Voto(nivel=dono.nivel_confiabilidade(),afirmacao=a_idx, cluster=cid, direcao=sinal, peso=round(peso, 4),
                     valor=round(sinal * peso, 4),
                     urls=sorted({it.url for _, _, it in contribs}),
                     classes=sorted({it.classe for _, _, it in contribs if it.classe}),

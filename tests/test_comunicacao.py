@@ -551,3 +551,51 @@ def test_checar_html_devolve_o_mesmo_bloco_da_pagina_com_raciocinio(monkeypatch)
     assert r.status_code == 200 and r.headers["content-type"].startswith("text/html")
     assert "🧠" in r.text and "nega que o governo vá confiscar" in r.text
     assert "Outras fontes acessadas (1)" in r.text and "<html" not in r.text  # só o bloco, sem a página
+
+
+def test_checar_stream_manda_etapas_reais_e_o_mesmo_bloco(monkeypatch):
+    # A página mostra os avisos do pipeline (os do bot) e insere o mesmo bloco do /checar-html.
+    import json
+    from fastapi.testclient import TestClient
+    from factcheck_mvp import api
+    rel = _rel()
+
+    class _Pipe:
+        async def executar(self, entrada, progresso=None, **_):
+            await progresso("Recebi. Extraindo as afirmações verificáveis…")
+            await progresso("Consultando a web…")
+            return rel
+
+    monkeypatch.setattr(api, "pipeline", lambda: _Pipe())
+    monkeypatch.setattr(api, "_rate_ok", lambda request: True)
+    r = TestClient(api.app).post("/checar-stream", json={"tipo": "texto", "conteudo": "Governo vai confiscar a poupança"})
+    assert r.status_code == 200 and r.headers["content-type"].startswith("application/x-ndjson")
+    eventos = [json.loads(l) for l in r.text.splitlines() if l.strip()]
+    assert [e["etapa"] for e in eventos[:-1]] == ["Recebi. Extraindo as afirmações verificáveis…",
+                                                   "Consultando a web…"]
+    assert eventos[-1]["html"] == api._relatorio_html("Governo vai confiscar a poupança", rel)
+
+
+def test_checar_stream_erro_vira_evento(monkeypatch):
+    import json
+    from fastapi.testclient import TestClient
+    from factcheck_mvp import api
+
+    class _Pipe:
+        async def executar(self, entrada, **_):
+            raise RuntimeError("detalhe interno que não pode vazar")
+
+    monkeypatch.setattr(api, "pipeline", lambda: _Pipe())
+    monkeypatch.setattr(api, "_rate_ok", lambda request: True)
+    r = TestClient(api.app).post("/checar-stream", json={"tipo": "texto", "conteudo": "Governo vai confiscar a poupança"})
+    eventos = [json.loads(l) for l in r.text.splitlines() if l.strip()]
+    assert eventos == [{"erro": "falha temporária, tente de novo em instantes", "status": 502}]
+    assert "detalhe interno" not in r.text
+
+
+def test_checar_stream_rate_limit_e_http_429(monkeypatch):
+    from fastapi.testclient import TestClient
+    from factcheck_mvp import api
+    monkeypatch.setattr(api, "_rate_ok", lambda request: False)
+    r = TestClient(api.app).post("/checar-stream", json={"tipo": "texto", "conteudo": "Governo vai confiscar a poupança"})
+    assert r.status_code == 429
