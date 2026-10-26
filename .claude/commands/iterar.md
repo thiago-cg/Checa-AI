@@ -7,7 +7,8 @@ Execute **$ARGUMENTS** rodada(s) (padrão 1) do loop de melhoria descrito no `CL
 
 1. **Estado atual.** `python3 -m pytest tests -q` (tem que passar) e
    `python3 -m eval.run --nome iter<N>-antes` (modo replay, split dev). Anote acerto, erro_grave,
-   taxa_indeterminada, `descoberta` (rodou/pulada) e `http_miss_total`. Se `http_miss_total > 0`, os
+   taxa_indeterminada, `descoberta` (rodou/pulada), `http_miss_total` e `busca_bloqueada` (tem que estar
+   ausente). Se `http_miss_total > 0`, os
    casos com miss não estão medindo o sistema: grave com `--modo record` antes de concluir.
 2. **Diagnóstico.** Leia `eval/resultados/<último>/relatorio.md`. Para 2–4 casos errados (erros graves
    primeiro), rode `python3 -m factcheck_mvp.cli trace <run_id>` e, se preciso,
@@ -27,11 +28,13 @@ Execute **$ARGUMENTS** rodada(s) (padrão 1) do loop de melhoria descrito no `CL
    - Evidência (run_ids / eventos): …
    - Mudança: arquivos e resumo
    - Métricas dev (antes → depois): acerto a→b, erro_grave a→b, indeterminada a→b, fallbacks …
-   - Modo: replay|record · buscas SerpAPI live: n
+   - Modo: replay|record · buscas live: n (`busca_live`, por provedor em `busca_live_por_provedor`)
    - Decisão: mantida|revertida · baseline atualizado? sim|não
    ```
 
 Ao terminar todas as rodadas: rode `python3 -m eval.run --split holdout --nome holdout-<data>` e reporte
 dev × holdout. Regras: não editar casos/baseline para passar; não ajustar pesos para um caso; todo
 fallback novo emite `telemetria.fallback`; não carregar outro modelo no Unsloth Studio; não commitar sem
-pedido; se aparecer fallback de cota da SerpAPI, pare e peça nova chave ao usuário.
+pedido; se aparecer fallback de cota da SerpAPI (provedor serpapi), pare e peça nova chave ao usuário. Se
+`busca_bloqueada` aparecer, ou os fallbacks `onde=ddgs` com `ratelimit` persistirem em todos os backends, pare e
+avise o usuário (limite de taxa ou bloqueio de IP do ddgs): não troque de provedor nem use proxy por conta própria.

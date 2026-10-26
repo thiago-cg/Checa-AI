@@ -389,3 +389,61 @@ def test_origem_do_trace_reconhece_selo_que_entrou_em_conflito():
     orig = decisao.decidir(_ev_original_i4("VERDADEIRO", "indice"))
     assert orig.conflitos and not any("VERDADEIRO" in v.motivo for v in orig.votos)  # o voto some no conflito
     assert origem_do_trace(_trace_como_o_pipeline_emite(orig, "VERDADEIRO"), "https://lupa.test/x", "VERDADEIRO") == "indice"
+
+
+def test_busca_ddgs_conta_e_bloqueio_por_provedor():
+    from eval.run import _buscas_live_por_provedor, _busca_bloqueada_n, _descoberta_status, _provedor_da_url
+    assert _provedor_da_url("ddgs://text?q=x") == "ddgs"
+    assert _provedor_da_url("https://serpapi.com/search.json?q=x") == "serpapi"
+    assert _provedor_da_url("https://exemplo.test/") is None
+    ev_live = [
+        {"tipo": "http", "dados": {"url": "ddgs://text?q=a", "status": 200, "cache": "live"}},
+        {"tipo": "http", "dados": {"url": "ddgs://news?q=b", "status": 200, "cache": "cassete"}},
+        {"tipo": "http", "dados": {"url": "https://serpapi.com/search.json?q=c", "status": 200, "cache": "live"}},
+    ]
+    assert _buscas_live_por_provedor(ev_live) == {"serpapi": 1, "ddgs": 1}  # cassete não conta
+    rate = {"tipo": "fallback", "dados": {"onde": "ddgs", "motivo": "ratelimit em todos os backends: x"}}
+    # 1 backend limitado com o próximo respondendo é desvio da cadeia, não busca bloqueada
+    um_backend = {"tipo": "fallback", "dados": {"onde": "ddgs", "motivo": "bing: ratelimit: próximo backend"}}
+    vazio = {"tipo": "fallback", "dados": {"onde": "ddgs", "motivo": "vazio"}}
+    assert _busca_bloqueada_n([rate, um_backend, vazio]) == 1
+    etapa = {"tipo": "etapa", "dados": {"nome": "descoberta", "status": "ok"}}
+    ok = {"tipo": "http", "dados": {"url": "ddgs://text?q=a", "status": 200}}
+    assert _descoberta_status([etapa, ok]) == "rodou"
+    assert _descoberta_status([etapa, rate]) == "falhou"
+    assert _descoberta_status([etapa, ok, rate]) == "parcial"
+
+
+def test_ddgs_bloqueada_aparece_no_resumo_e_no_relatorio():
+    from eval.run import relatorio_md, resumo_texto
+    m = {"n": 1, "descoberta": {}, "serpapi": {"live_no_eval": 0, "usadas_total": 0, "restantes": None,
+                                               "orcamento": None}, "busca_live_por_provedor": {"serpapi": 0, "ddgs": 2},
+         "busca_bloqueada": True, "busca_bloqueada_n": 3, "por_rotulo": {}, "por_tag": {}}
+    meta = {"nome": "t", "timestamp": "x", "git": "g", "modo": "replay", "split": "dev", "env": {},
+            "arquivos_casos": [], "filtro_tag": None, "ids": None}
+    assert "BUSCA BLOQUEADA" in resumo_texto(meta, m, None)
+    assert "BUSCA BLOQUEADA" in relatorio_md(meta, m, [], None)
+
+
+def test_desvio_da_cadeia_ddgs_nao_marca_descoberta_parcial():
+    etapa = {"tipo": "etapa", "dados": {"nome": "descoberta", "status": "ok"}}
+    ok = {"tipo": "http", "dados": {"url": "ddgs://text?q=a&backend=bing", "status": 200}}
+    desvios = [{"tipo": "fallback", "dados": {"onde": o, "motivo": "x"}}
+               for o in ("ddgs.cadeia", "ddgs.top", "ddgs.scholar", "ddgs.reserva")]
+    assert ev._descoberta_status([etapa, ok] + desvios) == "rodou"
+    perdida = {"tipo": "fallback", "dados": {"onde": "ddgs", "motivo": "DDGSException: x"}}
+    assert ev._descoberta_status([etapa, ok, perdida]) == "parcial"
+
+
+def test_estimativa_por_caso_conta_a_cadeia_do_ddgs(monkeypatch):
+    monkeypatch.setattr(config, "SERP_ESTRATEGIA", "agente")
+    monkeypatch.setattr(config, "AGENTE_MAX_BUSCAS", 9)
+    monkeypatch.setattr(config, "BUSCA_PROVEDOR", "serpapi")
+    assert ev._estimativa_buscas_por_caso() == 9
+    monkeypatch.setattr(config, "BUSCA_PROVEDOR", "ddgs")
+    monkeypatch.setattr(config, "DDGS_TEXT_BACKENDS", "bing,duckduckgo,brave,google")
+    monkeypatch.setattr(config, "DDGS_NEWS_BACKENDS", "bing,duckduckgo,yahoo")
+    monkeypatch.setattr(config, "DDGS_TOP_STORIES", True)
+    assert ev._estimativa_buscas_por_caso() == 9 * 7
+    monkeypatch.setattr(config, "DDGS_TOP_STORIES", False)
+    assert ev._estimativa_buscas_por_caso() == 9 * 4

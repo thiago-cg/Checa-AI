@@ -12,6 +12,8 @@ Modo (`IO_MODO` no ambiente, padrão `live`; override com `definir_modo` ou
 SerpAPI: toda busca live é contada em eval/serpapi_uso.json; teto opcional
 (SERPAPI_ORCAMENTO_RESTANTE / definir_teto_serpapi) -> `OrcamentoSerpAPIEsgotado`;
 cota da conta esgotada (HTTP 401/403/429) -> `CotaSerpAPIEsgotada` (troque a chave).
+ddgs: `busca_ddgs` grava a resposta como cassete `ddgs://<função>?…` (JSON com `criado_em` e
+`resultados`) e conta no mesmo orçamento, por provedor (`por_provedor` no arquivo de uso).
 
 Cassetes: `<CASSETES_DIR>/<sha256>.json` (padrão `eval/cassettes/`). Chave =
 sha256(método + URL canônica SEM segredos (api_key/key/token… removidos, query
@@ -20,6 +22,7 @@ temperatura e max_tokens: mudar o prompt = cassete novo (miss em replay).
 
 API (todas emitem evento `http` de telemetria; `llm_post` também `llm`):
   http_get(url, params=None, **kw) -> Resposta          (sync, ~curl_cffi get)
+  busca_ddgs(funcao, params, ao_vivo) -> dict           (busca do ddgs como cassete ddgs://…)
   http_post(url, json=None, **kw) -> Resposta           (sync, ~curl_cffi post)
   await ahttp_get(url, max_bytes=None, headers=None, timeout=10.0)
         -> Resposta   (async, streaming com teto de bytes, SEM seguir redirect:
@@ -352,6 +355,10 @@ class CotaSerpAPIEsgotada(HTTPError):
     """A SerpAPI recusou a chave (sem buscas na conta / chave inválida): troque SERPAPI_KEY no .env."""
 
 
+class BuscaLimitada(HTTPError):
+    """Rate limit do ddgs numa chamada live (um backend). Não é gravado em cassete, como 429/5xx."""
+
+
 _lock_uso = threading.Lock()
 _teto_processo: Optional[int] = None
 _usadas_processo = 0
@@ -372,8 +379,9 @@ def resetar_cota() -> None:
 
 
 def arq_uso_serpapi() -> Optional[Path]:
-    """Arquivo do contador. Sob pytest só com SERPAPI_USO_ARQ explícito (não suja o real)."""
-    d = os.environ.get("SERPAPI_USO_ARQ")
+    """Arquivo do contador (BUSCA_USO_ARQ, ou o nome antigo SERPAPI_USO_ARQ). Sob pytest só com
+    a variável explícita (não suja o real)."""
+    d = os.environ.get("BUSCA_USO_ARQ") or os.environ.get("SERPAPI_USO_ARQ")
     if d:
         return Path(d).expanduser().resolve()
     if "PYTEST_CURRENT_TEST" in os.environ:
@@ -397,17 +405,25 @@ def _ler_uso(arq: Path) -> Dict[str, Any]:
             return d
     except (OSError, ValueError):
         pass
-    return {"total_live": 0, "por_dia": {}, "por_run": {}, "chamadas": []}
+    return {"total_live": 0, "por_dia": {}, "por_run": {}, "por_provedor": {}, "chamadas": []}
+
+
+def _usadas_serpapi(uso: Dict[str, Any]) -> int:
+    """Buscas SerpAPI do arquivo: o total menos as do ddgs (arquivo antigo, sem `por_provedor`, era só SerpAPI).
+    O orçamento (SERPAPI_ORCAMENTO_RESTANTE) protege a cota paga: busca grátis do ddgs não entra nele."""
+    return max(0, int(uso.get("total_live", 0)) - int((uso.get("por_provedor") or {}).get("ddgs", 0)))
 
 
 def uso_serpapi() -> Dict[str, Any]:
-    """{usadas, orcamento, restantes, usadas_processo, teto_processo, arquivo}."""
+    """{usadas (só SerpAPI), orcamento, restantes, usadas_processo (todas), teto_processo, arquivo, por_provedor}."""
     arq = arq_uso_serpapi()
-    usadas = int(_ler_uso(arq).get("total_live", 0)) if arq else 0
+    lido = _ler_uso(arq) if arq else {}
+    usadas = _usadas_serpapi(lido)
     orc = orcamento_serpapi()
     return {"usadas": usadas, "orcamento": orc, "restantes": (max(0, orc - usadas) if orc is not None else None),
             "usadas_processo": _usadas_processo, "teto_processo": _teto_processo,
-            "arquivo": str(arq) if arq else None}
+            "arquivo": str(arq) if arq else None,
+            "por_provedor": dict(lido.get("por_provedor") or {})}
 
 
 def definir_teto_serpapi(n: Optional[int]) -> None:
@@ -423,6 +439,23 @@ def _eh_serpapi(url: str) -> bool:
     except Exception:
         return False
     return h == "serpapi.com" or h.endswith(".serpapi.com")
+
+
+def _eh_ddgs(url: str) -> bool:
+    """Pseudo-URL de busca do ddgs (`ddgs://<função>?…`, ver `busca_ddgs`)."""
+    try:
+        return urlsplit(url).scheme.lower() == "ddgs"
+    except Exception:
+        return False
+
+
+def _eh_busca_live(url: str) -> bool:
+    """Chamada que gasta busca de provedor (SerpAPI ou ddgs): entra no orçamento e no contador."""
+    return _eh_serpapi(url) or _eh_ddgs(url)
+
+
+def _provedor_de(url: str) -> str:
+    return "ddgs" if _eh_ddgs(url) else "serpapi"
 
 
 def _eh_llm(url: str) -> bool:
@@ -443,15 +476,16 @@ def _modo_efetivo(url: str) -> str:
     return m
 
 
-def _reservar_serpapi(url: str) -> None:
-    """Conta 1 busca live ANTES de chamar (conservador: falha de rede também conta)."""
+def _reservar_busca(url: str) -> None:
+    """Conta 1 busca live (SerpAPI ou ddgs) ANTES de chamar (conservador: falha de rede também conta)."""
     global _usadas_processo
     arq = arq_uso_serpapi()
+    prov = _provedor_de(url)
     with _lock_uso:
         if _teto_processo is not None and _usadas_processo >= _teto_processo:
-            telemetria.fallback("serpapi", "orcamento", escopo="processo", teto=_teto_processo)
+            telemetria.fallback(prov, "orcamento", escopo="processo", teto=_teto_processo)
             raise OrcamentoSerpAPIEsgotado(
-                f"orcamento SerpAPI do processo esgotado ({_usadas_processo}/{_teto_processo})")
+                f"orcamento de buscas do processo esgotado ({_usadas_processo}/{_teto_processo})")
         if arq is not None:
             arq.parent.mkdir(parents=True, exist_ok=True)
             with open(str(arq) + ".lock", "w") as lk:
@@ -462,20 +496,23 @@ def _reservar_serpapi(url: str) -> None:
                     pass
                 uso = _ler_uso(arq)
                 orc = orcamento_serpapi()
-                if orc is not None and int(uso.get("total_live", 0)) >= orc:
-                    telemetria.fallback("serpapi", "orcamento", escopo="arquivo",
-                                        usadas=uso.get("total_live"), orcamento=orc)
+                usadas_serp = _usadas_serpapi(uso)
+                if prov == "serpapi" and orc is not None and usadas_serp >= orc:
+                    telemetria.fallback(prov, "orcamento", escopo="arquivo", usadas=usadas_serp, orcamento=orc)
                     raise OrcamentoSerpAPIEsgotado(
-                        f"orcamento SerpAPI esgotado ({uso.get('total_live')}/{orc}; {arq.name})")
+                        f"orcamento SerpAPI esgotado ({usadas_serp}/{orc}; {arq.name})")
                 dia = time.strftime("%Y-%m-%d")
                 rid = telemetria.run_atual() or "sem-run"
-                q = dict(parse_qsl(urlsplit(url).query)).get("q", "")
+                consulta = dict(parse_qsl(urlsplit(url).query))
+                # ddgs: o "motor" é a função (text|news), que vai no host da pseudo-URL
+                motor = consulta.get("engine") or (urlsplit(url).netloc if prov == "ddgs" else None)
                 uso["total_live"] = int(uso.get("total_live", 0)) + 1
+                uso.setdefault("por_provedor", {})[prov] = uso.get("por_provedor", {}).get(prov, 0) + 1
                 uso.setdefault("por_dia", {})[dia] = uso.get("por_dia", {}).get(dia, 0) + 1
                 uso.setdefault("por_run", {})[rid] = uso.get("por_run", {}).get(rid, 0) + 1
                 uso.setdefault("chamadas", []).append(
-                    {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "run_id": rid,
-                     "engine": dict(parse_qsl(urlsplit(url).query)).get("engine"), "q": q[:120]})
+                    {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "run_id": rid, "provedor": prov,
+                     "engine": motor, "q": consulta.get("q", "")[:120]})
                 tmp = arq.with_suffix(f".{os.getpid()}.tmp")
                 # Pasta sincronizada (OneDrive) pode negar o os.replace por instantes (PermissionError): tenta de
                 # novo e, se não der, a contagem local é perdida mas a BUSCA segue (auditoria de 13/10).
@@ -486,10 +523,13 @@ def _reservar_serpapi(url: str) -> None:
                         break
                     except OSError as e:
                         if tentativa == 3:
-                            telemetria.fallback("serpapi.contador", f"{type(e).__name__}: {e}"[:200])
+                            telemetria.fallback(f"{prov}.contador", f"{type(e).__name__}: {e}"[:200])
                         else:
                             time.sleep(0.15 * (tentativa + 1))
         _usadas_processo += 1
+
+
+_reservar_serpapi = _reservar_busca  # nome antigo (compat)
 
 
 def _checar_cota_serpapi(metodo: str, url: str, resp: Resposta, lat: float) -> None:
@@ -561,8 +601,8 @@ def _executar(metodo: str, url_chave: str, corpo_chave: Any, ao_vivo: Callable[[
         return resp
     t0 = time.perf_counter()
     try:
-        if _eh_serpapi(url_chave):
-            _reservar_serpapi(url_chave)
+        if _eh_busca_live(url_chave):
+            _reservar_busca(url_chave)
         resp = ao_vivo()
     except Exception as e:
         _evento_http(metodo, url_chave, None, (time.perf_counter() - t0) * 1000, "live",
@@ -586,6 +626,23 @@ def http_get(url: str, params: Optional[Dict[str, Any]] = None, **kw: Any) -> Re
             args["params"] = params
         return _de_resposta(curl_cffi.requests.get(url, **args), _url_com_params(url, params))
     return _executar("GET", _url_com_params(url, params), None, _vivo)
+
+
+def busca_ddgs(funcao: str, params: Dict[str, Any], ao_vivo: Callable[[], Dict[str, Any]]) -> Dict[str, Any]:
+    """Busca do ddgs com cassete. Chave = `ddgs://<funcao>?<params>` (um backend por chave).
+
+    `ao_vivo()` devolve `{"criado_em": <ISO UTC da busca>, "resultados": [...]}`; o JSON gravado é esse
+    mesmo dicionário, então o replay reproduz a âncora de data. Exceções de `ao_vivo` (rate limit,
+    timeout) não são gravadas. Parâmetros None/vazios saem da chave.
+    """
+    pares = sorted((str(k), str(v)) for k, v in params.items() if v is not None and str(v) != "")
+    url = f"ddgs://{funcao}?{urlencode(pares)}"
+
+    def _vivo() -> Resposta:
+        dados = ao_vivo()
+        corpo = _json.dumps(dados, ensure_ascii=False).encode("utf-8")
+        return Resposta(200, {"content-type": "application/json"}, corpo, url)
+    return _executar("GET", url, None, _vivo).json()
 
 
 _limite_lock = threading.Lock()
@@ -658,8 +715,8 @@ async def ahttp_get(url: str, max_bytes: Optional[int] = None, headers: Optional
         return resp
     t0 = time.perf_counter()
     try:
-        if _eh_serpapi(url):
-            _reservar_serpapi(url)
+        if _eh_busca_live(url):
+            _reservar_busca(url)
         args = _args_curl(kw)
         async with curl_cffi.requests.AsyncSession(timeout=timeout,
                                                   allow_redirects=follow_redirects,

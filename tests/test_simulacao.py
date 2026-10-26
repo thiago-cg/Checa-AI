@@ -1,3 +1,4 @@
+import json
 """Simulação de usuário: só as partes puras (sem rede, sem API). O script em si não roda aqui."""
 from eval import simulacao as sim
 
@@ -149,3 +150,16 @@ def test_payload_do_caso_leva_os_campos_de_avaliacao():
     reg = sim.executar_caso(f, lambda payload: (_ for _ in ()).throw(RuntimeError("sem rede")),
                             excluir_fonte=True, repeticao=1)
     assert reg["repeticao"] == 1 and reg["fonte_excluida"] and reg["erro"]
+
+
+def test_buscas_web_do_run_conta_serpapi_e_ddgs(tmp_path):
+    linhas = [
+        {"tipo": "http", "dados": {"url": "ddgs://text?q=a", "cache": "live"}},
+        {"tipo": "http", "dados": {"url": "https://serpapi.com/search.json?q=b", "cache": "live"}},
+        {"tipo": "http", "dados": {"url": "ddgs://text?q=c", "cache": "cassete"}},
+        {"tipo": "http", "dados": {"url": "https://exemplo.test/x", "cache": "live"}},
+    ]
+    (tmp_path / "trace.jsonl").write_text("\n".join(json.dumps(x) for x in linhas), encoding="utf-8")
+    assert sim.buscas_web_do_run(tmp_path) == 2
+    assert sim.buscas_serpapi_do_run(tmp_path) == 2  # nome antigo
+    assert sim.buscas_web_do_run(None) is None

@@ -8,6 +8,7 @@ python3 -m eval.run --filtro-tag negacao,caixa       # subconjunto por tag
 python3 -m eval.run --ids cafe_cura_cancer --modo replay
 python3 -m eval.run --env INDICE_CHECAGENS=1 --nome indice   # métrica secundária: atalho do índice
 python3 -m eval.run --gate                           # exit 1 se piorar vs baseline
+python3 -m eval.run --modo record --env BUSCA_PROVEDOR=ddgs --nome ddgs-dev   # outro provedor de busca: cassetes novos
 ```
 
 ## Casos (`eval/casos*.jsonl`, 1 JSON por linha; `#` = comentário)
@@ -67,14 +68,17 @@ no mesmo formato. Todos os `eval/casos*.jsonl` são lidos por padrão (`--casos`
   `fallbacks_total_por_onde`, `descartes_por_motivo`.
 - `llm_chamadas_total`, `llm_chamadas_por_caso`, `latencia_p50_ms`, `latencia_p95_ms`,
   `n_erros_execucao`, `http_miss_total` (em replay: requisições sem cassete).
-- `serpapi`: `live_no_eval` (buscas live gastas neste eval), `usadas_total`, `restantes`/`orcamento`
+- Busca live: `busca_live` (buscas live gastas neste eval, qualquer provedor), `busca_live_por_provedor`
+  (`{serpapi, ddgs}`), `busca_bloqueada` (há busca que o ddgs limitou em TODOS os backends; 1 backend limitado só passa ao
+  próximo; ver "Provedor de busca" abaixo).
+- `serpapi`: `live_no_eval` (buscas live da SerpAPI gastas neste eval), `usadas_total`, `restantes`/`orcamento`
   (só se houver teto).
 - `meta`: modo, split, filtros, `env` (overrides aplicados), git sha, arquivos de casos.
 - `delta` vs `eval/baseline.json` calculado **só sobre os ids em comum** (casos novos não distorcem),
   com a lista de casos que mudaram de nível.
 
 `casos.jsonl` do resultado: por caso `id, rotulo, nivel, esperado, ok, parcial, grave, run_id,
-dur_ms, n_llm, n_fallbacks, fallbacks_por_onde, descoberta, serpapi_live, erro`.
+dur_ms, n_llm, n_fallbacks, fallbacks_por_onde, descoberta, busca_live, erro` (`busca_live` substitui `serpapi_live`).
 `relatorio.md`: tabela legível + "Para investigar" com `python3 -m factcheck_mvp.cli trace <run_id>`.
 
 ## Flags
@@ -89,13 +93,33 @@ dur_ms, n_llm, n_fallbacks, fallbacks_por_onde, descoberta, serpapi_live, erro`.
 | `--nome x` | sufixo do diretório de resultado |
 | `--paralelo N` | casos simultâneos (padrão 1) |
 | `--timeout-caso S` | padrão 300 s |
-| `--max-buscas-serpapi N` | teto de buscas live neste eval; não inicia caso que poderia estourar |
+| `--max-buscas N` | teto de buscas live neste eval, SerpAPI ou ddgs (alias `--max-buscas-serpapi`); não inicia caso que poderia estourar |
 | `--salvar-baseline` | grava `eval/baseline.json` |
 | `--gate [--gate-pp 5]` | exit 1 se `n_erro_grave` subir ou `acerto` cair mais que N pp vs baseline |
 | `--catalogo-real` | por padrão o eval usa cópia temporária do `catalogo.json` (o pipeline atual grava nele) |
 
 Perfis: **principal** = busca aberta (`INDICE_CHECAGENS=0`, padrão). **Secundário** = atalho do
 índice (`--env INDICE_CHECAGENS=1 --nome indice`).
+
+## Provedor de busca (serpapi × ddgs)
+
+`BUSCA_PROVEDOR=serpapi` é o padrão. `ddgs` é a alternativa sem chave e só vira padrão quando o eval aprovar.
+Para medir:
+
+```bash
+python3 -m eval.run --modo record --env BUSCA_PROVEDOR=ddgs --nome ddgs-dev   # grava as buscas ddgs:// que faltam
+python3 -m eval.run --env BUSCA_PROVEDOR=ddgs --nome ddgs-dev-replay           # deve ter http_miss_total = 0
+```
+
+- Cassetes são por provedor: buscas `ddgs://…` não reaproveitam as da SerpAPI, e vice-versa. Por isso o
+  `record` é obrigatório na primeira rodada de cada provedor.
+- Risco do ddgs: limite de taxa e bloqueio de IP, não cota. `fallback onde=ddgs` (busca perdida; `ddgs.cadeia` é só
+  desvio entre backends) numa rodada significa lacuna de busca: não compare essa rodada sem olhar o caso. Se o eval terminar com
+  `busca_bloqueada` em `metricas.json`, pare e avise o usuário.
+- Perdas conhecidas do ddgs: o orgânico não traz data relativa (compare a fração de `data_pub` nula com o
+  baseline), `top_stories` vêm de uma busca de notícias (`DDGS_TOP_STORIES`) e não há Google Scholar
+  (`SERP_ENGINE=google_scholar` cai na busca orgânica, com fallback registrado).
+- Para o provedor serpapi, o contador e o teto são os de sempre (`serpapi.*` em `metricas.json`).
 
 ## A/B da descoberta (agente × estratégias estáticas)
 
@@ -104,7 +128,7 @@ O A/B é feito **pelo eval** (casos rotulados = gold), não por métrica de URL:
 (circular) e foi removido. Mesmos casos, mesma seed de cassetes; só muda `SERP_ESTRATEGIA`:
 
 ```bash
-# 1ª vez (queries/prompts novos): grava cassetes; cada perna gasta SerpAPI + LLM
+# 1ª vez (queries/prompts novos): grava cassetes; cada perna gasta busca live + LLM
 python3 -m eval.run --modo record --env SERP_ESTRATEGIA=agente   --nome ab-agente
 python3 -m eval.run --modo record --env SERP_ESTRATEGIA=avancada --nome ab-avancada
 # depois, determinístico (sem rede):
@@ -114,7 +138,7 @@ python3 -m eval.run --env SERP_ESTRATEGIA=avancada --nome ab-avancada
 python3 -m eval.run --env SERP_ESTRATEGIA=agente --env AGENTE_MAX_ONDAS_EXTRAS=0 --nome ab-agente-sem-extra
 ```
 
-Compare os `metricas.json` (`acerto`, `n_erro_grave`, `taxa_indeterminada`, `serpapi.live_no_eval`,
+Compare os `metricas.json` (`acerto`, `n_erro_grave`, `taxa_indeterminada`, `busca_live`,
 `llm_chamadas_por_caso`, `latencia_p95_ms`) e confira `descoberta.pulada ≈ 0` nas duas pernas.
 `avancada` = 2 buscas/afirmação (crua + `site:` das agências do catálogo), sem crítico; `agente` =
 as mesmas 2 da onda 1 + crítico pós-juiz com até `AGENTE_MAX_ONDAS_EXTRAS` ondas reescritas pelo

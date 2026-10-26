@@ -42,10 +42,11 @@ def construir_pipeline(serpapi=None, detector=None):
     que só é consultado com INDICE_CHECAGENS=1 (atalho opcional; núcleo = busca aberta)."""
     from .catalogo import Catalogo
     from .indice import Indice
+    from . import busca_web
     from .pipeline import Pipeline
-    from .serpapi_layer import SerpAPIClient
 
-    return Pipeline(Catalogo.carregar(), Indice.de_checagens(), Indice(), serpapi or SerpAPIClient(), detector)
+    return Pipeline(Catalogo.carregar(), Indice.de_checagens(), Indice(),
+                    serpapi or busca_web.cliente_padrao(), detector)
 
 
 class catalogo_isolado:
@@ -111,7 +112,7 @@ def cmd_checar(a) -> int:
     else:
         print("run_id: (telemetria desligada: TELEMETRIA=0)")
     teto = f"saldo {uso['restantes']}/{uso['orcamento']}" if uso["orcamento"] is not None else "sem teto"
-    print(f"serpapi: {uso['usadas_processo']} busca(s) live nesta execução; {uso['usadas']} no total "
+    print(f"busca web: {uso['usadas_processo']} busca(s) live nesta execução; {uso['usadas']} no total "
           f"({teto}; {uso['arquivo']})")
     return 0
 

@@ -121,6 +121,35 @@ RESULT_CACHE_MAX = _int("RESULT_CACHE_MAX", 256)
 FEEDBACK_PATH = _get("FEEDBACK_PATH", "")
 # Safety / cost caps (não quebram bot+API: só degradam p/ parcial/pulada)
 SERPAPI_DAILY_CAP = _int("SERPAPI_DAILY_CAP", 100)
+# Busca web (fábrica em busca_web.py). `serpapi` = padrão até o eval aprovar o `ddgs` (ver docs/superpowers).
+BUSCA_PROVEDOR = _get("BUSCA_PROVEDOR", "serpapi").strip().lower()
+# 1 = a busca web está ligada (no ddgs, não depende de chave); 0 = a descoberta fica pulada.
+BUSCA_WEB = _bool("BUSCA_WEB", True)
+# Teto diário e TTL do cache de busca: nomes neutros; sem eles, valem os SERPAPI_* de sempre.
+BUSCA_DAILY_CAP = _int("BUSCA_DAILY_CAP", SERPAPI_DAILY_CAP)
+CACHE_BUSCA_TTL = _int("CACHE_BUSCA_TTL", CACHE_SERPAPI_TTL)
+# ddgs: backends em ORDEM, um por chamada (nunca `auto`: sorteia motores e quebra o replay). Passa ao próximo
+# quando o atual falha, vem vazio ou limita a taxa. Só motores que o ddgs habilita (backend desligado é pulado):
+# no 9.16 o `bing` de TEXTO vem desligado (`disabled = True`); o de notícias funciona.
+DDGS_TEXT_BACKENDS = _get("DDGS_TEXT_BACKENDS", "duckduckgo,yahoo,brave,google")
+DDGS_NEWS_BACKENDS = _get("DDGS_NEWS_BACKENDS", "bing,duckduckgo,yahoo")
+DDGS_REGIAO = _get("DDGS_REGIAO", "br-pt")
+DDGS_SAFESEARCH = _get("DDGS_SAFESEARCH", "moderate")
+DDGS_TIMEOUT_S = _int("DDGS_TIMEOUT_S", 10)  # por tentativa; timeout ganha 1 nova tentativa
+# Buscas VIVAS por segundo no processo (cassete não espera). 0 = sem limite.
+DDGS_RPS = _float("DDGS_RPS", 1.0)
+DDGS_PROXY = _get("DDGS_PROXY", "")  # vazio = conexão direta
+# 1 = cada busca orgânica sem `site:` também pede notícias e usa as 3 primeiras como top stories.
+DDGS_TOP_STORIES = _bool("DDGS_TOP_STORIES", True)
+# Palavras mantidas na consulta (o limite de 32 é do Google; o ddgs aceita o mesmo corte).
+DDGS_MAX_PALAVRAS = _int("DDGS_MAX_PALAVRAS", 32)
+# ddgs limitado em TODOS os backends: 1 = a busca vai para a SerpAPI (se houver SERPAPI_KEY; gasta cota).
+# O eval desliga (ENV_PADRAO), para não misturar provedores na medição do ddgs.
+BUSCA_FALLBACK_SERPAPI = _bool("BUSCA_FALLBACK_SERPAPI", True)
+# Depois de limitar em todos os backends, o ddgs fica estes segundos sem buscas (vão direto à reserva). 0 = sem pausa.
+DDGS_PAUSA_BLOQUEIO_S = _int("DDGS_PAUSA_BLOQUEIO_S", 300)
+# Espera (s) após rate limit de um backend, antes do próximo.
+DDGS_ESPERA_RATELIMIT_S = _float("DDGS_ESPERA_RATELIMIT_S", 2.0)
 # Estratégia no orgânico: `agente` (padrão: onda 1 determinística → extração → juiz →
 # crítico pós-juiz com onda extra reescrita por LLM; ver agente.py), `simples` (crua +
 # dirigida leve), `avancada` (crua + site: das agências do catálogo) ou `ambas` (união).

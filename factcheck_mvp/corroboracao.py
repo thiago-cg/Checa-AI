@@ -171,9 +171,10 @@ def agencia_assinada(corpo: str) -> Optional[str]:
 
 # ----------------------------------------------------------------------------- datas
 # Prioridade de uma data de publicação (maior vence; E4 Task 2 + revisão I-3): JSON-LD (dia) 6 >
-# SerpAPI absoluta/ISO (dia) 5 > trafilatura (dia) 4 > SerpAPI relativa ancorada 3 > só ano 2 >
+# busca absoluta/ISO (dia) 5 > trafilatura (dia) 4 > busca relativa ancorada 3 > só ano 2 >
 # ReaderLM 1. `fonte` é a fonte REAL da data; o método que extraiu o texto não entra. Fonte não
-# declarada (None) fica no nível da trafilatura: não sobrepõe a data absoluta da SerpAPI.
+# declarada (None) fica no nível da trafilatura: não sobrepõe a data absoluta da busca.
+# "serpapi" e "ddgs" (ou "ddgs:<backend>") são a mesma fonte de busca: mesmo peso.
 def tier_data(fonte: Optional[str], precisao: Optional[str], relativa: bool = False) -> int:
     if relativa:
         return 3
@@ -181,6 +182,8 @@ def tier_data(fonte: Optional[str], precisao: Optional[str], relativa: bool = Fa
         return 1
     if precisao == "ano":
         return 2
+    if isinstance(fonte, str) and fonte.split(":", 1)[0] == "ddgs":
+        fonte = "serpapi"
     return {"jsonld": 6, "serpapi": 5, "trafilatura": 4}.get(fonte, 4)
 
 

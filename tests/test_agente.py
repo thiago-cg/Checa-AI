@@ -191,7 +191,7 @@ def test_cap_diario_interrompe():
 
 def test_sem_cliente_nao_busca():
     est = _rodar_onda1([_alvo(0, "x", "x")], None)
-    assert est.buscas == 0 and any("sem SerpAPI" in d for d in est.decisoes)
+    assert est.buscas == 0 and any("busca web desligada" in d for d in est.decisoes)
 
 
 def test_cliente_real_conta_por_requisicao_e_cache(monkeypatch):
