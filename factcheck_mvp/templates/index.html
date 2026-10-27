@@ -110,6 +110,11 @@
         </svg>
         <span>Telegram</span>
       </a>
+
+      <!-- Telegram Web: no computador sem o app, o "Start Bot" do t.me não abre nada. No celular fica oculto (o app abre). -->
+      <a class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold text-telegram hover:text-telegram-hover bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-all duration-200 shadow-sm active:scale-95 whitespace-nowrap" href='https://web.telegram.org/k/#@fn_tic_bot' rel="noopener noreferrer" target="_blank" title="Abrir o bot no navegador, sem instalar o Telegram">
+        <span>Telegram Web</span>
+      </a>
     </div>
   </div>
 </header>
@@ -206,12 +211,16 @@
           <p class="text-xs text-slate-500 dark:text-slate-400">Encaminhe prints, áudios e links para o bot @fn_tic_bot</p>
         </div>
       </div>
-      <a class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-telegram hover:bg-telegram-hover text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
-        Abrir no Telegram
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-        </svg>
-      </a>
+      <div class="w-full sm:w-auto flex flex-col items-center gap-1.5">
+        <a class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-telegram hover:bg-telegram-hover text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
+          Abrir no Telegram
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </a>
+        <!-- Sem o app do Telegram instalado (computador), o "Start Bot" do t.me não abre nada: o Web abre no navegador. -->
+        <a class="text-xs text-slate-500 dark:text-slate-400 hover:text-telegram underline underline-offset-2" href='https://web.telegram.org/k/#@fn_tic_bot' rel="noopener noreferrer" target="_blank">ou abra no Telegram Web</a>
+      </div>
     </div>
 
     <!-- Trust Badges & Numerical Indicators -->
@@ -427,13 +436,14 @@
       </div>
 
       <!-- Input Footer Simulator -->
-      <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center">
+      <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-2">
         <a class="w-full py-3 rounded-xl bg-telegram hover:bg-telegram-hover text-white font-bold text-sm text-center transition-all flex items-center justify-center gap-2" href='https://t.me/fn_tic_bot' rel="noopener noreferrer" target="_blank">
           <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
             <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.923z"></path>
           </svg>
           Iniciar Conversa no Telegram (@fn_tic_bot)
         </a>
+        <a class="text-xs text-slate-500 dark:text-slate-400 hover:text-telegram underline underline-offset-2" href='https://web.telegram.org/k/#@fn_tic_bot' rel="noopener noreferrer" target="_blank">Sem o app instalado? Abra no Telegram Web</a>
       </div>
     </div>
     <p class="text-center text-xs text-slate-500 mt-6">
